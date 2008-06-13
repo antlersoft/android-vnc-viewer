@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+    
+<TextView
+	android:id="@+id/text1"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:textSize="18sp"
+	android:text="Address"
+	android:layout_x="45px"
+	android:layout_y="60px"
+	/>
+	
+<EditText
+	android:id="@+id/textIP"
+	android:layout_width="160px"
+	android:layout_height="wrap_content"
+	android:textSize="18sp"
+	android:text=""
+	android:layout_x="115px"
+	android:layout_y="45px"
+	/>
+
+<TextView
+	android:id="@+id/text2"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:textSize="18sp"
+	android:text="   Port"
+	android:layout_x="45px"
+	android:layout_y="115px"
+	
+	/>
+
+<EditText
+	android:id="@+id/textPORT"
+	android:layout_width="60px"
+	android:layout_height="wrap_content"
+	android:textSize="18sp"
+	android:text="5900"
+	android:layout_x="115px"
+	android:layout_y="100px"
+	/>
+
+<Button
+	android:id="@+id/buttonGO"
+	android:text="Connect"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:textSize="18sp"
+	android:layout_x="190px"
+	android:layout_y="100px"
+	/>
+
+</AbsoluteLayout>
