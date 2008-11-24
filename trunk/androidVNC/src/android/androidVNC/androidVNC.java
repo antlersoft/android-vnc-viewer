@@ -35,6 +35,9 @@ public class androidVNC extends Activity {
 	private EditText portText;
 	private Button goButton;
 	
+	public androidVNC() {
+    }
+	
 	@Override
     public void onCreate(Bundle icicle) {
 
