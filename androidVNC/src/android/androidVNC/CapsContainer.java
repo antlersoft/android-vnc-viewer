@@ -31,8 +31,8 @@ class CapsContainer {
   // Public methods
 
   public CapsContainer() {
-    infoMap = new Hashtable(64, (float)0.25);
-    orderedList = new Vector(32, 8);
+    infoMap = new Hashtable<Integer, CapabilityInfo>(64, (float)0.25);
+    orderedList = new Vector<Integer>(32, 8);
   }
 
   public void add(CapabilityInfo capinfo) {
@@ -98,7 +98,7 @@ class CapsContainer {
 
   // Protected data
 
-  protected Hashtable infoMap;
-  protected Vector orderedList;
+  protected Hashtable<Integer, CapabilityInfo> infoMap;
+  protected Vector<Integer> orderedList;
 }
 

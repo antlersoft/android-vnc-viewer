@@ -62,6 +62,11 @@ public class VncCanvas extends SurfaceView implements SurfaceHolder.Callback{
 			if(canvas == null)
 				Log.v(TAG, "canvas is null in handler");
 			canvas.drawColor(Color.BLACK);
+			
+			Paint textFormat = new Paint(1);
+			textFormat.setColor(Color.LTGRAY);
+			canvas.drawText("Connecting. Please wait...", 20, 30, textFormat);
+			
 			holder.unlockCanvasAndPost(canvas);
 
 			try {        	
@@ -122,7 +127,7 @@ public class VncCanvas extends SurfaceView implements SurfaceHolder.Callback{
       // Log.v(TAG, "Initializing...");
     
 
-      Log.v(TAG, "Connecting to" + server + ", port" + port + "...");
+      Log.v(TAG, "Connecting to " + server + ", port " + port + "...");
       
       rfb = new RfbProto(server, port);
       Log.v(TAG, "Connected to server");
@@ -176,7 +181,7 @@ public class VncCanvas extends SurfaceView implements SurfaceHolder.Callback{
       Log.v(TAG, "Desktop name is " + rfb.desktopName);
       Log.v(TAG, "Desktop size is " + rfb.framebufferWidth + " x " + rfb.framebufferHeight);
       
-      mbitmap = Bitmap.createBitmap(rfb.framebufferWidth, rfb.framebufferHeight, false);
+      mbitmap = Bitmap.createBitmap(rfb.framebufferWidth, rfb.framebufferHeight, Bitmap.Config.RGB_565);
       
       if(bytesPerPixel == 4)
     	  pixels24 = new int [rfb.framebufferWidth * rfb.framebufferHeight];
@@ -333,7 +338,7 @@ public class VncCanvas extends SurfaceView implements SurfaceHolder.Callback{
           	case RfbProto.FramebufferUpdate:
         	  // Log.v(TAG, "FrameBuffer Update...");
           	  rfb.readFramebufferUpdate();
-        	  boolean cursorPosReceived = false;
+        	  //boolean cursorPosReceived = false;
 
         	  for (int i = 0; i < rfb.updateNRects; i++) {
         		  rfb.readFramebufferUpdateRectHdr();
@@ -341,29 +346,29 @@ public class VncCanvas extends SurfaceView implements SurfaceHolder.Callback{
         		  int rx = rfb.updateRectX, ry = rfb.updateRectY;
         		  int rw = rfb.updateRectW, rh = rfb.updateRectH;
 
-        		  if (rfb.updateRectEncoding == rfb.EncodingLastRect){
+        		  if (rfb.updateRectEncoding == RfbProto.EncodingLastRect){
         			  Log.v(TAG, "rfb.EncodingLastRect");
         			  break;
         		  }
         			  
-        		  if (rfb.updateRectEncoding == rfb.EncodingNewFBSize) {
+        		  if (rfb.updateRectEncoding == RfbProto.EncodingNewFBSize) {
         			  rfb.setFramebufferSize(rw, rh);
         			  	//- updateFramebufferSize();
         			  Log.v(TAG, "rfb.EncodingNewFBSize");
         			  break;
         		  }
 
-        		  if (rfb.updateRectEncoding == rfb.EncodingXCursor ||
-        				  rfb.updateRectEncoding == rfb.EncodingRichCursor) {
+        		  if (rfb.updateRectEncoding == RfbProto.EncodingXCursor ||
+        				  rfb.updateRectEncoding == RfbProto.EncodingRichCursor) {
         			  //- handleCursorShapeUpdate(rfb.updateRectEncoding, rx, ry, rw, rh);
         			  Log.v(TAG, "rfb.EncodingCursor");
         			  continue;
         			  
         		  }
 
-        		  if (rfb.updateRectEncoding == rfb.EncodingPointerPos) {
+        		  if (rfb.updateRectEncoding == RfbProto.EncodingPointerPos) {
         			  //- softCursorMove(rx, ry);
-        			  cursorPosReceived = true;
+        			  //cursorPosReceived = true;
         			  Log.v(TAG, "rfb.EncodingPointerPos");
         			  continue;
         		  }
@@ -454,7 +459,7 @@ public class VncCanvas extends SurfaceView implements SurfaceHolder.Callback{
 
           case RfbProto.ServerCutText:
         	  Log.v(TAG, "ServerCutText");
-        	  String s = rfb.readServerCutText();
+        	  //String s = rfb.readServerCutText();
         	  //- viewer.clipboard.setCutText(s);
         	  break;
 
