@@ -24,7 +24,7 @@ package android.androidVNC;
 import android.os.Bundle;
 import android.view.Window;
 import android.app.Activity;
-import android.util.Log;
+//import android.util.Log;
 
 public class CanvasView extends Activity {
 
