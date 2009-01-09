@@ -53,6 +53,7 @@ public class VncCanvasActivity extends Activity {
 	private final static int MENU_ITEM_ONE2ONE = Menu.FIRST + 2;
 	private final static int MENU_ITEM_FITSCREEN = Menu.FIRST + 3;
 	private final static int MENU_ITEM_DISCONNECT = Menu.FIRST + 4;
+	private final static int MENU_ITEM_CTRLALTDEL = Menu.FIRST + 5;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -112,10 +113,21 @@ public class VncCanvasActivity extends Activity {
 		menu.add(Menu.NONE, MENU_ITEM_SETTINGS, 0, "Settings").setShortcut('2', 's').setIcon(android.R.drawable.ic_menu_preferences);
 		menu.add(Menu.NONE, MENU_ITEM_ONE2ONE, 0, "1:1").setShortcut('3', 'r').setIcon(android.R.drawable.ic_menu_zoom);
 		menu.add(Menu.NONE, MENU_ITEM_FITSCREEN, 0, "Fit-to-Screen").setShortcut('4', 'c').setIcon(android.R.drawable.ic_menu_zoom);
+		menu.add(Menu.NONE, MENU_ITEM_CTRLALTDEL, 0, "Ctrl-Alt-Del").setShortcut('6', 'a').setIcon(android.R.drawable.ic_menu_share);
 		menu.add(Menu.NONE, MENU_ITEM_DISCONNECT, 0, "Disconnect").setShortcut('5', 'd').setIcon(android.R.drawable.ic_menu_close_clear_cancel);
 		return super.onCreateOptionsMenu(menu);
 	}
 
+	/** {@inheritDoc} */
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		// Hide the button for the current scaling mode
+		boolean isFitToScreen = vncCanvas.getScaleType() == ScaleType.FIT_CENTER;
+		menu.findItem(MENU_ITEM_ONE2ONE).setVisible(isFitToScreen);
+		menu.findItem(MENU_ITEM_FITSCREEN).setVisible(!isFitToScreen);
+		return true;
+	}
+	
 	int absoluteXPosition = 0, absoluteYPosition = 0;
 
 	@Override
@@ -150,7 +162,10 @@ public class VncCanvasActivity extends Activity {
 			vncCanvas.closeConnection();
 			finish();
 			return true;
-		}
+		case MENU_ITEM_CTRLALTDEL:
+			vncCanvas.ctrlAltDel();
+			return true;
+	}
 		return super.onOptionsItemSelected(item);
 	}
 
