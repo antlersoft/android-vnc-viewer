@@ -563,6 +563,14 @@ public class VncCanvas extends ImageView {
 	public void closeConnection() {
 		maintainConnection = false;
 	}
+	
+	public void ctrlAltDel() {
+		try {
+			rfb.writeCtrlAltDel();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public int getImageWidth() {
 		return mbitmap.getWidth();

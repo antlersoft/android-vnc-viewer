@@ -1064,6 +1064,29 @@ class RfbProto {
     os.write(eventBuf, 0, eventBufLen);
   }
 
+  void writeCtrlAltDel() throws IOException {
+	  final int DELETE = 0xffff;
+	  final int CTRLALT = CTRL_MASK | ALT_MASK;
+	  try {
+		  // Press
+		  eventBufLen = 0;
+		  writeModifierKeyEvents(CTRLALT);
+		  writeKeyEvent(DELETE, true);
+		  os.write(eventBuf, 0, eventBufLen);
+		  
+		  // Release
+		  eventBufLen = 0;
+		  writeModifierKeyEvents(CTRLALT);
+		  writeKeyEvent(DELETE, false);
+		  
+		  // Reset VNC server modifiers state
+		  writeModifierKeyEvents(0);
+		  os.write(eventBuf, 0, eventBufLen);
+	  } catch (IOException e) {
+		  e.printStackTrace();
+	  }
+  }
+  
   //
   // Write a key event message.  We may need to send modifier key events
   // around it to set the correct modifier state.  Also we need to translate
