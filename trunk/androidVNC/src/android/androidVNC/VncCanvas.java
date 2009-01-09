@@ -64,13 +64,12 @@ import java.util.zip.Inflater;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.widget.ImageView;
@@ -78,6 +77,9 @@ import android.widget.Toast;
 
 public class VncCanvas extends ImageView {
 	private final static String TAG = "VncCanvas";
+	
+	// Available to activity
+	int mouseX, mouseY;
 
 	// User-provided connection settings
 	private String server;
@@ -100,9 +102,7 @@ public class VncCanvas extends ImageView {
 	public RfbProto rfb;
 
 	// Internal bitmap data
-	private Bitmap mbitmap;
-	private int bitmapPixels[];
-	private Canvas memGraphics;
+	AbstractBitmapData bitmapData;
 	public Handler handler = new Handler();
 
 	// VNC Encoding parameters
@@ -180,7 +180,7 @@ public class VncCanvas extends ImageView {
 							// TODO  Not sure if this will happen but...
 							// figure out how to gracefully notify the user
 							// Instantiating an alert dialog here doesn't work
-							// because we are ouf of memory. :(
+							// because we are out of memory. :(
 						} else {
 							if (e.getMessage().indexOf("authentication") > -1) {
 								handler.post(new Runnable() {
@@ -257,9 +257,16 @@ public class VncCanvas extends ImageView {
 		Log.v(TAG, "Desktop name is " + rfb.desktopName);
 		Log.v(TAG, "Desktop size is " + rfb.framebufferWidth + " x " + rfb.framebufferHeight);
 
-		mbitmap = Bitmap.createBitmap(rfb.framebufferWidth, rfb.framebufferHeight, Bitmap.Config.RGB_565);
-		memGraphics = new Canvas(mbitmap);
-		bitmapPixels = new int[rfb.framebufferWidth * rfb.framebufferHeight];
+		Display display=((VncCanvasActivity)getContext()).getWindowManager().getDefaultDisplay();
+		int dx=display.getWidth();
+		int dy=display.getHeight();
+		int max=(dx>dy) ? dx : dy;
+		if ( rfb.framebufferWidth>max*2 || rfb.framebufferHeight>max*2)
+			bitmapData=new LargeBitmapData(rfb,dx,dy);
+		else
+			bitmapData=new CompactBitmapData(rfb);
+		mouseX=rfb.framebufferWidth/2;
+		mouseY=rfb.framebufferHeight/2;
 
 		setPixelFormat();
 	}
@@ -282,24 +289,22 @@ public class VncCanvas extends ImageView {
 		return (colorModel != null) && colorModel.equals(cm);
 	}
 
-	public void processNormalProtocol(Context context, ProgressDialog pd) throws Exception {
+	public void processNormalProtocol(final Context context, ProgressDialog pd) throws Exception {
 		try {
-			rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth, rfb.framebufferHeight, false);
+			bitmapData.writeFullUpdateRequest(false);
 
 			//
 			// main dispatch loop
 			//
 			while (maintainConnection) {
-
+				bitmapData.syncScroll();
 				// Read message type from the server.
 				int msgType = rfb.readServerMessageType();
-
+				bitmapData.doneWaiting();
 				// Process the message depending on its type.
 				switch (msgType) {
 				case RfbProto.FramebufferUpdate:
 					rfb.readFramebufferUpdate();
-					@SuppressWarnings("unused")
-					boolean cursorPosReceived = false;
 
 					for (int i = 0; i < rfb.updateNRects; i++) {
 						rfb.readFramebufferUpdateRectHdr();
@@ -328,8 +333,8 @@ public class VncCanvas extends ImageView {
 						}
 
 						if (rfb.updateRectEncoding == RfbProto.EncodingPointerPos) {
-							// - softCursorMove(rx, ry);
-							cursorPosReceived = true;
+							mouseX=rx;
+							mouseY=ry;
 							Log.v(TAG, "rfb.EncodingPointerPos");
 							continue;
 						}
@@ -378,7 +383,7 @@ public class VncCanvas extends ImageView {
 					}
 
 					setEncodings(true);
-					rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth, rfb.framebufferHeight, !fullUpdateNeeded);
+					bitmapData.writeFullUpdateRequest(!fullUpdateNeeded);
 
 					break;
 
@@ -386,7 +391,9 @@ public class VncCanvas extends ImageView {
 					throw new Exception("Can't handle SetColourMapEntries message");
 
 				case RfbProto.Bell:
-					Utils.notify(context, "VNC Beep!");
+					handler.post( new Runnable() {
+						public void run() { Toast.makeText( context, "VNC Beep", Toast.LENGTH_SHORT); }
+					});
 					break;
 
 				case RfbProto.ServerCutText:
@@ -418,9 +425,35 @@ public class VncCanvas extends ImageView {
 
 	public void onDestroy() {
 		Log.v(TAG, "Cleaning up resources");
-		mbitmap.recycle();
-		memGraphics = null;
-		bitmapPixels = null;
+		if ( bitmapData!=null) bitmapData.dispose();
+	}
+	
+	/**
+	 * Warp the mouse to x, y in the RFB coordinates
+	 * @param x
+	 * @param y
+	 */
+	void warpMouse(int x, int y)
+	{
+		mouseX=x;
+		mouseY=y;
+		try
+		{
+			rfb.writePointerEvent(x, y, 0, MOUSE_BUTTON_NONE);
+		}
+		catch ( IOException ioe)
+		{
+			Log.w(TAG,ioe);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see android.view.View#onScrollChanged(int, int, int, int)
+	 */
+	@Override
+	protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+		super.onScrollChanged(l, t, oldl, oldt);
+		bitmapData.scrollChanged(l, t);
 	}
 
 	void handleRawRect(int x, int y, int w, int h) throws IOException {
@@ -428,17 +461,19 @@ public class VncCanvas extends ImageView {
 	}
 
 	void handleRawRect(int x, int y, int w, int h, boolean paint) throws IOException {
-		int firstoffset = y * rfb.framebufferWidth + x;
+		boolean valid=bitmapData.validDraw(x, y, w, h);
+		int[] pixels=bitmapData.bitmapPixels;
 		if (bytesPerPixel == 1) {
 			// 1 byte per pixel. Use palette lookup table.
 			byte[] buf = new byte[w];
 			int i, offset;
 			for (int dy = y; dy < y + h; dy++) {
 				rfb.readFully(buf);
-
-				offset = dy * rfb.framebufferWidth + x;
+				if ( ! valid)
+					continue;
+				offset = bitmapData.offset(x, dy);
 				for (i = 0; i < w; i++) {
-					bitmapPixels[offset + i] = colorPalette[0xFF & buf[i]];
+					pixels[offset + i] = colorPalette[0xFF & buf[i]];
 				}
 			}
 		} else {
@@ -447,16 +482,20 @@ public class VncCanvas extends ImageView {
 			int i, offset;
 			for (int dy = y; dy < y + h; dy++) {
 				rfb.readFully(buf);
-
-				offset = dy * rfb.framebufferWidth + x;
+				if ( ! valid)
+					continue;
+				offset = bitmapData.offset(x, dy);
 				for (i = 0; i < w; i++) {
-					bitmapPixels[offset + i] = // 0xFF << 24 |
+					pixels[offset + i] = // 0xFF << 24 |
 					(buf[i * 4 + 2] & 0xff) << 16 | (buf[i * 4 + 1] & 0xff) << 8 | (buf[i * 4] & 0xff);
 				}
 			}
 		}
+		
+		if ( ! valid)
+			return;
 
-		mbitmap.setPixels(bitmapPixels, firstoffset, rfb.framebufferWidth, x, y, w, h);
+		bitmapData.updateBitmap( x, y, w, h);
 
 		if (paint)
 			reDraw();
@@ -469,15 +508,15 @@ public class VncCanvas extends ImageView {
 				showDesktopInfo = false;
 				showConnectionInfo();
 			}
-			setImageBitmap(mbitmap);
+			bitmapData.updateView(VncCanvas.this);
 		}
 	};
-
+	
 	private void reDraw() {
 		if (repaintsEnabled)
 			handler.post(reDraw);
 	}
-
+	
 	public void disableRepaints() {
 		repaintsEnabled = false;
 	}
@@ -526,15 +565,65 @@ public class VncCanvas extends ImageView {
 		return "";
 	}
 
+    // Useful shortcuts for modifier masks.
+
+    final static int CTRL_MASK  = KeyEvent.META_SYM_ON;
+    final static int SHIFT_MASK = KeyEvent.META_SHIFT_ON;
+    final static int META_MASK  = 0;
+    final static int ALT_MASK   = KeyEvent.META_ALT_ON;
+    
+	private static final int MOUSE_BUTTON_NONE = 0;
+	private static final int MOUSE_BUTTON_1 = 1;
+	private static final int MOUSE_BUTTON_2 = 2;
+	/**
+	 * Current state of "mouse" buttons
+	 * Alt meta means use second mouse button
+	 * 0 = none
+	 * 1 = default button
+	 * 2 = second button
+	 */
+	private int pointerMask = MOUSE_BUTTON_NONE;
+	
+	/**
+	 * Convert a motion event to a format suitable for sending over the wire
+	 * @param evt motion event; x and y must already have been converted from screen coordinates
+	 * to remote frame buffer coordinates.  ALT meta state flag is interpreted as second mouse
+	 * button
+	 * @return true if event was actually sent
+	 */
 	public boolean processPointerEvent(MotionEvent evt) {
 		if (rfb != null && rfb.inNormalProtocol) {
-			synchronized (rfb) {
-				try {
-					rfb.writePointerEvent(evt);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				rfb.notify();
+		    int modifiers = evt.getMetaState();
+
+		    if (evt.getAction() == MotionEvent.ACTION_DOWN) {
+		      if ((modifiers & KeyEvent.META_ALT_ON) != 0) {
+		        pointerMask = MOUSE_BUTTON_2;
+		        modifiers &= ~ALT_MASK;
+//		      } else if ((modifiers & KeyEvent.META_SYM_ON) != 0) {
+//		        pointerMask = mask3;
+//		        modifiers &= ~META_MASK;
+		      } else {
+		        pointerMask = MOUSE_BUTTON_1;
+		      }
+		    } else if (evt.getAction() == MotionEvent.ACTION_UP) {
+		      pointerMask = 0;
+		      if ((modifiers & KeyEvent.META_ALT_ON) != 0) {
+		        modifiers &= ~ALT_MASK;
+		      }
+//		      else if ((modifiers & KeyEvent.META_SYM_ON) != 0) {
+//		        modifiers &= ~META_MASK;
+//		      }
+		    }
+		    mouseX=(int)evt.getX();
+		    mouseY=(int)evt.getY();
+		    if ( mouseX<0) mouseX=0;
+		    else if ( mouseX>=rfb.framebufferWidth) mouseX=rfb.framebufferWidth-1;
+		    if ( mouseY<0) mouseY=0;
+		    else if ( mouseY>=rfb.framebufferHeight) mouseY=rfb.framebufferHeight-1;
+			try {
+				rfb.writePointerEvent(mouseX,mouseY,modifiers,pointerMask);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			return true;
 		}
@@ -573,20 +662,20 @@ public class VncCanvas extends ImageView {
 	}
 
 	public int getImageWidth() {
-		return mbitmap.getWidth();
+		return bitmapData.framebufferwidth;
 	}
 
 	public int getImageHeight() {
-		return mbitmap.getHeight();
+		return bitmapData.framebufferheight;
 	}
 
 	public int getCenteredXOffset() {
-		int xoffset = (mbitmap.getWidth() - getWidth()) / 2;
+		int xoffset = (bitmapData.framebufferwidth - getWidth()) / 2;
 		return xoffset;
 	}
 
 	public int getCenteredYOffset() {
-		int yoffset = (mbitmap.getHeight() - getHeight()) / 2;
+		int yoffset = (bitmapData.framebufferheight - getHeight()) / 2;
 		return yoffset;
 	}
 
@@ -676,6 +765,8 @@ public class VncCanvas extends ImageView {
 		 */
 
 		rfb.readCopyRect();
+		if ( ! bitmapData.validDraw(x, y, w, h))
+			return;
 		Paint paint = new Paint();
 		// Source Coordinates
 		int leftSrc = rfb.copyRectSrcX;
@@ -693,7 +784,7 @@ public class VncCanvas extends ImageView {
 		int rightDest = rightSrc + dx;
 		int bottomDest = bottomSrc + dy;
 
-		memGraphics.drawBitmap(mbitmap, new Rect(leftSrc, topSrc, rightSrc, bottomSrc), new Rect(leftDest, topDest, rightDest, bottomDest), paint);
+		bitmapData.copyRect(new Rect(leftSrc, topSrc, rightSrc, bottomSrc), new Rect(leftDest, topDest, rightDest, bottomDest), paint);
 
 		reDraw();
 	}
@@ -703,7 +794,7 @@ public class VncCanvas extends ImageView {
 	//
 
 	private void handleRRERect(int x, int y, int w, int h) throws IOException {
-
+		boolean valid=bitmapData.validDraw(x, y, w, h);
 		int nSubrects = rfb.is.readInt();
 
 		byte[] bg_buf = new byte[bytesPerPixel];
@@ -717,10 +808,13 @@ public class VncCanvas extends ImageView {
 		Paint paint = new Paint();
 		paint.setColor(pixel);
 		paint.setStyle(Paint.Style.FILL);
-		memGraphics.drawRect(x, y, x + w, y + h, paint);
+		if ( valid)
+			bitmapData.drawRect(x, y, w, h, paint);
 
 		byte[] buf = new byte[nSubrects * (bytesPerPixel + 8)];
 		rfb.readFully(buf);
+		if ( ! valid)
+			return;
 		DataInputStream ds = new DataInputStream(new ByteArrayInputStream(buf));
 
 		int sx, sy, sw, sh;
@@ -738,7 +832,7 @@ public class VncCanvas extends ImageView {
 			sh = ds.readUnsignedShort();
 
 			paint.setColor(pixel);
-			memGraphics.drawRect(sx, sy, sx + sw, sy + sh, paint);
+			bitmapData.drawRect(sx, sy, sw, sh, paint);
 		}
 
 		reDraw();
@@ -749,6 +843,7 @@ public class VncCanvas extends ImageView {
 	//
 
 	private void handleCoRRERect(int x, int y, int w, int h) throws IOException {
+		boolean valid=bitmapData.validDraw(x, y, w, h);
 		int nSubrects = rfb.is.readInt();
 
 		byte[] bg_buf = new byte[bytesPerPixel];
@@ -762,10 +857,13 @@ public class VncCanvas extends ImageView {
 		Paint paint = new Paint();
 		paint.setColor(pixel);
 		paint.setStyle(Paint.Style.FILL);
-		memGraphics.drawRect(x, y, x + w, y + h, paint);
+		if ( valid)
+			bitmapData.drawRect(x, y, w, h, paint);
 
 		byte[] buf = new byte[nSubrects * (bytesPerPixel + 4)];
 		rfb.readFully(buf);
+		if ( ! valid)
+			return;
 
 		int sx, sy, sw, sh;
 		int i = 0;
@@ -783,7 +881,7 @@ public class VncCanvas extends ImageView {
 			sh = buf[i++] & 0xFF;
 
 			paint.setColor(pixel);
-			memGraphics.drawRect(sx, sy, sx + sw, sy + sh, paint);
+			bitmapData.drawRect(sx, sy, sw, sh, paint);
 		}
 
 		reDraw();
@@ -833,6 +931,7 @@ public class VncCanvas extends ImageView {
 			return;
 		}
 
+		boolean valid=bitmapData.validDraw(tx, ty, tw, th);
 		// Read and draw the background if specified.
 		byte[] cbuf = new byte[bytesPerPixel];
 		if ((subencoding & RfbProto.HextileBackgroundSpecified) != 0) {
@@ -846,7 +945,8 @@ public class VncCanvas extends ImageView {
 		Paint paint = new Paint();
 		paint.setColor(hextile_bg);
 		paint.setStyle(Paint.Style.FILL);
-		memGraphics.drawRect(tx, ty, tx + tw, ty + th, paint);
+		if ( valid )
+			bitmapData.drawRect(tx, ty, tw, th, paint);
 
 		// Read the foreground color if specified.
 		if ((subencoding & RfbProto.HextileForegroundSpecified) != 0) {
@@ -883,7 +983,8 @@ public class VncCanvas extends ImageView {
 				sy = ty + (b1 & 0xf);
 				sw = (b2 >> 4) + 1;
 				sh = (b2 & 0xf) + 1;
-				memGraphics.drawRect(sx, sy, sx + sw, sy + sh, paint);
+				if ( valid)
+					bitmapData.drawRect(sx, sy, sw, sh, paint);
 			}
 		} else if (bytesPerPixel == 1) {
 
@@ -897,7 +998,8 @@ public class VncCanvas extends ImageView {
 				sw = (b2 >> 4) + 1;
 				sh = (b2 & 0xf) + 1;
 				paint.setColor(hextile_fg);
-				memGraphics.drawRect(sx, sy, sx + sw, sy + sh, paint);
+				if ( valid)
+					bitmapData.drawRect(sx, sy, sw, sh, paint);
 			}
 
 		} else {
@@ -913,7 +1015,8 @@ public class VncCanvas extends ImageView {
 				sw = (b2 >> 4) + 1;
 				sh = (b2 & 0xf) + 1;
 				paint.setColor(hextile_fg);
-				memGraphics.drawRect(sx, sy, sx + sw, sy + sh, paint);
+				if ( valid )
+					bitmapData.drawRect(sx, sy, sw, sh, paint);
 			}
 
 		}
@@ -940,6 +1043,8 @@ public class VncCanvas extends ImageView {
 		rfb.readFully(zrleBuf, 0, nBytes);
 
 		zrleInStream.setUnderlying(new MemInStream(zrleBuf, 0, nBytes), nBytes);
+		
+		boolean valid=bitmapData.validDraw(x, y, w, h);
 
 		for (int ty = y; ty < y + h; ty += 64) {
 
@@ -962,7 +1067,8 @@ public class VncCanvas extends ImageView {
 					Paint paint = new Paint();
 					paint.setColor(c);
 					paint.setStyle(Paint.Style.FILL);
-					memGraphics.drawRect(tx, ty, tx + tw, ty + th, paint);
+					if ( valid)
+						bitmapData.drawRect(tx, ty, tw, th, paint);
 					continue;
 				}
 
@@ -979,7 +1085,8 @@ public class VncCanvas extends ImageView {
 						readZrlePackedRLEPixels(tw, th, palette);
 					}
 				}
-				handleUpdatedZrleTile(tx, ty, tw, th);
+				if ( valid )
+					handleUpdatedZrleTile(tx, ty, tw, th);
 			}
 		}
 
@@ -993,7 +1100,7 @@ public class VncCanvas extends ImageView {
 	//
 
 	private void handleZlibRect(int x, int y, int w, int h) throws Exception {
-
+		boolean valid = bitmapData.validDraw(x, y, w, h);
 		int nBytes = rfb.is.readInt();
 
 		if (zlibBuf == null || zlibBufLen < nBytes) {
@@ -1007,6 +1114,8 @@ public class VncCanvas extends ImageView {
 			zlibInflater = new Inflater();
 		}
 		zlibInflater.setInput(zlibBuf, 0, nBytes);
+		
+		int[] pixels=bitmapData.bitmapPixels;
 
 		if (bytesPerPixel == 1) {
 			// 1 byte per pixel. Use palette lookup table.
@@ -1014,9 +1123,11 @@ public class VncCanvas extends ImageView {
 			int i, offset;
 			for (int dy = y; dy < y + h; dy++) {
 				zlibInflater.inflate(buf);
-				offset = dy * rfb.framebufferWidth + x;
+				if ( ! valid)
+					continue;
+				offset = bitmapData.offset(x, dy);
 				for (i = 0; i < w; i++) {
-					bitmapPixels[offset + i] = colorPalette[0xFF & buf[i]];
+					pixels[offset + i] = colorPalette[0xFF & buf[i]];
 				}
 			}
 		} else {
@@ -1025,14 +1136,17 @@ public class VncCanvas extends ImageView {
 			int i, offset;
 			for (int dy = y; dy < y + h; dy++) {
 				zlibInflater.inflate(buf);
-				offset = dy * rfb.framebufferWidth + x;
+				if ( ! valid)
+					continue;
+				offset = bitmapData.offset(x, dy);
 				for (i = 0; i < w; i++) {
-					bitmapPixels[offset + i] = (buf[i * 4 + 2] & 0xFF) << 16 | (buf[i * 4 + 1] & 0xFF) << 8 | (buf[i * 4] & 0xFF);
+					pixels[offset + i] = (buf[i * 4 + 2] & 0xFF) << 16 | (buf[i * 4 + 1] & 0xFF) << 8 | (buf[i * 4] & 0xFF);
 				}
 			}
 		}
-		int firstoffset = y * rfb.framebufferWidth + x;
-		mbitmap.setPixels(bitmapPixels, firstoffset, rfb.framebufferWidth, x, y, w, h);
+		if ( ! valid)
+			return;
+		bitmapData.updateBitmap(x, y, w, h);
 
 		reDraw();
 	}
@@ -1174,14 +1288,14 @@ public class VncCanvas extends ImageView {
 
 	private void handleUpdatedZrleTile(int x, int y, int w, int h) {
 		int offsetSrc = 0;
-		int offsetDst = (y * rfb.framebufferWidth + x);
+		int offsetDst = bitmapData.offset(x, y);
+		int[] destPixels=bitmapData.bitmapPixels;
 		for (int j = 0; j < h; j++) {
-			System.arraycopy(zrleTilePixels, offsetSrc, bitmapPixels, offsetDst, w);
+			System.arraycopy(zrleTilePixels, offsetSrc, destPixels, offsetDst, w);
 			offsetSrc += w;
-			offsetDst += rfb.framebufferWidth;
+			offsetDst += bitmapData.bitmapwidth;
 		}
 
-		int firstoffset = y * rfb.framebufferWidth + x;
-		mbitmap.setPixels(bitmapPixels, firstoffset, rfb.framebufferWidth, x, y, w, h);
+		bitmapData.updateBitmap(x, y, w, h);
 	}
 }

@@ -33,8 +33,14 @@ import java.net.Socket;
 //- import java.util.zip.*;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 
+/**
+ * Access the RFB protocol through a socket.
+ * <p>
+ * This class has no knowledge of the android-specific UI; it sees framebuffer updates
+ * and input events as defined in the RFB protocol.
+ * 
+ */
 class RfbProto {
 
 	final static String TAG = "RfbProto";
@@ -305,7 +311,7 @@ class RfbProto {
   // Write our protocol version message
   //
 
-  void writeVersionMsg() throws IOException {
+  synchronized void writeVersionMsg() throws IOException {
     clientMajor = 3;
     if (serverMajor > 3 || serverMinor >= 8) {
       clientMinor = 8;
@@ -862,7 +868,7 @@ class RfbProto {
   // Write a FramebufferUpdateRequest message
   //
 
-  void writeFramebufferUpdateRequest(int x, int y, int w, int h,
+  synchronized void writeFramebufferUpdateRequest(int x, int y, int w, int h,
 				     boolean incremental)
        throws IOException
   {
@@ -887,7 +893,7 @@ class RfbProto {
   // Write a SetPixelFormat message
   //
 
-  void writeSetPixelFormat(int bitsPerPixel, int depth, boolean bigEndian,
+  synchronized void writeSetPixelFormat(int bitsPerPixel, int depth, boolean bigEndian,
 			   boolean trueColour,
 			   int redMax, int greenMax, int blueMax,
 			   int redShift, int greenShift, int blueShift, boolean fGreyScale) // sf@2005)
@@ -920,7 +926,7 @@ class RfbProto {
   // blue arrays are from 0 to 65535.
   //
 
-  void writeFixColourMapEntries(int firstColour, int nColours,
+  synchronized void writeFixColourMapEntries(int firstColour, int nColours,
 				int[] red, int[] green, int[] blue)
        throws IOException
   {
@@ -949,7 +955,7 @@ class RfbProto {
   // Write a SetEncodings message
   //
 
-  void writeSetEncodings(int[] encs, int len) throws IOException {
+  synchronized void writeSetEncodings(int[] encs, int len) throws IOException {
     byte[] b = new byte[4 + 4 * len];
 
     b[0] = (byte) SetEncodings;
@@ -971,7 +977,7 @@ class RfbProto {
   // Write a ClientCutText message
   //
 
-  void writeClientCutText(String text) throws IOException {
+  synchronized void writeClientCutText(String text) throws IOException {
     byte[] b = new byte[8 + text.length()];
 
     b[0] = (byte) ClientCutText;
@@ -997,76 +1003,42 @@ class RfbProto {
   byte[] eventBuf = new byte[72];
   int eventBufLen;
 
-  // Useful shortcuts for modifier masks.
 
-  final static int CTRL_MASK  = KeyEvent.META_SYM_ON;
-  final static int SHIFT_MASK = KeyEvent.META_SHIFT_ON;
-  final static int META_MASK  = 0;
-  final static int ALT_MASK   = KeyEvent.META_ALT_ON;
+  /**
+   * Write a pointer event message.  We may need to send modifier key events
+   * around it to set the correct modifier state.
+   * @param x
+   * @param y
+   * @param modifiers
+   * @param pointerMask
+   * @throws IOException
+   */
+  synchronized void writePointerEvent( int x, int y, int modifiers, int pointerMask) throws IOException
+  {
+	    eventBufLen = 0;
+	    writeModifierKeyEvents(modifiers);
 
+	    eventBuf[eventBufLen++] = (byte) PointerEvent;
+	    eventBuf[eventBufLen++] = (byte) pointerMask;
+	    eventBuf[eventBufLen++] = (byte) ((x >> 8) & 0xff);
+	    eventBuf[eventBufLen++] = (byte) (x & 0xff);
+	    eventBuf[eventBufLen++] = (byte) ((y >> 8) & 0xff);
+	    eventBuf[eventBufLen++] = (byte) (y & 0xff);
 
-  //
-  // Write a pointer event message.  We may need to send modifier key events
-  // around it to set the correct modifier state.
-  //
-  int pointerMask = 0;
+	    //
+	    // Always release all modifiers after an "up" event
+	    //
 
-  void writePointerEvent(MotionEvent evt) throws IOException {
-    int modifiers = evt.getMetaState();
+	    if (pointerMask == 0) {
+	      writeModifierKeyEvents(0);
+	    }
 
-    int mask2 = 2;
-//    int mask3 = 4;
-
-    if (evt.getAction() == MotionEvent.ACTION_DOWN) {
-      if ((modifiers & KeyEvent.META_ALT_ON) != 0) {
-        pointerMask = mask2;
-        modifiers &= ~ALT_MASK;
-//      } else if ((modifiers & KeyEvent.META_SYM_ON) != 0) {
-//        pointerMask = mask3;
-//        modifiers &= ~META_MASK;
-      } else {
-        pointerMask = 1;
-      }
-    } else if (evt.getAction() == MotionEvent.ACTION_UP) {
-      pointerMask = 0;
-      if ((modifiers & KeyEvent.META_ALT_ON) != 0) {
-        modifiers &= ~ALT_MASK;
-      }
-//      else if ((modifiers & KeyEvent.META_SYM_ON) != 0) {
-//        modifiers &= ~META_MASK;
-//      }
-    }
-
-    eventBufLen = 0;
-    writeModifierKeyEvents(modifiers);
-
-    int x = (int) evt.getX();
-    int y = (int) evt.getY();
-
-    if (x < 0) x = 0;
-    if (y < 0) y = 0;
-
-    eventBuf[eventBufLen++] = (byte) PointerEvent;
-    eventBuf[eventBufLen++] = (byte) pointerMask;
-    eventBuf[eventBufLen++] = (byte) ((x >> 8) & 0xff);
-    eventBuf[eventBufLen++] = (byte) (x & 0xff);
-    eventBuf[eventBufLen++] = (byte) ((y >> 8) & 0xff);
-    eventBuf[eventBufLen++] = (byte) (y & 0xff);
-
-    //
-    // Always release all modifiers after an "up" event
-    //
-
-    if (pointerMask == 0) {
-      writeModifierKeyEvents(0);
-    }
-
-    os.write(eventBuf, 0, eventBufLen);
+	    os.write(eventBuf, 0, eventBufLen);	  
   }
 
   void writeCtrlAltDel() throws IOException {
 	  final int DELETE = 0xffff;
-	  final int CTRLALT = CTRL_MASK | ALT_MASK;
+	  final int CTRLALT = VncCanvas.CTRL_MASK | VncCanvas.ALT_MASK;
 	  try {
 		  // Press
 		  eventBufLen = 0;
@@ -1092,7 +1064,7 @@ class RfbProto {
   // around it to set the correct modifier state.  Also we need to translate
   // from the Java key values to the X keysym values used by the RFB protocol.
   //
-  boolean writeKeyEvent(int keyCode, KeyEvent evt) throws IOException {
+  synchronized boolean writeKeyEvent(int keyCode, KeyEvent evt) throws IOException {
 
    boolean down = (evt.getAction() == KeyEvent.ACTION_DOWN);
    int key = evt.getDisplayLabel();
@@ -1144,17 +1116,17 @@ class RfbProto {
   int oldModifiers = 0;
 
   void writeModifierKeyEvents(int newModifiers) {
-    if ((newModifiers & CTRL_MASK) != (oldModifiers & CTRL_MASK))
-      writeKeyEvent(0xffe3, (newModifiers & CTRL_MASK) != 0);
+    if ((newModifiers & VncCanvas.CTRL_MASK) != (oldModifiers & VncCanvas.CTRL_MASK))
+      writeKeyEvent(0xffe3, (newModifiers & VncCanvas.CTRL_MASK) != 0);
 
-    if ((newModifiers & SHIFT_MASK) != (oldModifiers & SHIFT_MASK))
-      writeKeyEvent(0xffe1, (newModifiers & SHIFT_MASK) != 0);
+    if ((newModifiers & VncCanvas.SHIFT_MASK) != (oldModifiers & VncCanvas.SHIFT_MASK))
+      writeKeyEvent(0xffe1, (newModifiers & VncCanvas.SHIFT_MASK) != 0);
 
-    if ((newModifiers & META_MASK) != (oldModifiers & META_MASK))
-      writeKeyEvent(0xffe7, (newModifiers & META_MASK) != 0);
+    if ((newModifiers & VncCanvas.META_MASK) != (oldModifiers & VncCanvas.META_MASK))
+      writeKeyEvent(0xffe7, (newModifiers & VncCanvas.META_MASK) != 0);
 
-    if ((newModifiers & ALT_MASK) != (oldModifiers & ALT_MASK))
-      writeKeyEvent(0xffe9, (newModifiers & ALT_MASK) != 0);
+    if ((newModifiers & VncCanvas.ALT_MASK) != (oldModifiers & VncCanvas.ALT_MASK))
+      writeKeyEvent(0xffe9, (newModifiers & VncCanvas.ALT_MASK) != 0);
 
     oldModifiers = newModifiers;
   }
@@ -1254,7 +1226,7 @@ class RfbProto {
     }
   }
 
-  void writeOpenChat() throws Exception {
+    synchronized void writeOpenChat() throws Exception {
 		os.write(TextChat); // byte type
 		os.write(0); // byte pad 1
 		os.write(0); // byte pad 2
@@ -1262,7 +1234,7 @@ class RfbProto {
 		writeInt(CHAT_OPEN); // int message length
 	}
 
-	void writeCloseChat() throws Exception {
+    synchronized void writeCloseChat() throws Exception {
 		os.write(TextChat); // byte type
 		os.write(0); // byte pad 1
 		os.write(0); // byte pad 2
@@ -1270,7 +1242,7 @@ class RfbProto {
 		writeInt(CHAT_CLOSE); // int message length
 	}
 
-	void writeFinishedChat() throws Exception {
+    synchronized void writeFinishedChat() throws Exception {
 		os.write(TextChat); // byte type
 		os.write(0); // byte pad 1
 		os.write(0); // byte pad 2
@@ -1307,7 +1279,7 @@ class RfbProto {
 		return null;
 	}
 
-	public void writeChatMessage(String msg) throws Exception {
+	public synchronized void writeChatMessage(String msg) throws Exception {
 		os.write(TextChat); // byte type
 		os.write(0); // byte pad 1
 		os.write(0); // byte pad 2

@@ -3,8 +3,6 @@ package android.androidVNC;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -41,15 +39,6 @@ public class Utils {
 		return nextNoticeID;
 	}
 
-	public static void notify(Context _context, String tickerText) {
-		NotificationManager manager = (NotificationManager) _context.getSystemService(Context.NOTIFICATION_SERVICE);
-		Notification n = new Notification();
-		n.defaults = Notification.DEFAULT_ALL;
-		n.tickerText = tickerText;
-		n.icon = android.R.drawable.stat_sys_warning;
-		manager.notify(nextNoticeID(), n);
-	}
-	
 	public static void showErrorMessage(Context _context, String message) {
 		showMessage(_context, "Error!", message, android.R.drawable.ic_dialog_alert, null);
 	}
