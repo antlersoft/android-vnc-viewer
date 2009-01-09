@@ -52,6 +52,7 @@
 	android:layout_height="wrap_content"
 	android:textSize="18sp"
 	android:text=""
+	android:password="true"
 	android:layout_x="120px" android:layout_y="155px"/>
 <Button
 	android:id="@+id/buttonGO"
