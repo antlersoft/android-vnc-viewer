@@ -51,11 +51,15 @@ public class androidVNC extends Activity {
 		passwordText = (EditText) findViewById(R.id.textPASSWORD);
 		goButton = (Button) findViewById(R.id.buttonGO);
 		colorSpinner = (Spinner)findViewById(R.id.colorformat);
-		ArrayAdapter<COLORMODEL> colorSpinnerAdapter = new ArrayAdapter<COLORMODEL>(this, android.R.layout.simple_spinner_item, COLORMODEL.values());
+		COLORMODEL[] models=COLORMODEL.values();
+		ArrayAdapter<COLORMODEL> colorSpinnerAdapter = new ArrayAdapter<COLORMODEL>(this, android.R.layout.simple_spinner_item, models);
+		int indexC64;
+		for ( indexC64=0; models[indexC64] != COLORMODEL.C64; ++indexC64);
 		colorSpinner.setAdapter(colorSpinnerAdapter);
-		colorSpinner.setSelection(0);
+		colorSpinner.setSelection(indexC64);
 
 		goButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View view) {
 				canvasStart();
 			}
