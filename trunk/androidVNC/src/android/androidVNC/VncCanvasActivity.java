@@ -96,15 +96,15 @@ public class VncCanvasActivity extends Activity {
     } 
 
 	@Override 
-    protected void onPause() { 
+    protected void onStop() { 
       vncCanvas.disableRepaints(); 
-      super.onPause();       
+      super.onStop();       
     } 
 
 	@Override 
-    protected void onResume() { 
+    protected void onRestart() { 
       vncCanvas.enableRepaints(); 
-      super.onResume();       
+      super.onRestart();       
     } 
 
 	/** {@inheritDoc} */
@@ -244,7 +244,10 @@ public class VncCanvasActivity extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		if (isFinishing())
+		{
+			vncCanvas.closeConnection();
 			vncCanvas.onDestroy();
+		}
 	}
 	
 	@Override
@@ -282,12 +285,6 @@ public class VncCanvasActivity extends Activity {
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		return inputHandler.onTouchEvent(event);
-	}
-
-	@Override
-	public void onStop() {
-		vncCanvas.closeConnection();
-		super.onStop();
 	}
 
 	private void selectColorModel() {
