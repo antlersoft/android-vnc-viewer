@@ -28,14 +28,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 public class androidVNC extends Activity {
 	private EditText ipText;
 	private EditText portText;
 	private EditText passwordText;
 	private Button goButton;
+	private Spinner colorSpinner;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -47,6 +50,10 @@ public class androidVNC extends Activity {
 		portText = (EditText) findViewById(R.id.textPORT);
 		passwordText = (EditText) findViewById(R.id.textPASSWORD);
 		goButton = (Button) findViewById(R.id.buttonGO);
+		colorSpinner = (Spinner)findViewById(R.id.colorformat);
+		ArrayAdapter<COLORMODEL> colorSpinnerAdapter = new ArrayAdapter<COLORMODEL>(this, android.R.layout.simple_spinner_item, COLORMODEL.values());
+		colorSpinner.setAdapter(colorSpinnerAdapter);
+		colorSpinner.setSelection(0);
 
 		goButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
@@ -59,30 +66,31 @@ public class androidVNC extends Activity {
 		String ip = ipText.getText().toString();
 		int port = Integer.parseInt(portText.getText().toString());
 		String password = passwordText.getText().toString();
-		vnc(this, ip, port, password, null);
+		COLORMODEL model = (COLORMODEL) colorSpinner.getSelectedItem();
+		vnc(this, ip, port, password, null, model);
 	}
 	
-	
-	private void vnc(final Context _context, final String host, final int port, final String password, final String repeaterID) {
+	private void vnc(final Context _context, final String host, final int port, final String password, final String repeaterID, final COLORMODEL model) {
 		MemoryInfo info = Utils.getMemoryInfo(_context);
 		if (info.lowMemory) {
 			// Low Memory situation.  Prompt.
 			Utils.showYesNoPrompt(_context, "Continue?", "Android reports low system memory.\nContinue with VNC connection?", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					vnc_(_context, host, port, password, repeaterID);
+					vnc_(_context, host, port, password, repeaterID, model);
 				}
 			}, null);
 		} else
-			vnc_(_context, host, port, password, repeaterID);
+			vnc_(_context, host, port, password, repeaterID, model);
 	}
 		
-	private void vnc_(Context _context, String host, int port, String password, String repeaterID) {
+	private void vnc_(Context _context, String host, int port, String password, String repeaterID, final COLORMODEL model) {
 		 Intent intent = new Intent(_context, VncCanvasActivity.class);
-		 intent.putExtra("HOST", host);
-		 intent.putExtra("PORT", port);
-		 intent.putExtra("PASSWORD", password);
-		 intent.putExtra("ID", repeaterID);
+		 intent.putExtra(VncConstants.HOST, host);
+		 intent.putExtra(VncConstants.PORT, port);
+		 intent.putExtra(VncConstants.PASSWORD, password);
+		 intent.putExtra(VncConstants.ID, repeaterID);
+		 intent.putExtra(VncConstants.COLORMODEL, model);
 		 _context.startActivity(intent);
 	}
 }

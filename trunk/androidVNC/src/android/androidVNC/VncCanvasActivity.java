@@ -63,10 +63,10 @@ public class VncCanvasActivity extends Activity {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		Bundle extras = getIntent().getExtras();
-		String host = extras.getString("HOST");
+		String host = extras.getString(VncConstants.HOST);
 		if (host == null)
-			host = extras.getString("IP");
-		int port = extras.getInt("PORT");
+			host = extras.getString(VncConstants.IP);
+		int port = extras.getInt(VncConstants.PORT);
 		if (port == 0)
 			port = 5900;
 
@@ -80,10 +80,10 @@ public class VncCanvasActivity extends Activity {
 			host = host.substring(0, host.indexOf(':'));
 		}
 
-		String password = extras.getString("PASSWORD");
-		String repeaterID = extras.getString("ID");
+		String password = extras.getString(VncConstants.PASSWORD);
+		String repeaterID = extras.getString(VncConstants.ID);
 
-		vncCanvas = new VncCanvas(this, host, port, password, repeaterID);
+		vncCanvas = new VncCanvas(this, host, port, password, repeaterID, (COLORMODEL)extras.getSerializable(VncConstants.COLORMODEL));
 		setContentView(vncCanvas);
 		
 		inputHandler=getInputHandlerById(R.id.itemInputFitToScreen);

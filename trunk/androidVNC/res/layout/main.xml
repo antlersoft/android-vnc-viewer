@@ -1,65 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
-    
-<TextView
-	android:id="@+id/text1"
-	android:layout_width="wrap_content"
-	android:layout_height="wrap_content"
-	android:textSize="18sp"
-	android:text="Address"
-	android:layout_y="60px"
-	android:layout_x="35px"/>
-	
-<EditText
-	android:id="@+id/textIP"
-	android:layout_width="160px"
-	android:layout_height="wrap_content"
-	android:textSize="18sp"
-	android:text=""
-	android:layout_y="45px"
-	android:layout_x="120px"/>
-
-<TextView
-	android:id="@+id/text2"
-	android:layout_width="wrap_content"
-	android:layout_height="wrap_content"
-	android:textSize="18sp"
-	android:text="   Port"
-	android:layout_x="45px" android:layout_y="115px"/>
-
-<EditText
-	android:id="@+id/textPORT"
-	android:layout_height="wrap_content"
-	android:textSize="18sp"
-	android:text="5900"
-	android:layout_x="120px" android:layout_width="70px" android:layout_y="100px"/>
-
-<TextView
-	android:id="@+id/text3"
-	android:layout_width="wrap_content"
-	android:layout_height="wrap_content"
-	android:textSize="18sp"
-	android:text="Password"
-	android:layout_x="35px" android:layout_y="170px"/>
-	
-<EditText
-	android:id="@+id/textPASSWORD"
-	android:layout_width="160px"
-	android:layout_height="wrap_content"
-	android:textSize="18sp"
-	android:text=""
-	android:password="true"
-	android:layout_x="120px" android:layout_y="155px"/>
-<Button
-	android:id="@+id/buttonGO"
-	android:text="Connect"
-	android:layout_width="wrap_content"
-	android:layout_height="wrap_content"
-	android:textSize="18sp"
-	android:layout_x="195px" android:layout_y="210px"/>
-
-</AbsoluteLayout>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="fill_parent"
+	android:layout_width="fill_parent"	
+	android:scrollbars="vertical"
+	>	
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:padding="10dip"
+		android:orientation="vertical"
+		>
+		<TableLayout 
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:padding="10dip"
+			>
+				
+			<TableRow>
+				<TextView android:text="Address" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+				<EditText android:id="@+id/textIP" android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
+			</TableRow>
+			<TableRow>
+				<TextView android:text="Port" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+				<EditText android:id="@+id/textPORT"
+					android:text="5900"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
+			</TableRow>
+			<TableRow>
+				<TextView android:text="Password" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+				<EditText android:id="@+id/textPASSWORD"
+					android:password="true"
+					android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
+			</TableRow>
+		</TableLayout>
+		<TextView
+		    android:layout_height="wrap_content"
+		    android:layout_width="wrap_content"
+		    android:layout_gravity="left|center_vertical"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:text="Color Format"
+		/>
+		<Spinner 
+		    android:id="@+id/colorformat" 
+		    android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+		   />
+		<Button 
+		    android:id="@+id/buttonGO" 
+		    android:text="Connect"
+			android:layout_width="wrap_content" 
+			android:layout_height="wrap_content"
+		/>
+	</LinearLayout>
+</ScrollView>

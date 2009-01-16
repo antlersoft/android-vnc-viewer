@@ -93,7 +93,7 @@ public class VncCanvas extends ImageView {
 	private boolean repaintsEnabled = true;
 
 	// Color Model settings
-	private COLORMODEL pendingColorModel = COLORMODEL.C64;
+	private COLORMODEL pendingColorModel = COLORMODEL.C24bit;
 	private COLORMODEL colorModel = null;
 	private int bytesPerPixel = 0;
 	private int[] colorPalette = null;
@@ -132,12 +132,13 @@ public class VncCanvas extends ImageView {
 	private int zlibBufLen = 0;
 	private Inflater zlibInflater;
 
-	public VncCanvas(final Context context, String serverIP, int serverPort, String serverPassword, String repeaterid) {
+	public VncCanvas(final Context context, String serverIP, int serverPort, String serverPassword, String repeaterid, COLORMODEL colorModel) {
 		super(context);
 		this.server = serverIP;
 		this.port = serverPort;
 		this.password = serverPassword;
 		this.repeaterID = repeaterid;
+		this.pendingColorModel = colorModel;
 
 		// Startup the RFB thread with a nifty progess dialog
 		final ProgressDialog pd = ProgressDialog.show(context, "Connecting...", "Establishing handshake.\nPlease wait...", true, true, new DialogInterface.OnCancelListener() {
@@ -182,19 +183,16 @@ public class VncCanvas extends ImageView {
 							// Instantiating an alert dialog here doesn't work
 							// because we are out of memory. :(
 						} else {
-							if (e.getMessage().indexOf("authentication") > -1) {
-								handler.post(new Runnable() {
-									public void run() {
-										Utils.showFatalErrorMessage(context, "VNC authentication failed!");
-									}
-								});
-							} else {
-								handler.post(new Runnable() {
-									public void run() {
-										Utils.showFatalErrorMessage(context, "VNC connection failed!");
-									}
-								});
-							}
+							String error = "VNC connection failed!";
+							if (e.getMessage() != null && (e.getMessage().indexOf("authentication") > -1)) {
+								error = "VNC authentication failed!";
+ 							}
+							final String error_ = error;
+							handler.post(new Runnable() {
+								public void run() {
+									Utils.showFatalErrorMessage(context, error_);
+								}
+							});
 						}
 					}
 				}
@@ -625,6 +623,7 @@ public class VncCanvas extends ImageView {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		    
 			return true;
 		}
 		return false;
