@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<project name="androidVNC" default="build" basedir=".">
+	<!-- androidVNC info -->
+	<property name="project.name" value="androidVNC" />
+	<property name="application-package" value="android.androidVNC" />
+	<property name="signed.apk" value="androidVNC.apk" />
+	<property name="certificate.file" value="androidVNC.cert" />
+
+	<!-- Android SDK Locations -->
+	<property name="sdk-folder" value="C:\android-sdk-windows-1.0_r2" />
+	<property name="android-tools" value="C:\android-sdk-windows-1.0_r2\tools" />
+	
+	<!-- Import android build file -->
+	<import file="build_android.xml" />
+
+	<!-- Sign the application for release. -->
+	<target name="build" depends="release">
+		<!-- Sign the APK otherwise it will not be installable on Android -->
+		<available file="${certificate.file}" property="androidVNC.hasCertificate" />
+		<antcall target="sign" />
+		<antcall target="unsigned" />
+		<antcall target="clean" />
+	</target>
+
+	<target name="sign" if="androidVNC.hasCertificate" >
+		<!-- Sign the APK otherwise it will not be installable on Android -->
+		<signjar jar="${out-unsigned-package}" signedjar="${signed.apk}" alias="" storetype="" keystore="${certificate.file}" storepass="" />
+		<echo>${signed.apk} READY FOR RELEASE!</echo>
+	</target>
+
+	<target name="unsigned" unless="androidVNC.hasCertificate" >
+		<copy verbose="true" todir="${basedir}" file="${out-unsigned-package}"/>
+		<echo>YOU MUST SIGN THIS APK BEFORE IT CAN BE INSTALLED ONTO AN ANDROID DEVICE!</echo>
+	</target>
+
+</project>
