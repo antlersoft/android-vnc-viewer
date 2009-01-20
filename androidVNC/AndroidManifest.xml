@@ -2,17 +2,52 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="android.androidVNC">
     <application android:icon="@drawable/icon" android:label="androidVNC">
- 		<activity android:label="@string/app_name" android:name="androidVNC" android:screenOrientation="landscape">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN"></action>
-				<category android:name="android.intent.category.LAUNCHER"></category>
-			</intent-filter>
-		</activity>
+        
+        <provider android:name="Provider"
+            android:authorities="android.androidVNC.Provider" />
+        		
 		<activity android:screenOrientation="landscape" android:configChanges="orientation|keyboardHidden" android:name="VncCanvasActivity">
 			<intent-filter>
-				<action android:name="android.intent.action.VIEW"></action>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.vnc.config" />
 			</intent-filter>
 		</activity>
+	
+	    <activity android:name=".gui.ListVncSettingsActivity" android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".gui.InsertVncSettingsActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.INSERT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/vnd.vnc.config" />
+            </intent-filter>
+        </activity>
+    
+        <activity android:name=".gui.EditVncSettingsActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.EDIT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.vnc.config" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".gui.DeleteVncSettingsActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.DELETE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.vnc.config" />
+            </intent-filter>
+        </activity>
+	
 	</application>
-<uses-permission android:name="android.permission.INTERNET"></uses-permission>
+    
+    
+    
+    
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
 </manifest> 
