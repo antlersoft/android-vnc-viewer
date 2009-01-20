@@ -1,8 +1,9 @@
 package android.androidVNC;
 
 import java.io.IOException;
+import java.io.Serializable;
 
-public enum COLORMODEL {
+public enum COLORMODEL implements Serializable {
 	C24bit, C256, C64, C8, C4, C2;
 
 	public int bpp() {

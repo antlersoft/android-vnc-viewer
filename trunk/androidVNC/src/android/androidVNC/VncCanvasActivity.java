@@ -20,9 +20,11 @@
 //
 package android.androidVNC;
 
+import android.androidVNC.Provider.VncSettings;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -57,33 +59,47 @@ public class VncCanvasActivity extends Activity {
 
 	@Override
 	public void onCreate(Bundle icicle) {
-
 		super.onCreate(icicle);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-		Bundle extras = getIntent().getExtras();
-		String host = extras.getString(VncConstants.HOST);
-		if (host == null)
-			host = extras.getString(VncConstants.IP);
-		int port = extras.getInt(VncConstants.PORT);
-		if (port == 0)
-			port = 5900;
+		Intent intent = getIntent();
+		String host = null;
+		int port = 5900;
+		String password = null;
+		COLORMODEL colorModel = COLORMODEL.C64;
+		String repeaterID = null;
+		
+		if (intent.getData() != null) {
+		  VncSettings settings = VncSettings.getHelper(this, intent.getData());
+		  host = settings.getString(VncSettings.HOST);
+		  port = Integer.parseInt(settings.getString(VncSettings.PORT));
+		  password = settings.getString(VncSettings.PASSWORD);
+		  colorModel = COLORMODEL.values()[settings.getInt(VncSettings.COLORMODEL)];
+		  repeaterID = "";
+		} else {
+	    Bundle extras = getIntent().getExtras();
+	    host = extras.getString(VncConstants.HOST);
+	    if (host == null) 
+	      host = extras.getString(VncConstants.IP);
+	    port = extras.getInt(VncConstants.PORT);
+	    if (port == 0)
+	      port = 5900;
 
-		// Parse a HOST:PORT entry
-		if (host.indexOf(':') > -1) {
-			String p = host.substring(host.indexOf(':') + 1);
-			try {
-				port = Integer.parseInt(p);
-			} catch (Exception e) {
-			}
-			host = host.substring(0, host.indexOf(':'));
+	    // Parse a HOST:PORT entry
+	    if (host.indexOf(':') > -1) {
+	      String p = host.substring(host.indexOf(':') + 1);
+	      try {
+	        port = Integer.parseInt(p);
+	      } catch (Exception e) {
+	      }
+	      host = host.substring(0, host.indexOf(':'));
+	    }
+	    password = extras.getString(VncConstants.PASSWORD);
+	    repeaterID = extras.getString(VncConstants.ID);
+	    colorModel = (COLORMODEL)extras.getSerializable(VncConstants.COLORMODEL);
 		}
-
-		String password = extras.getString(VncConstants.PASSWORD);
-		String repeaterID = extras.getString(VncConstants.ID);
-
-		vncCanvas = new VncCanvas(this, host, port, password, repeaterID, (COLORMODEL)extras.getSerializable(VncConstants.COLORMODEL));
+		vncCanvas = new VncCanvas(this, host, port, password, repeaterID, colorModel);
 		setContentView(vncCanvas);
 		
 		inputHandler=getInputHandlerById(R.id.itemInputFitToScreen);
@@ -177,6 +193,8 @@ public class VncCanvasActivity extends Activity {
 					case R.id.itemInputTouchPanTrackballMouse :
 						inputModeHandlers[i]=new TouchPanTrackballMouse();
 						break;
+					default:
+						throw new IllegalArgumentException("unknown id" + id);
 					}
 				}
 				return inputModeHandlers[i];

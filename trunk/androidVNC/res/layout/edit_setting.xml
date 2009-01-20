@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+	<LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent">
+		<LinearLayout android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_weight="1" android:orientation="vertical">
+		    <TextView 
+		        android:layout_height="wrap_content"
+		        android:layout_width="wrap_content" 
+		        android:layout_gravity="right"
+		        android:text="Address" 
+		        android:textSize="10px" 
+		    />
+		    <EditText 
+		        android:id="@+id/edit_ip" 
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content" 
+		        android:layout_gravity="right" 
+		    />
+		</LinearLayout>
+		<LinearLayout android:layout_height="wrap_content" android:layout_width="wrap_content"  android:layout_weight="0.2" android:orientation="vertical"> 
+		    <TextView 
+		        android:layout_width="wrap_content" 
+		        android:layout_height="wrap_content"
+		        android:layout_gravity="right"
+		        android:text="Port" 
+		        android:textSize="10px" 
+		    />
+		    <EditText 
+		        android:id="@+id/edit_port" 
+		        android:layout_height="wrap_content"
+		        android:layout_width="fill_parent"
+		        android:layout_gravity="right"
+		        android:text="5900" 
+		    />
+		</LinearLayout>
+	</LinearLayout>
+    <TextView 
+        android:layout_height="wrap_content" 
+        android:layout_width="wrap_content"
+        android:layout_gravity="right"
+        android:textSize="10px"
+        android:text="Password" 
+    />
+    <EditText 
+        android:id="@+id/edit_password" 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="" 
+        android:password="true" 
+    />
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_gravity="right"
+        android:textSize="10px"
+        android:text="Colorformat"
+    />
+
+    <Spinner 
+        android:id="@+id/edit_colorformat" 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+    />
+
+</LinearLayout>
