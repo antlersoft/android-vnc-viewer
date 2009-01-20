@@ -1081,7 +1081,7 @@ class RfbProto {
     }
 
     eventBufLen = 0;
-    writeModifierKeyEvents(evt.getMetaState());
+    writeModifierKeyEvents(key!=0 ? evt.getMetaState() & ~VncCanvas.ALT_MASK : evt.getMetaState());
     writeKeyEvent(key, down);
 
     // Always release all modifiers after an "up" event
