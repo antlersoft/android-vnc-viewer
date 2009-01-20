@@ -22,6 +22,7 @@ package android.androidVNC;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Configuration;
@@ -63,27 +64,24 @@ public class VncCanvasActivity extends Activity {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		Bundle extras = getIntent().getExtras();
-		String host = extras.getString(VncConstants.HOST);
-		if (host == null)
-			host = extras.getString(VncConstants.IP);
-		int port = extras.getInt(VncConstants.PORT);
-		if (port == 0)
-			port = 5900;
+		
+		ConnectionBean bean=new ConnectionBean();
+		bean.Gen_populate((ContentValues)extras.getParcelable(VncConstants.CONNECTION));
+		if (bean.getPort() == 0)
+			bean.setPort(5900);
 
 		// Parse a HOST:PORT entry
+		String host=bean.getAddress();
 		if (host.indexOf(':') > -1) {
 			String p = host.substring(host.indexOf(':') + 1);
 			try {
-				port = Integer.parseInt(p);
+				bean.setPort( Integer.parseInt(p) );
 			} catch (Exception e) {
 			}
-			host = host.substring(0, host.indexOf(':'));
+			bean.setAddress( host.substring(0, host.indexOf(':')));
 		}
 
-		String password = extras.getString(VncConstants.PASSWORD);
-		String repeaterID = extras.getString(VncConstants.ID);
-
-		vncCanvas = new VncCanvas(this, host, port, password, repeaterID, (COLORMODEL)extras.getSerializable(VncConstants.COLORMODEL));
+		vncCanvas = new VncCanvas(this, bean);
 		setContentView(vncCanvas);
 		
 		inputHandler=getInputHandlerById(R.id.itemInputFitToScreen);

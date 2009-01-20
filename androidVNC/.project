@@ -25,9 +25,21 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
+		<buildCommand>
+			<name>com.antlersoft.bbq_eclipse.BBQBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>com.antlersoft.sqlitegen.SQLiteGenBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
 	</buildSpec>
 	<natures>
 		<nature>com.android.ide.eclipse.adt.AndroidNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>com.antlersoft.bbq_eclipse.BBQNature</nature>
+		<nature>com.antlersoft.sqlitegen.SQLiteGenNature</nature>
 	</natures>
 </projectDescription>

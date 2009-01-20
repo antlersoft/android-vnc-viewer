@@ -15,7 +15,18 @@
 			android:layout_height="wrap_content"
 			android:padding="10dip"
 			>
-				
+			<TableRow>
+				<TextView android:text="Connection" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+				<Spinner 
+				    android:id="@+id/spinnerConnection" 
+				    android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+				/>
+			</TableRow>	
+			<TableRow>
+				<TextView android:text="Nickname" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+				<EditText android:id="@+id/textNickname" android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
+			</TableRow>
 			<TableRow>
 				<TextView android:text="Address" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
 				<EditText android:id="@+id/textIP" android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
@@ -45,12 +56,32 @@
 		    android:id="@+id/colorformat" 
 		    android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-		   />
-		<Button 
-		    android:id="@+id/buttonGO" 
-		    android:text="Connect"
-			android:layout_width="wrap_content" 
-			android:layout_height="wrap_content"
 		/>
+		<LinearLayout android:orientation="horizontal" 
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			>
+			<CheckBox
+				android:id="@+id/checkboxForceFullScreen"
+			    android:text="Force full-screen bitmap"
+			    android:layout_width="wrap_content"
+			    android:gravity="left|center_vertical"
+			    android:layout_height="wrap_content"
+			/>
+			<LinearLayout
+				android:orientation="horizontal"
+				android:gravity="right"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				>
+				<Button 
+				    android:id="@+id/buttonGO" 
+				    android:text="Connect"
+				    android:textAppearance="?android:attr/textAppearanceMedium"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+				/>
+			</LinearLayout>
+		</LinearLayout>
 	</LinearLayout>
 </ScrollView>

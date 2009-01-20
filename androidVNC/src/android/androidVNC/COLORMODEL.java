@@ -32,6 +32,11 @@ public enum COLORMODEL {
 			return ColorModel256.colors;
 		}
 	}
+	
+	public String nameString()
+	{
+		return super.toString();
+	}
 
 	public void setPixelFormat(RfbProto rfb) throws IOException {
 		switch (this) {

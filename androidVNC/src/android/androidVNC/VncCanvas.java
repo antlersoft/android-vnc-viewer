@@ -80,6 +80,9 @@ public class VncCanvas extends ImageView {
 	
 	// Available to activity
 	int mouseX, mouseY;
+	
+	// Connection parameters
+	ConnectionBean connection;
 
 	// User-provided connection settings
 	private String server;
@@ -132,13 +135,14 @@ public class VncCanvas extends ImageView {
 	private int zlibBufLen = 0;
 	private Inflater zlibInflater;
 
-	public VncCanvas(final Context context, String serverIP, int serverPort, String serverPassword, String repeaterid, COLORMODEL colorModel) {
+	public VncCanvas(final Context context, ConnectionBean bean) {
 		super(context);
-		this.server = serverIP;
-		this.port = serverPort;
-		this.password = serverPassword;
-		this.repeaterID = repeaterid;
-		this.pendingColorModel = colorModel;
+		connection = bean;
+		this.server = bean.getAddress();
+		this.port = bean.getPort();
+		this.password = bean.getPassword();
+		repeaterID = bean.getRepeaterId();
+		this.pendingColorModel = COLORMODEL.valueOf(bean.getColorModel());
 
 		// Startup the RFB thread with a nifty progess dialog
 		final ProgressDialog pd = ProgressDialog.show(context, "Connecting...", "Establishing handshake.\nPlease wait...", true, true, new DialogInterface.OnCancelListener() {
@@ -258,8 +262,7 @@ public class VncCanvas extends ImageView {
 		Display display=((VncCanvasActivity)getContext()).getWindowManager().getDefaultDisplay();
 		int dx=display.getWidth();
 		int dy=display.getHeight();
-		int max=(dx>dy) ? dx : dy;
-		if ( rfb.framebufferWidth>max*2 || rfb.framebufferHeight>max*2)
+		if ((rfb.framebufferWidth > 1024 || rfb.framebufferHeight > 1024) && ! connection.getForceFull())
 			bitmapData=new LargeBitmapData(rfb,dx,dy);
 		else
 			bitmapData=new CompactBitmapData(rfb);
