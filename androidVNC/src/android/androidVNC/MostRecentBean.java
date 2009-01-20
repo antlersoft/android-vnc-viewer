@@ -30,6 +30,7 @@ public class MostRecentBean extends com.antlersoft.android.dbimpl.IdImplementati
         }
     }
     ;
+
     public String Gen_tableName() { return GEN_TABLE_NAME; }
 
     // Field accessors
@@ -61,10 +62,10 @@ public class MostRecentBean extends com.antlersoft.android.dbimpl.IdImplementati
      * Populate one instance from a cursor 
      */
     public void Gen_populate(android.database.Cursor cursor,int[] columnIndices) {
-        if ( ! cursor.isNull(0)) {
+        if ( columnIndices[GEN_ID__ID] >= 0 && ! cursor.isNull(columnIndices[GEN_ID__ID])) {
             gen__Id = cursor.getLong(columnIndices[GEN_ID__ID]);
         }
-        if ( ! cursor.isNull(1)) {
+        if ( columnIndices[GEN_ID_CONNECTION_ID] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_CONNECTION_ID])) {
             gen_CONNECTION_ID = cursor.getLong(columnIndices[GEN_ID_CONNECTION_ID]);
         }
     }

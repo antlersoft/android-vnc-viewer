@@ -46,6 +46,8 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
     private java.lang.String gen_colorModel;
     private boolean gen_forceFull;
     private java.lang.String gen_repeaterId;
+
+
     public String Gen_tableName() { return GEN_TABLE_NAME; }
 
     // Field accessors
@@ -101,28 +103,28 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
      * Populate one instance from a cursor 
      */
     public void Gen_populate(android.database.Cursor cursor,int[] columnIndices) {
-        if ( ! cursor.isNull(0)) {
+        if ( columnIndices[GEN_ID__ID] >= 0 && ! cursor.isNull(columnIndices[GEN_ID__ID])) {
             gen__Id = cursor.getLong(columnIndices[GEN_ID__ID]);
         }
-        if ( ! cursor.isNull(1)) {
+        if ( columnIndices[GEN_ID_NICKNAME] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_NICKNAME])) {
             gen_nickname = cursor.getString(columnIndices[GEN_ID_NICKNAME]);
         }
-        if ( ! cursor.isNull(2)) {
+        if ( columnIndices[GEN_ID_ADDRESS] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_ADDRESS])) {
             gen_address = cursor.getString(columnIndices[GEN_ID_ADDRESS]);
         }
-        if ( ! cursor.isNull(3)) {
+        if ( columnIndices[GEN_ID_PORT] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_PORT])) {
             gen_port = (int)cursor.getInt(columnIndices[GEN_ID_PORT]);
         }
-        if ( ! cursor.isNull(4)) {
+        if ( columnIndices[GEN_ID_PASSWORD] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_PASSWORD])) {
             gen_password = cursor.getString(columnIndices[GEN_ID_PASSWORD]);
         }
-        if ( ! cursor.isNull(5)) {
+        if ( columnIndices[GEN_ID_COLORMODEL] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_COLORMODEL])) {
             gen_colorModel = cursor.getString(columnIndices[GEN_ID_COLORMODEL]);
         }
-        if ( ! cursor.isNull(6)) {
+        if ( columnIndices[GEN_ID_FORCEFULL] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_FORCEFULL])) {
             gen_forceFull = (cursor.getInt(columnIndices[GEN_ID_FORCEFULL]) != 0);
         }
-        if ( ! cursor.isNull(7)) {
+        if ( columnIndices[GEN_ID_REPEATERID] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_REPEATERID])) {
             gen_repeaterId = cursor.getString(columnIndices[GEN_ID_REPEATERID]);
         }
     }
