@@ -27,4 +27,6 @@ The bottom section of the page is where you enter your connection configurations
 
 === Scaling ===
 
+==== Fit to Screen ====
+
 === Input Modes ===
