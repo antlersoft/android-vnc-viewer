@@ -50,8 +50,7 @@ to the VNC display, to enable a style of interaction most convenient for the app
 you are using.
 You can switch between these modes with the _Input Mode_ menu item.
 
-  _No Pan; Trackball Mouse_ This mode is only available in [Scaling Fit to Screen] scaling and is the only input mode available then.  In this mode the touchscreen is not used.  Keyboard events are sent to the server and the trackball (if your device, like the G1, has a trackball)
-  controls the VNC mouse.
+  _No Pan; Trackball Mouse_ This mode is only available in [#Scaling Fit to Screen] scaling and is the only input mode available then.  In this mode the touchscreen is not used.  Keyboard events are sent to the server and the trackball (if your device, like the G1, has a trackball) controls the VNC mouse.
 
   _Desktop Panning Mode_ In this mode, both the touchscreen and the trackball are used to pan the device display over the larger VNC display.  Keyboard events are sent to the server.  Pressing the trackball toggles between _Desktop Panning_ and _Mouse Pointer Control_ modes.
 
