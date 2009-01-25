@@ -11,17 +11,17 @@ Next to the list is a _Connect_ button.  The _Connect_ button will start the VNC
 
 The bottom section of the page is where you enter your connection configurations.  There are more options that will fit on the page, so this section scrolls.
 
-  *_Nickname_* Each configuration you create can have a nickname which will make it easy to find in the list.  Enter that name here.
+  _*Nickname*_ Each configuration you create can have a nickname which will make it easy to find in the list.  Enter that name here.
 
-  *_Password_* If your VNC server is configured to require a password, enter that password here.  Most configuration settings are stored in a simple database on your device.  The password will only be stored if you check _Keep_; otherwise, you will have to re-enter it when you recall a configuration.  Even if the password is not stored in the database, it will remain available on the page for as long as *android-vnc-viewer* runs on your device.
+  _*Password*_ If your VNC server is configured to require a password, enter that password here.  Most configuration settings are stored in a simple database on your device.  The password will only be stored if you check _Keep_; otherwise, you will have to re-enter it when you recall a configuration.  Even if the password is not stored in the database, it will remain available on the page for as long as *android-vnc-viewer* runs on your device.
 
-  *_Address_* This is where you enter the DNS name or IP address of the computer running the VNC server to which you want to connect.
+  _*Address*_ This is where you enter the DNS name or IP address of the computer running the VNC server to which you want to connect.
 
-  *_Port_* Here you should enter the port number of the VNC server.  This field will default to the first VNC port number, 5900.
+  _*Port*_ Here you should enter the port number of the VNC server.  This field will default to the first VNC port number, 5900.
 
-  *_Color Format_* The client supports a number of color formats, which are specified by number of colors/number of bits per pixel.  Formats with more bits per pixel provide greater fidelity to high color depth displays, but use more bandwidth (sometimes dramatically more because they don't compress as well) and more CPU on your Android device.  Not all VNC servers support all color depths-- if you are having trouble connecting to a server, try using 8-bit (256 colors) or 24-bit color.
+  _*Color Format*_ The client supports a number of color formats, which are specified by number of colors/number of bits per pixel.  Formats with more bits per pixel provide greater fidelity to high color depth displays, but use more bandwidth (sometimes dramatically more because they don't compress as well) and more CPU on your Android device.  Not all VNC servers support all color depths-- if you are having trouble connecting to a server, try using 8-bit (256 colors) or 24-bit color.
 
-  *_Force full-screen bitmap_* The VNC client requires a bitmap for it's representation of the display.  For a VNC server serving a large display, this bitmap might require more memory than Android allows in an application.  To work with these large displays, *android-vnc-client* breaks large display into smaller tiles and works with only one tile at a time.  Unfortunately, this will sometimes create some visual artifacts.  In particular, when a large display is in [#Scaling Fit to Screen] mode only a portion of it will be visible, and in [#Scaling 1:1] mode as you pan over a large display you might see different parts of the display flicker in.  *android-vnc-client* will only use tiling if it thinks the display is too large to fit in memory, but you can override this decision and always turn off tiling by checking *_Force full-screen bitmap_*.  This might cause the application to crash on connection.
+  _*Force full-screen bitmap*_ The VNC client requires a bitmap for it's representation of the display.  For a VNC server serving a large display, this bitmap might require more memory than Android allows in an application.  To work with these large displays, *android-vnc-client* breaks large display into smaller tiles and works with only one tile at a time.  Unfortunately, this will sometimes create some visual artifacts.  In particular, when a large display is in [#Scaling Fit to Screen] mode only a portion of it will be visible, and in [#Scaling 1:1] mode as you pan over a large display you might see different parts of the display flicker in.  *android-vnc-client* will only use tiling if it thinks the display is too large to fit in memory, but you can override this decision and always turn off tiling by checking *_Force full-screen bitmap_*.  This might cause the application to crash on connection.
 
 The menu on this page allows you to _Delete_ unneeded connection configurations,
 or to _Save as Copy_ an existing connection to base a different configuration from it.
@@ -50,54 +50,35 @@ to the VNC display, to enable a style of interaction most convenient for the app
 you are using.
 You can switch between these modes with the _Input Mode_ menu item.
 
-  _No Pan; Trackball Mouse_ This mode is only available in [Scaling Fit to Screen] scaling and is the only input mode available then.  In this
-  mode the touchscreen is not used.  Keyboard events are sent to the
-  server and the trackball (if your device, like the G1, has a trackball)
+  _No Pan; Trackball Mouse_ This mode is only available in [Scaling Fit to Screen] scaling and is the only input mode available then.  In this mode the touchscreen is not used.  Keyboard events are sent to the server and the trackball (if your device, like the G1, has a trackball)
   controls the VNC mouse.
 
-  _Desktop Panning Mode_ In this mode, both the touchscreen and the trackball
-  are used to pan the device display over the larger VNC display.  Keyboard
-  events are sent to the server.  Pressing the trackball toggles between
-  _Desktop Panning_ and _Mouse Pointer Control_ modes.
-  
-  _Mouse Control Mode_ In this mode, use the touchscreen to control the mouse.
-  Touching the screen generates a mouse click at that point; dragging on the
-  screen creates a mouse drag.  Keyboard events are sent as normal.  The
-  trackball is used to send arrow-key events to the VNC server.  Pressing
-  the trackball toggles between _Mouse Pointer Control_ and _Desktop Panning_
-  modes.
+  _Desktop Panning Mode_ In this mode, both the touchscreen and the trackball are used to pan the device display over the larger VNC display.  Keyboard events are sent to the server.  Pressing the trackball toggles between _Desktop Panning_ and _Mouse Pointer Control_ modes.
 
-  _Touch Pan; Trackball Mouse_ In this mode, drag on the touchscreen to
-  pan the device display over the VNC display.  Keyboard events are sent
-  to the server.  The trackball controls the VNC mouse.  Pressing the
-  trackball sends a mouse click; holding the ball down while rolling
-  accomplishes a click and drag.
+  _Mouse Control Mode_ In this mode, use the touchscreen to control the mouse.  Touching the screen generates a mouse click at that point; dragging on the screen creates a mouse drag.  Keyboard events are sent as normal.  The trackball is used to send arrow-key events to the VNC server.  Pressing the trackball toggles between _Mouse Pointer Control_ and _Desktop Panning_ modes.
+
+  _Touch Pan; Trackball Mouse_ In this mode, drag on the touchscreen to pan the device display over the VNC display.  Keyboard events are sent to the server.  The trackball controls the VNC mouse.  Pressing the trackball sends a mouse click; holding the ball down while rolling accomplishes a click and drag.
 
 === Special Controls ===
 
 Some special controls try to make up for missing features of an Android
 device (i.e., a G1) as a VNC controller.
 
-  * To use the right mouse button, hold down the *Camera* button while clicking
-  as appropriate for the selected input mode (touching the screen or clicking the trackball)
+  * To use the right mouse button, hold down the *Camera* button while clicking as appropriate for the selected input mode (touching the screen or clicking the trackball)
 
   * To send the _Esc_ key, press the *Back* button on the device.
 
   * To send the arrow keys, roll the trackball in _Mouse Pointer Control Mode_.
 
-  * The Alt button generally is used to send the special symbols that
-  aren't otherwise available on the keyboard, rather than sending the Alt
-  meta-key over the VNC connection.
+  * The Alt button generally is used to send the special symbols that aren't otherwise available on the keyboard, rather than sending the Alt meta-key over the VNC connection.
 
 === Other Menu Items ===
 
   _Info_ Gives information about current configuration
 
-  _Mouse @_ Warps the VNC mouse to the center of the portion of the display
-  shown on your device.
+  _Mouse @_ Warps the VNC mouse to the center of the portion of the display shown on your device.
 
-  _Color Mode_ Allows you to switch the [#Connection_Configuration Color Mode]
-  of your connection.
+  _Color Mode_ Allows you to switch the [#Connection_Configuration Color Mode] of your connection.
 
   _Disconnect_ Closes the current VNC connection, returning you to the configuration page.
 
