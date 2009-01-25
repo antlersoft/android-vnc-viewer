@@ -25,7 +25,7 @@ The bottom section of the page is where you enter your connection configurations
 
 == VNC Client ==
 
-<a title="FitScreen">dd</a>
+<a name="FitScreen">dd</a>
 
 === Scaling ===
 
