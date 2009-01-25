@@ -1,10 +1,19 @@
-
 = Using android-vnc-viewer =
 
 *android-vnc-viewer* lets you use your Android mobile device as a client for a VNC server.  It is a work in progress and still has a number of limitations: for example, it does not support display of VNC servers representing multiple monitors.
 
 == Connection Configuration ==
 When you first open *android-vnc-viewer*, you will see a connection configuration page.  Here you can set up a connection with a VNC server, or choose an already configured connection.
+
+The page is divided into two sections.  The top section contains a drop-down list of the connection configurations you've created.  The first time you run android-vnc-viewer, this list will have only one entry: _New_.  Select _New_ when you want to create a new configuration.
+
+Next to the list is a _Connect_ button.  The _Connect_ button will start the VNC client with the currently selected configuration.
+
+The bottom section of the page is where you enter your connection configurations.  There are more options that will fit on the page, so this section of the page scrolls.
+
+  _Nickname_ Each configuration you create can have a nickname which will make it easy to find in the list.  Enter that name here.
+
+  _Password_ If your VNC server is configured to require a password, enter that password here.
 
 == VNC Client ==
 
