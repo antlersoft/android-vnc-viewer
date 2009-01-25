@@ -9,11 +9,19 @@ The page is divided into two sections.  The top section contains a drop-down lis
 
 Next to the list is a _Connect_ button.  The _Connect_ button will start the VNC client with the currently selected configuration.
 
-The bottom section of the page is where you enter your connection configurations.  There are more options that will fit on the page, so this section of the page scrolls.
+The bottom section of the page is where you enter your connection configurations.  There are more options that will fit on the page, so this section scrolls.
 
   _Nickname_ Each configuration you create can have a nickname which will make it easy to find in the list.  Enter that name here.
 
-  _Password_ If your VNC server is configured to require a password, enter that password here.
+  _Password_ If your VNC server is configured to require a password, enter that password here.  Most configuration settings are stored in a simple database on your device.  The password will only be stored if you check _Keep_; otherwise, you will have to re-enter it when you recall a configuration.  Even if the password is not stored in the database, it will remain available on the page for as long as *android-vnc-viewer* runs on your device.
+
+  _Address_ This is where you enter the DNS name or IP address of the computer running the VNC server to which you want to connect.
+
+  _Port_ Here you should enter the port number of the VNC server.  This field will default to the first VNC port number, 5900.
+
+  _Color Format_ The client supports a number of color formats, which are specified by number of colors/number of bits per pixel.  Formats with more bits per pixel provide greater fidelity to high color depth displays, but use more bandwidth (sometimes dramatically more because they don't compress as much) and more CPU on the device.  Not all VNC servers support all color depths-- if you are having trouble connecting to a server, try using 8-bit or 24-bit color.
+
+  _Force full-screen bitmap_
 
 == VNC Client ==
 
