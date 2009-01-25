@@ -1,87 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
-	android:layout_width="fill_parent"	
-	android:scrollbars="vertical"
-	>	
+	android:padding="10dip"
+	android:orientation="vertical"
+		>
 	<LinearLayout
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:padding="10dip"
-		android:orientation="vertical"
+		android:orientation="horizontal"
 		>
-		<TableLayout 
-			android:layout_width="fill_parent"
+		<LinearLayout
+			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:padding="10dip"
+			android:orientation="vertical"
 			>
-			<TableRow>
-				<TextView android:text="Connection" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
-				<Spinner 
-				    android:id="@+id/spinnerConnection" 
-				    android:layout_width="fill_parent"
-					android:layout_height="wrap_content"
+			<TextView
+				android:text="Connection"
+				android:textAppearance="?android:attr/textAppearanceMedium"
+				android:gravity="right|center_vertical"
+				android:paddingRight="10dip" 
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
 				/>
-			</TableRow>	
-			<TableRow>
-				<TextView android:text="Nickname" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
-				<EditText android:id="@+id/textNickname" android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
-			</TableRow>
-			<TableRow>
-				<TextView android:text="Address" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
-				<EditText android:id="@+id/textIP" android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
-			</TableRow>
-			<TableRow>
-				<TextView android:text="Port" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
-				<EditText android:id="@+id/textPORT"
-					android:text="5900"
-					android:layout_width="fill_parent"
-					android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
-			</TableRow>
-			<TableRow>
-				<TextView android:text="Password" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
-				<EditText android:id="@+id/textPASSWORD"
-					android:password="true"
-					android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
-			</TableRow>
-		</TableLayout>
-		<TextView
-		    android:layout_height="wrap_content"
-		    android:layout_width="wrap_content"
-		    android:layout_gravity="left|center_vertical"
-			android:textAppearance="?android:attr/textAppearanceMedium"
-			android:text="Color Format"
-		/>
+			<Button 
+			    android:id="@+id/buttonGO" 
+			    android:text="Connect"
+			    android:textAppearance="?android:attr/textAppearanceMedium"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+			/>
+		</LinearLayout>
 		<Spinner 
-		    android:id="@+id/colorformat" 
+		    android:id="@+id/spinnerConnection"
 		    android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 		/>
-		<LinearLayout android:orientation="horizontal" 
+	</LinearLayout>
+	<ImageView android:layout_width="fill_parent" android:layout_height="wrap_content" android:src="@android:drawable/divider_horizontal_bright"/>
+	<ScrollView
+		android:layout_height="fill_parent"
+		android:layout_width="fill_parent"	
+		android:scrollbars="vertical"
+		>	
+		<LinearLayout
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
+			android:padding="10dip"
+			android:orientation="vertical"
 			>
-			<CheckBox
-				android:id="@+id/checkboxForceFullScreen"
-			    android:text="Force full-screen bitmap"
-			    android:layout_width="wrap_content"
-			    android:gravity="left|center_vertical"
+			<TableLayout 
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:padding="10dip"
+				>
+				<TableRow>
+					<TextView android:text="Nickname" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+					<EditText android:id="@+id/textNickname" android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
+				</TableRow>
+				<TableRow>
+					<TextView android:text="Password" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+					<LinearLayout
+						android:layout_width="fill_parent"
+						android:layout_height="wrap_content"
+						android:orientation="horizontal"
+						android:layout_weight="1"
+						>
+						<EditText android:id="@+id/textPASSWORD"
+							android:password="true"
+							android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
+						<CheckBox android:id="@+id/checkboxKeepPassword"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Keep"
+							android:layout_weight="0"
+						/>
+					</LinearLayout>
+				</TableRow>
+				<TableRow>
+					<TextView android:text="Address" android:hint="localhost" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+					<EditText android:id="@+id/textIP" android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
+				</TableRow>
+				<TableRow>
+					<TextView android:text="Port" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+					<EditText android:id="@+id/textPORT"
+						android:text="5900"
+						android:layout_width="fill_parent"
+						android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
+				</TableRow>
+			</TableLayout>
+			<TextView
 			    android:layout_height="wrap_content"
+			    android:layout_width="wrap_content"
+			    android:layout_gravity="left|center_vertical"
+				android:textAppearance="?android:attr/textAppearanceMedium"
+				android:text="Color Format"
 			/>
-			<LinearLayout
-				android:orientation="horizontal"
-				android:gravity="right"
+			<Spinner 
+			    android:id="@+id/colorformat" 
+			    android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+			/>
+			<LinearLayout android:orientation="horizontal" 
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
 				>
-				<Button 
-				    android:id="@+id/buttonGO" 
-				    android:text="Connect"
-				    android:textAppearance="?android:attr/textAppearanceMedium"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
+				<CheckBox
+					android:id="@+id/checkboxForceFullScreen"
+				    android:text="Force full-screen bitmap"
+				    android:layout_width="wrap_content"
+				    android:gravity="left|center_vertical"
+				    android:layout_height="wrap_content"
 				/>
 			</LinearLayout>
 		</LinearLayout>
-	</LinearLayout>
-</ScrollView>
+	</ScrollView>
+</LinearLayout>

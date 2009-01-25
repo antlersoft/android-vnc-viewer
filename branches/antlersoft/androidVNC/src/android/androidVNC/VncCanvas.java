@@ -94,6 +94,11 @@ public class VncCanvas extends ImageView {
 	private boolean maintainConnection = true;
 	private boolean showDesktopInfo = true;
 	private boolean repaintsEnabled = true;
+	
+	/**
+	 * Use camera button as meta key for right mouse button
+	 */
+	private boolean cameraButtonDown = false;
 
 	// Color Model settings
 	private COLORMODEL pendingColorModel = COLORMODEL.C24bit;
@@ -574,8 +579,10 @@ public class VncCanvas extends ImageView {
     final static int ALT_MASK   = KeyEvent.META_ALT_ON;
     
 	private static final int MOUSE_BUTTON_NONE = 0;
-	private static final int MOUSE_BUTTON_1 = 1;
-	private static final int MOUSE_BUTTON_2 = 2;
+	private static final int MOUSE_BUTTON_LEFT = 1;
+	//private static final int MOUSE_BUTTON_MIDDLE = 2;
+	private static final int MOUSE_BUTTON_RIGHT = 4;
+	
 	/**
 	 * Current state of "mouse" buttons
 	 * Alt meta means use second mouse button
@@ -596,24 +603,17 @@ public class VncCanvas extends ImageView {
 		if (rfb != null && rfb.inNormalProtocol) {
 		    int modifiers = evt.getMetaState();
 
-		    if (evt.getAction() == MotionEvent.ACTION_DOWN) {
-		      if ((modifiers & KeyEvent.META_ALT_ON) != 0) {
-		        pointerMask = MOUSE_BUTTON_2;
-		        modifiers &= ~ALT_MASK;
+		    if (evt.getAction() == MotionEvent.ACTION_DOWN || evt.getAction() == MotionEvent.ACTION_MOVE) {
+		      if (cameraButtonDown) {
+		        pointerMask = MOUSE_BUTTON_RIGHT;
 //		      } else if ((modifiers & KeyEvent.META_SYM_ON) != 0) {
 //		        pointerMask = mask3;
 //		        modifiers &= ~META_MASK;
 		      } else {
-		        pointerMask = MOUSE_BUTTON_1;
+		        pointerMask = MOUSE_BUTTON_LEFT;
 		      }
 		    } else if (evt.getAction() == MotionEvent.ACTION_UP) {
 		      pointerMask = 0;
-		      if ((modifiers & KeyEvent.META_ALT_ON) != 0) {
-		        modifiers &= ~ALT_MASK;
-		      }
-//		      else if ((modifiers & KeyEvent.META_SYM_ON) != 0) {
-//		        modifiers &= ~META_MASK;
-//		      }
 		    }
 		    mouseX=(int)evt.getX();
 		    mouseY=(int)evt.getY();
@@ -636,6 +636,10 @@ public class VncCanvas extends ImageView {
 		if (keyCode == KeyEvent.KEYCODE_MENU)
 			// Ignore menu key
 			return true;
+		if (keyCode == KeyEvent.KEYCODE_CAMERA)
+		{
+			cameraButtonDown = (evt.getAction() != KeyEvent.ACTION_UP);
+		}
 		if (rfb != null && rfb.inNormalProtocol) {
 			boolean result = false;
 			synchronized (rfb) {

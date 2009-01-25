@@ -14,4 +14,6 @@
 <string name="center_mouse">Mouse @</string>
 <string name="fit_to_screen">Fit to Screen</string>
 <string name="ctrl_alt_del">Ctrl-Alt-Del</string>
+<string name="delete_connection">Delete Connection</string>
+<string name="save_as_copy">Save as Copy</string>
 </resources>

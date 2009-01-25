@@ -14,41 +14,46 @@ public final class R {
         public static final int icon=0x7f020000;
     }
     public static final class id {
-        public static final int buttonGO=0x7f060007;
-        public static final int checkboxForceFullScreen=0x7f060006;
-        public static final int colorformat=0x7f060005;
-        public static final int groupScaling=0x7f06000c;
-        public static final int itemCenterMouse=0x7f060009;
-        public static final int itemColorMode=0x7f06000a;
-        public static final int itemCtrlAltDel=0x7f060015;
-        public static final int itemDisconnect=0x7f060014;
-        public static final int itemFitToScreen=0x7f06000e;
-        public static final int itemInfo=0x7f060008;
-        public static final int itemInputFitToScreen=0x7f060010;
-        public static final int itemInputMode=0x7f06000f;
-        public static final int itemInputMouse=0x7f060012;
-        public static final int itemInputPan=0x7f060011;
-        public static final int itemInputTouchPanTrackballMouse=0x7f060013;
-        public static final int itemOneToOne=0x7f06000d;
-        public static final int itemScaling=0x7f06000b;
-        public static final int spinnerConnection=0x7f060000;
-        public static final int textIP=0x7f060002;
-        public static final int textNickname=0x7f060001;
-        public static final int textPASSWORD=0x7f060004;
-        public static final int textPORT=0x7f060003;
+        public static final int buttonGO=0x7f060000;
+        public static final int checkboxForceFullScreen=0x7f060008;
+        public static final int checkboxKeepPassword=0x7f060004;
+        public static final int colorformat=0x7f060007;
+        public static final int groupScaling=0x7f06000f;
+        public static final int itemCenterMouse=0x7f06000c;
+        public static final int itemColorMode=0x7f06000d;
+        public static final int itemCtrlAltDel=0x7f060018;
+        public static final int itemDeleteConnection=0x7f06000a;
+        public static final int itemDisconnect=0x7f060017;
+        public static final int itemFitToScreen=0x7f060011;
+        public static final int itemInfo=0x7f06000b;
+        public static final int itemInputFitToScreen=0x7f060013;
+        public static final int itemInputMode=0x7f060012;
+        public static final int itemInputMouse=0x7f060015;
+        public static final int itemInputPan=0x7f060014;
+        public static final int itemInputTouchPanTrackballMouse=0x7f060016;
+        public static final int itemOneToOne=0x7f060010;
+        public static final int itemSaveAsCopy=0x7f060009;
+        public static final int itemScaling=0x7f06000e;
+        public static final int spinnerConnection=0x7f060001;
+        public static final int textIP=0x7f060005;
+        public static final int textNickname=0x7f060002;
+        public static final int textPASSWORD=0x7f060003;
+        public static final int textPORT=0x7f060006;
     }
     public static final class layout {
         public static final int canvas=0x7f030000;
         public static final int main=0x7f030001;
     }
     public static final class menu {
-        public static final int vnccanvasactivitymenu=0x7f050000;
+        public static final int androidvncmenu=0x7f050000;
+        public static final int vnccanvasactivitymenu=0x7f050001;
     }
     public static final class string {
         public static final int app_name=0x7f040000;
         public static final int center_mouse=0x7f04000b;
         public static final int color_mode=0x7f040006;
         public static final int ctrl_alt_del=0x7f04000d;
+        public static final int delete_connection=0x7f04000e;
         public static final int disconnect=0x7f040008;
         public static final int fit_to_screen=0x7f04000c;
         public static final int info=0x7f040005;
@@ -58,6 +63,7 @@ public final class R {
         public static final int input_mode_panning=0x7f040001;
         public static final int input_mode_touchpad_pan_trackball_mouse=0x7f040004;
         public static final int one_to_one=0x7f04000a;
+        public static final int save_as_copy=0x7f04000f;
         public static final int scaling=0x7f040007;
     }
 }

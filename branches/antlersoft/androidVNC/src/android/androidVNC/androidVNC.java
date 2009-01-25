@@ -27,6 +27,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -36,6 +38,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class androidVNC extends Activity {
 	private EditText ipText;
@@ -49,6 +52,8 @@ public class androidVNC extends Activity {
 	private VncDatabase database;
 	private ConnectionBean selected;
 	private EditText textNickname;
+	private CheckBox checkboxKeepPassword;
+	//private CheckBox checkboxLocalCursor;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -65,6 +70,8 @@ public class androidVNC extends Activity {
 		COLORMODEL[] models=COLORMODEL.values();
 		ArrayAdapter<COLORMODEL> colorSpinnerAdapter = new ArrayAdapter<COLORMODEL>(this, android.R.layout.simple_spinner_item, models);
 		checkboxForceFullScreen = (CheckBox)findViewById(R.id.checkboxForceFullScreen);
+		checkboxKeepPassword = (CheckBox)findViewById(R.id.checkboxKeepPassword);
+		// checkboxLocalCursor = (CheckBox)findViewById(R.id.checkboxUseLocalCursor);
 		colorSpinner.setAdapter(colorSpinnerAdapter);
 		colorSpinner.setSelection(0);
 		spinnerConnection = (Spinner)findViewById(R.id.spinnerConnection);
@@ -110,13 +117,64 @@ public class androidVNC extends Activity {
 		super.onDestroy();
 	}
 	
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.androidvncmenu,menu);
+		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onMenuOpened(int, android.view.Menu)
+	 */
+	@Override
+	public boolean onMenuOpened(int featureId, Menu menu) {
+		menu.findItem(R.id.itemDeleteConnection).setEnabled(selected!=null && ! selected.isNew());
+		menu.findItem(R.id.itemSaveAsCopy).setEnabled(selected!=null && ! selected.isNew());
+		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId())
+		{
+		case R.id.itemSaveAsCopy :
+			updateSelectedFromView();
+			selected.set_Id(0);
+			saveAndWriteRecent();
+			arriveOnPage();
+			break;
+		case R.id.itemDeleteConnection :
+			Utils.showYesNoPrompt(this, "Delete?", "Delete " + selected.getNickname() + "?",
+					new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int i)
+				{
+					selected.Gen_delete(database.getWritableDatabase());
+					arriveOnPage();
+				}
+			}, null);
+			break;
+		}
+		return true;
+	}
+
 	private void updateViewFromSelected() {
 		if (selected==null)
 			return;
 		ipText.setText(selected.getAddress());
 		portText.setText(Integer.toString(selected.getPort()));
-		passwordText.setText(selected.getPassword());
+		if (selected.getKeepPassword() || selected.getPassword().length()>0) {
+			passwordText.setText(selected.getPassword());
+		}
 		checkboxForceFullScreen.setChecked(selected.getForceFull());
+		checkboxKeepPassword.setChecked(selected.getKeepPassword());
+		//checkboxLocalCursor.setChecked(selected.getUseLocalCursor());
 		textNickname.setText(selected.getNickname());
 		COLORMODEL cm = COLORMODEL.valueOf(selected.getColorModel());
 		COLORMODEL[] colors=COLORMODEL.values();
@@ -145,15 +203,22 @@ public class androidVNC extends Activity {
 		selected.setNickname(textNickname.getText().toString());
 		selected.setForceFull(checkboxForceFullScreen.isChecked());
 		selected.setPassword(passwordText.getText().toString());
+		selected.setKeepPassword(checkboxKeepPassword.isChecked());
+		//selected.setUseLocalCursor(checkboxLocalCursor.isChecked());
 		selected.setColorModel(((COLORMODEL)colorSpinner.getSelectedItem()).nameString());
 	}
 	
 	protected void onStart() {
 		super.onStart();
+		arriveOnPage();
+	}
+	
+	private void arriveOnPage() {
 		ArrayList<ConnectionBean> connections=new ArrayList<ConnectionBean>();
-		connections.add(new ConnectionBean());
-		int connectionIndex=0;
 		ConnectionBean.getAll(database.getReadableDatabase(), ConnectionBean.GEN_TABLE_NAME, connections, ConnectionBean.newInstance);
+		Collections.sort(connections);
+		connections.add(0, new ConnectionBean());
+		int connectionIndex=0;
 		if ( connections.size()>1)
 		{
 			ArrayList<MostRecentBean> recents=new ArrayList<MostRecentBean>(1);
@@ -184,19 +249,9 @@ public class androidVNC extends Activity {
 			return;
 		}
 		updateSelectedFromView();
-		updateInDb();
+		selected.save(database.getWritableDatabase());
 	}
 	
-	private void updateInDb()
-	{
-		SQLiteDatabase db=database.getWritableDatabase();
-		if (selected.isNew()) {
-			selected.Gen_insert(db);
-		} else {
-			selected.Gen_update(db);
-		}		
-	}
-
 	private void canvasStart() {
 		if (selected == null) return;
 		MemoryInfo info = Utils.getMemoryInfo(this);
@@ -212,15 +267,15 @@ public class androidVNC extends Activity {
 			vnc();
 	}
 	
-	private void vnc() {
-		updateSelectedFromView();
-		updateInDb();
-		mostRecent = new MostRecentBean();
-		mostRecent.setConnectionId(selected.get_Id());
-		SQLiteDatabase db=database.getWritableDatabase();
+	private void saveAndWriteRecent()
+	{
+		SQLiteDatabase db = database.getWritableDatabase();
 		db.beginTransaction();
 		try
 		{
+			selected.save(db);
+			mostRecent = new MostRecentBean();
+			mostRecent.setConnectionId(selected.get_Id());
 			db.execSQL("DELETE FROM "+MostRecentBean.GEN_TABLE_NAME);
 			mostRecent.Gen_insert(db);
 			db.setTransactionSuccessful();
@@ -229,6 +284,11 @@ public class androidVNC extends Activity {
 		{
 			db.endTransaction();
 		}
+	}
+	
+	private void vnc() {
+		updateSelectedFromView();
+		saveAndWriteRecent();
 		Intent intent = new Intent(this, VncCanvasActivity.class);
 		intent.putExtra(VncConstants.CONNECTION,selected.Gen_getValues());
 		startActivity(intent);

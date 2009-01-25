@@ -27,4 +27,12 @@ interface IConnectionBean {
 	boolean getForceFull();
 	@FieldAccessor
 	String getRepeaterId();
+	@FieldAccessor
+	String getInputMode();
+	@FieldAccessor
+	String getScaleMode();
+	@FieldAccessor
+	boolean getUseLocalCursor();
+	@FieldAccessor
+	boolean getKeepPassword();
 }
