@@ -19,12 +19,13 @@ The bottom section of the page is where you enter your connection configurations
 
   _Port_ Here you should enter the port number of the VNC server.  This field will default to the first VNC port number, 5900.
 
-  _Color Format_ The client supports a number of color formats, which are specified by number of colors/number of bits per pixel.  Formats with more bits per pixel provide greater fidelity to high color depth displays, but use more bandwidth (sometimes dramatically more because they don't compress as much) and more CPU on the device.  Not all VNC servers support all color depths-- if you are having trouble connecting to a server, try using 8-bit or 24-bit color.
+  _Color Format_ The client supports a number of color formats, which are specified by number of colors/number of bits per pixel.  Formats with more bits per pixel provide greater fidelity to high color depth displays, but use more bandwidth (sometimes dramatically more because they don't compress as well) and more CPU on your Android device.  Not all VNC servers support all color depths-- if you are having trouble connecting to a server, try using 8-bit (256 colors) or 24-bit color.
 
-  _Force full-screen bitmap_
+  _Force full-screen bitmap_ The VNC client requires a bitmap for it's representation of the display.  For a VNC server serving a large display, this bitmap might require more memory than Android allows in an application.  To work with these large displays, the client breaks large display into smaller tiles and works with only one tile at a time.  Unfortunately, this will sometimes create some visual artifacts.  In particular, when a large display is scaled down to display on the Android scre <a href="#FitScreen">link</a>
 
 == VNC Client ==
 
+<a title="FitScreen">dd</a>
 
 === Scaling ===
 
