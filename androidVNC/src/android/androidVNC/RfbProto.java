@@ -1070,6 +1070,7 @@ class RfbProto {
    int key = evt.getDisplayLabel();
    
    switch(keyCode) {
+   	  case KeyEvent.KEYCODE_BACK :        key = 0xff1b; break;
       case KeyEvent.KEYCODE_DPAD_LEFT:    key = 0xff51; break;
    	  case KeyEvent.KEYCODE_DPAD_UP:      key = 0xff52; break;
    	  case KeyEvent.KEYCODE_DPAD_RIGHT:   key = 0xff53; break;
