@@ -29,10 +29,12 @@ interface IConnectionBean {
 	String getRepeaterId();
 	@FieldAccessor
 	String getInputMode();
-	@FieldAccessor
-	String getScaleMode();
+	@FieldAccessor(Name="SCALEMODE")
+	String getScaleModeAsString();
 	@FieldAccessor
 	boolean getUseLocalCursor();
 	@FieldAccessor
 	boolean getKeepPassword();
+	@FieldAccessor
+	boolean getFollowMouse();
 }

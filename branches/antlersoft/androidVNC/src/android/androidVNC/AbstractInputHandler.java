@@ -45,4 +45,10 @@ interface AbstractInputHandler {
 	 * @return
 	 */
 	CharSequence getHandlerDescription();
+	
+	/**
+	 * Return an internal name for this handler; this name will be stable across language
+	 * and version changes
+	 */
+	String getName();
 }

@@ -77,18 +77,13 @@ import android.widget.Toast;
 
 public class VncCanvas extends ImageView {
 	private final static String TAG = "VncCanvas";
+	private final static boolean LOCAL_LOGV = true;
 	
 	// Available to activity
 	int mouseX, mouseY;
 	
 	// Connection parameters
 	ConnectionBean connection;
-
-	// User-provided connection settings
-	private String server;
-	private int port;
-	private String password;
-	private String repeaterID;
 
 	// Runtime control flags
 	private boolean maintainConnection = true;
@@ -140,13 +135,15 @@ public class VncCanvas extends ImageView {
 	private int zlibBufLen = 0;
 	private Inflater zlibInflater;
 
-	public VncCanvas(final Context context, ConnectionBean bean) {
+	/**
+	 * Create a view showing a VNC connection
+	 * @param context Containing context (activity)
+	 * @param bean Connection settings
+	 * @param setModes Callback to run on UI thread after connection is set up
+	 */
+	public VncCanvas(final Context context, ConnectionBean bean, final Runnable setModes) {
 		super(context);
 		connection = bean;
-		this.server = bean.getAddress();
-		this.port = bean.getPort();
-		this.password = bean.getPassword();
-		repeaterID = bean.getRepeaterId();
 		this.pendingColorModel = COLORMODEL.valueOf(bean.getColorModel());
 
 		// Startup the RFB thread with a nifty progess dialog
@@ -164,12 +161,12 @@ public class VncCanvas extends ImageView {
 		Thread t = new Thread() {
 			public void run() {
 				try {
-					if (repeaterID != null && !repeaterID.equals("")) {
+					if (connection.getRepeaterId() != null && connection.getRepeaterId().length()>0) {
 						// Connect to Repeater Session
 						// Passwords are irrelevant.
 						connectAndAuthenticate("");
 					} else {
-						connectAndAuthenticate(password);
+						connectAndAuthenticate(connection.getPassword());
 					}
 					doProtocolInitialisation();
 					handler.post(new Runnable() {
@@ -177,7 +174,7 @@ public class VncCanvas extends ImageView {
 							pd.setMessage("Downloading first frame.\nPlease wait...");
 						}
 					});
-					processNormalProtocol(context, pd);
+					processNormalProtocol(context, pd, setModes);
 				} catch (Throwable e) {
 					if (maintainConnection) {
 						Log.v(TAG, e.toString());
@@ -211,18 +208,18 @@ public class VncCanvas extends ImageView {
 	}
 
 	void connectAndAuthenticate(String pw) throws Exception {
-		Log.v(TAG, "Connecting to " + server + ", port " + port + "...");
+		Log.v(TAG, "Connecting to " + connection.getAddress() + ", port " + connection.getPort() + "...");
 
-		rfb = new RfbProto(server, port);
+		rfb = new RfbProto(connection.getAddress(), connection.getPort());
 		Log.v(TAG, "Connected to server");
 
 		// <RepeaterMagic>
-		if (repeaterID != null && !repeaterID.equals("")) {
+		if (connection.getRepeaterId() != null && connection.getRepeaterId().length()>0) {
 			Log.v(TAG, "Negotiating repeater/proxy connection");
 			byte[] protocolMsg = new byte[12];
 			rfb.is.read(protocolMsg);
 			byte[] buffer = new byte[250];
-			System.arraycopy(repeaterID.getBytes(), 0, buffer, 0, repeaterID.length());
+			System.arraycopy(connection.getRepeaterId().getBytes(), 0, buffer, 0, connection.getRepeaterId().length());
 			rfb.os.write(buffer);
 		}
 		// </RepeaterMagic>
@@ -295,10 +292,11 @@ public class VncCanvas extends ImageView {
 		return (colorModel != null) && colorModel.equals(cm);
 	}
 
-	public void processNormalProtocol(final Context context, ProgressDialog pd) throws Exception {
+	public void processNormalProtocol(final Context context, ProgressDialog pd, final Runnable setModes) throws Exception {
 		try {
 			bitmapData.writeFullUpdateRequest(false);
 
+			handler.post(setModes);
 			//
 			// main dispatch loop
 			//
@@ -339,6 +337,7 @@ public class VncCanvas extends ImageView {
 						}
 
 						if (rfb.updateRectEncoding == RfbProto.EncodingPointerPos) {
+							// This never actually happens
 							mouseX=rx;
 							mouseY=ry;
 							Log.v(TAG, "rfb.EncodingPointerPos");
@@ -595,15 +594,16 @@ public class VncCanvas extends ImageView {
 	/**
 	 * Convert a motion event to a format suitable for sending over the wire
 	 * @param evt motion event; x and y must already have been converted from screen coordinates
-	 * to remote frame buffer coordinates.  ALT meta state flag is interpreted as second mouse
+	 * to remote frame buffer coordinates.  cameraButton flag is interpreted as second mouse
 	 * button
+	 * @param downEvent True if "mouse button" (touch or trackball button) is down when this happens
 	 * @return true if event was actually sent
 	 */
-	public boolean processPointerEvent(MotionEvent evt) {
+	public boolean processPointerEvent(MotionEvent evt,boolean downEvent) {
 		if (rfb != null && rfb.inNormalProtocol) {
 		    int modifiers = evt.getMetaState();
 
-		    if (evt.getAction() == MotionEvent.ACTION_DOWN || evt.getAction() == MotionEvent.ACTION_MOVE) {
+		    if (evt.getAction() == MotionEvent.ACTION_DOWN || (downEvent && evt.getAction() == MotionEvent.ACTION_MOVE)) {
 		      if (cameraButtonDown) {
 		        pointerMask = MOUSE_BUTTON_RIGHT;
 //		      } else if ((modifiers & KeyEvent.META_SYM_ON) != 0) {
@@ -626,7 +626,7 @@ public class VncCanvas extends ImageView {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		    
+		    ((VncCanvasActivity)getContext()).panToMouse();
 			return true;
 		}
 		return false;

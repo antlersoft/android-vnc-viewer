@@ -16,4 +16,5 @@
 <string name="ctrl_alt_del">Ctrl-Alt-Del</string>
 <string name="delete_connection">Delete Connection</string>
 <string name="save_as_copy">Save as Copy</string>
+<string name="pan_follow_mouse">Pan Follows Mouse</string>
 </resources>

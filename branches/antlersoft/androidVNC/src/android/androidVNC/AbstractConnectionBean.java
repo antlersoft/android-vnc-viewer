@@ -5,7 +5,7 @@ package android.androidVNC;
 public abstract class AbstractConnectionBean extends com.antlersoft.android.dbimpl.IdImplementationBase implements IConnectionBean {
 
     public static final String GEN_TABLE_NAME = "CONNECTION_BEAN";
-    public static final int GEN_COUNT = 12;
+    public static final int GEN_COUNT = 13;
 
     // Field constants
     public static final String GEN_FIELD__ID = "_ID";
@@ -32,6 +32,8 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
     public static final int GEN_ID_USELOCALCURSOR = 10;
     public static final String GEN_FIELD_KEEPPASSWORD = "KEEPPASSWORD";
     public static final int GEN_ID_KEEPPASSWORD = 11;
+    public static final String GEN_FIELD_FOLLOWMOUSE = "FOLLOWMOUSE";
+    public static final int GEN_ID_FOLLOWMOUSE = 12;
 
     // SQL Command for creating the table
     public static String GEN_CREATE = "CREATE TABLE CONNECTION_BEAN (" +
@@ -46,7 +48,8 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
     "INPUTMODE TEXT," +
     "SCALEMODE TEXT," +
     "USELOCALCURSOR INTEGER," +
-    "KEEPPASSWORD INTEGER" +
+    "KEEPPASSWORD INTEGER," +
+    "FOLLOWMOUSE INTEGER" +
     ")";
 
     // Members corresponding to defined fields
@@ -59,9 +62,10 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
     private boolean gen_forceFull;
     private java.lang.String gen_repeaterId;
     private java.lang.String gen_inputMode;
-    private java.lang.String gen_scaleMode;
+    private java.lang.String gen_SCALEMODE;
     private boolean gen_useLocalCursor;
     private boolean gen_keepPassword;
+    private boolean gen_followMouse;
 
 
     public String Gen_tableName() { return GEN_TABLE_NAME; }
@@ -85,12 +89,14 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
     public void setRepeaterId(java.lang.String arg_repeaterId) { gen_repeaterId = arg_repeaterId; }
     public java.lang.String getInputMode() { return gen_inputMode; }
     public void setInputMode(java.lang.String arg_inputMode) { gen_inputMode = arg_inputMode; }
-    public java.lang.String getScaleMode() { return gen_scaleMode; }
-    public void setScaleMode(java.lang.String arg_scaleMode) { gen_scaleMode = arg_scaleMode; }
+    public java.lang.String getScaleModeAsString() { return gen_SCALEMODE; }
+    public void setScaleModeAsString(java.lang.String arg_SCALEMODE) { gen_SCALEMODE = arg_SCALEMODE; }
     public boolean getUseLocalCursor() { return gen_useLocalCursor; }
     public void setUseLocalCursor(boolean arg_useLocalCursor) { gen_useLocalCursor = arg_useLocalCursor; }
     public boolean getKeepPassword() { return gen_keepPassword; }
     public void setKeepPassword(boolean arg_keepPassword) { gen_keepPassword = arg_keepPassword; }
+    public boolean getFollowMouse() { return gen_followMouse; }
+    public void setFollowMouse(boolean arg_followMouse) { gen_followMouse = arg_followMouse; }
 
     public android.content.ContentValues Gen_getValues() {
         android.content.ContentValues values=new android.content.ContentValues();
@@ -103,9 +109,10 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
         values.put(GEN_FIELD_FORCEFULL,(this.gen_forceFull ? "1" : "0"));
         values.put(GEN_FIELD_REPEATERID,this.gen_repeaterId);
         values.put(GEN_FIELD_INPUTMODE,this.gen_inputMode);
-        values.put(GEN_FIELD_SCALEMODE,this.gen_scaleMode);
+        values.put(GEN_FIELD_SCALEMODE,this.gen_SCALEMODE);
         values.put(GEN_FIELD_USELOCALCURSOR,(this.gen_useLocalCursor ? "1" : "0"));
         values.put(GEN_FIELD_KEEPPASSWORD,(this.gen_keepPassword ? "1" : "0"));
+        values.put(GEN_FIELD_FOLLOWMOUSE,(this.gen_followMouse ? "1" : "0"));
         return values;
     }
 
@@ -128,6 +135,7 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
         result[9] = cursor.getColumnIndex(GEN_FIELD_SCALEMODE);
         result[10] = cursor.getColumnIndex(GEN_FIELD_USELOCALCURSOR);
         result[11] = cursor.getColumnIndex(GEN_FIELD_KEEPPASSWORD);
+        result[12] = cursor.getColumnIndex(GEN_FIELD_FOLLOWMOUSE);
         return result;
     }
 
@@ -163,13 +171,16 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
             gen_inputMode = cursor.getString(columnIndices[GEN_ID_INPUTMODE]);
         }
         if ( columnIndices[GEN_ID_SCALEMODE] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_SCALEMODE])) {
-            gen_scaleMode = cursor.getString(columnIndices[GEN_ID_SCALEMODE]);
+            gen_SCALEMODE = cursor.getString(columnIndices[GEN_ID_SCALEMODE]);
         }
         if ( columnIndices[GEN_ID_USELOCALCURSOR] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_USELOCALCURSOR])) {
             gen_useLocalCursor = (cursor.getInt(columnIndices[GEN_ID_USELOCALCURSOR]) != 0);
         }
         if ( columnIndices[GEN_ID_KEEPPASSWORD] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_KEEPPASSWORD])) {
             gen_keepPassword = (cursor.getInt(columnIndices[GEN_ID_KEEPPASSWORD]) != 0);
+        }
+        if ( columnIndices[GEN_ID_FOLLOWMOUSE] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_FOLLOWMOUSE])) {
+            gen_followMouse = (cursor.getInt(columnIndices[GEN_ID_FOLLOWMOUSE]) != 0);
         }
     }
 
@@ -186,8 +197,9 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
         gen_forceFull = (values.getAsInteger(GEN_FIELD_FORCEFULL) != 0);
         gen_repeaterId = values.getAsString(GEN_FIELD_REPEATERID);
         gen_inputMode = values.getAsString(GEN_FIELD_INPUTMODE);
-        gen_scaleMode = values.getAsString(GEN_FIELD_SCALEMODE);
+        gen_SCALEMODE = values.getAsString(GEN_FIELD_SCALEMODE);
         gen_useLocalCursor = (values.getAsInteger(GEN_FIELD_USELOCALCURSOR) != 0);
         gen_keepPassword = (values.getAsInteger(GEN_FIELD_KEEPPASSWORD) != 0);
+        gen_followMouse = (values.getAsInteger(GEN_FIELD_FOLLOWMOUSE) != 0);
     }
 }
