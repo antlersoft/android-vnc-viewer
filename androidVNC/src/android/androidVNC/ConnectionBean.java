@@ -5,6 +5,7 @@ package android.androidVNC;
 
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
+import android.widget.ImageView.ScaleType;
 
 import com.antlersoft.android.dbimpl.NewInstance;
 
@@ -21,12 +22,14 @@ class ConnectionBean extends AbstractConnectionBean implements Comparable<Connec
 	ConnectionBean()
 	{
 		set_Id(0);
-		setAddress("localhost");
+		setAddress("");
 		setPassword("");
 		setKeepPassword(true);
 		setNickname("");
 		setPort(5900);
 		setColorModel(COLORMODEL.C64.nameString());
+		setScaleMode(ScaleType.FIT_CENTER);
+		setInputMode(VncCanvasActivity.FIT_SCREEN_NAME);
 		setRepeaterId("");
 	}
 	
@@ -46,6 +49,16 @@ class ConnectionBean extends AbstractConnectionBean implements Comparable<Connec
 		} else {
 			database.update(GEN_TABLE_NAME, values, GEN_FIELD__ID + " = ?", new String[] { Long.toString(get_Id()) });
 		}
+	}
+	
+	ScaleType getScaleMode()
+	{
+		return ScaleType.valueOf(getScaleModeAsString());
+	}
+	
+	void setScaleMode(ScaleType value)
+	{
+		setScaleModeAsString(value.toString());
 	}
 	
 	@Override

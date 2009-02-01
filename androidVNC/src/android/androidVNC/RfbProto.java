@@ -790,7 +790,7 @@ class RfbProto {
     }
 	*/
 
-    if (updateRectEncoding < 0 || updateRectEncoding > MaxNormalEncoding)
+    if (updateRectEncoding != RfbProto.EncodingPointerPos && ( updateRectEncoding < 0 || updateRectEncoding > MaxNormalEncoding ))
       return;
 
     if (updateRectX + updateRectW > framebufferWidth ||

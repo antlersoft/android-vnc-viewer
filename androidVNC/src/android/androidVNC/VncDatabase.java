@@ -14,7 +14,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 class VncDatabase extends SQLiteOpenHelper {
 	VncDatabase(Context context)
 	{
-		super(context,"VncDatabase",null,4);
+		super(context,"VncDatabase",null,5);
 	}
 
 	/* (non-Javadoc)

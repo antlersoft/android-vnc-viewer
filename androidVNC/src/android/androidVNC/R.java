@@ -21,10 +21,11 @@ public final class R {
         public static final int groupScaling=0x7f06000f;
         public static final int itemCenterMouse=0x7f06000c;
         public static final int itemColorMode=0x7f06000d;
-        public static final int itemCtrlAltDel=0x7f060018;
+        public static final int itemCtrlAltDel=0x7f060019;
         public static final int itemDeleteConnection=0x7f06000a;
-        public static final int itemDisconnect=0x7f060017;
+        public static final int itemDisconnect=0x7f060018;
         public static final int itemFitToScreen=0x7f060011;
+        public static final int itemFollowMouse=0x7f060017;
         public static final int itemInfo=0x7f06000b;
         public static final int itemInputFitToScreen=0x7f060013;
         public static final int itemInputMode=0x7f060012;
@@ -63,6 +64,7 @@ public final class R {
         public static final int input_mode_panning=0x7f040001;
         public static final int input_mode_touchpad_pan_trackball_mouse=0x7f040004;
         public static final int one_to_one=0x7f04000a;
+        public static final int pan_follow_mouse=0x7f040010;
         public static final int save_as_copy=0x7f04000f;
         public static final int scaling=0x7f040007;
     }
