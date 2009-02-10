@@ -1,0 +1,11 @@
+﻿
+[Documentation User Documentation]
+How to use
+
+[FAQ (FAQ) Frequently asked questions]
+Questions and answers about known issues
+
+[Uninstall Install/uninstall tips]
+Since the app is not in android-market, upgrades aren't as smooth as
+they might be.  See here if you need to know how to uninstall
+the old version before you install the new.
