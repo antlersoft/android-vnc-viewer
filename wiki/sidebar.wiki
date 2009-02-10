@@ -2,7 +2,7 @@
 [Documentation User Documentation]
 How to use
 
-[FAQ (FAQ) Frequently asked questions]
+[faq (FAQ) Frequently asked questions]
 Questions and answers about known issues
 
 [Uninstall Install/uninstall tips]
