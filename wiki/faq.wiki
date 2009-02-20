@@ -37,3 +37,17 @@
 
   Some VNC servers require the client to render the mouse cursor.
   android-vnc-viewer can't do that (yet!).
+
+== 5. How do I right click, or send special keys? ==
+
+  See the [Documentation User Manual].
+  Hold down the camera button while clicking to
+  do a right-click.
+  Support for special
+  keys (Control-keys, Alt-keys, Function keys, Page Up, etc.)
+  is coming soon.  Ctrl-Alt-Del is available as its own
+  menu function.
+
+== 6. It doesn't work with my repeater ==
+
+  We hope to have support for the UltraVNC repeater soon.
