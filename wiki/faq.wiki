@@ -51,3 +51,12 @@
 == 6. It doesn't work with my repeater ==
 
   We hope to have support for the UltraVNC repeater soon.
+
+== 7. How do I connect to VNC from 3G without opening an insecure port to the internet? ==
+
+  We recommend you tunnel your VNC connection over SSH with
+  [http://code.google.com/p/connectbot connectbot].  Set up
+  your connectbot connection to the server hosting your
+  VNC server, and configure a tunnel to forward port 5900.
+  Then you can set up an android-vnc-viewer connection to
+  5900 on localhost.
