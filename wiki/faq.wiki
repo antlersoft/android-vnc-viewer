@@ -60,3 +60,26 @@
   VNC server, and configure a tunnel to forward port 5900.
   Then you can set up an android-vnc-viewer connection to
   5900 on localhost.
+
+== 8. Why can't I connect? ==
+
+  There are a number of reasons a connection to your
+  VNC server might fail.
+
+    * You are using an unsupported authorization protocol (see [#3. I can't log in to Real VNC Enterprise]).
+
+	* Your phone can't connect to the address you specified for the connection.  Try connecting to another service (i.e. ssh) at that address to verify connectivity.  Remember that connectivity might be different if you are accessing the server through you carrier's network rather than over a local Wi-Fi network.
+
+	* Your password might be entered wrong.
+
+	* Your VNC server might not support the color depth you requested.  Try a different color depth (24-bit).
+
+	* Your phone might be running out of memory RAM.  If *Force full-screen bitmap* is selected, de-select it.
+
+  If none of these suggestions work, you might have run into a bug in android-vnc-viewer.  Look at the submitted issues to see
+  if someone has encountered a similar problem.
+  You can help the project by submitting a bug report.
+  If you have access to the Android SDK, you might want
+  to include LogCat output from the time
+  you attempted your connection in your bug report.
+  
