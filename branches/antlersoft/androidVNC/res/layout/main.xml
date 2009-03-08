@@ -106,10 +106,17 @@
 				android:layout_height="wrap_content"
 				>
 				<CheckBox
+					android:id="@+id/checkboxUseLocalCursor"
+				    android:text="Local mouse pointer"
+				    android:layout_width="wrap_content"
+				    android:gravity="left|center_vertical"
+				    android:layout_height="wrap_content"
+				/>
+				<CheckBox
 					android:id="@+id/checkboxForceFullScreen"
 				    android:text="Force full-screen bitmap"
 				    android:layout_width="wrap_content"
-				    android:gravity="left|center_vertical"
+				    android:gravity="right|center_vertical"
 				    android:layout_height="wrap_content"
 				/>
 			</LinearLayout>

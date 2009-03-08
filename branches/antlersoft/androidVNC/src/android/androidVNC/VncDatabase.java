@@ -14,7 +14,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 class VncDatabase extends SQLiteOpenHelper {
 	VncDatabase(Context context)
 	{
-		super(context,"VncDatabase",null,5);
+		super(context,"VncDatabase",null,9);
 	}
 
 	/* (non-Javadoc)
@@ -24,6 +24,10 @@ class VncDatabase extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(AbstractConnectionBean.GEN_CREATE);
 		db.execSQL(MostRecentBean.GEN_CREATE);
+		db.execSQL(MetaList.GEN_CREATE);
+		db.execSQL(AbstractMetaKeyBean.GEN_CREATE);
+		
+		db.execSQL("INSERT INTO "+MetaList.GEN_TABLE_NAME+" VALUES ( 1, 'DEFAULT')");
 	}
 
 	/* (non-Javadoc)
@@ -33,6 +37,8 @@ class VncDatabase extends SQLiteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, int arg1, int arg2) {
 		db.execSQL("DROP TABLE IF EXISTS " + AbstractConnectionBean.GEN_TABLE_NAME);
 		db.execSQL("DROP TABLE IF EXISTS " + MostRecentBean.GEN_TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + MetaList.GEN_TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + AbstractMetaKeyBean.GEN_TABLE_NAME);
 		onCreate(db);
 	}
 

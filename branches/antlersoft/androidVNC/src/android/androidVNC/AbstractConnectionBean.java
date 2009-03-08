@@ -5,7 +5,7 @@ package android.androidVNC;
 public abstract class AbstractConnectionBean extends com.antlersoft.android.dbimpl.IdImplementationBase implements IConnectionBean {
 
     public static final String GEN_TABLE_NAME = "CONNECTION_BEAN";
-    public static final int GEN_COUNT = 13;
+    public static final int GEN_COUNT = 16;
 
     // Field constants
     public static final String GEN_FIELD__ID = "_ID";
@@ -34,6 +34,12 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
     public static final int GEN_ID_KEEPPASSWORD = 11;
     public static final String GEN_FIELD_FOLLOWMOUSE = "FOLLOWMOUSE";
     public static final int GEN_ID_FOLLOWMOUSE = 12;
+    public static final String GEN_FIELD_USEREPEATER = "USEREPEATER";
+    public static final int GEN_ID_USEREPEATER = 13;
+    public static final String GEN_FIELD_METALISTID = "METALISTID";
+    public static final int GEN_ID_METALISTID = 14;
+    public static final String GEN_FIELD_LAST_META_KEY_ID = "LAST_META_KEY_ID";
+    public static final int GEN_ID_LAST_META_KEY_ID = 15;
 
     // SQL Command for creating the table
     public static String GEN_CREATE = "CREATE TABLE CONNECTION_BEAN (" +
@@ -49,7 +55,10 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
     "SCALEMODE TEXT," +
     "USELOCALCURSOR INTEGER," +
     "KEEPPASSWORD INTEGER," +
-    "FOLLOWMOUSE INTEGER" +
+    "FOLLOWMOUSE INTEGER," +
+    "USEREPEATER INTEGER," +
+    "METALISTID INTEGER," +
+    "LAST_META_KEY_ID INTEGER" +
     ")";
 
     // Members corresponding to defined fields
@@ -66,6 +75,9 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
     private boolean gen_useLocalCursor;
     private boolean gen_keepPassword;
     private boolean gen_followMouse;
+    private boolean gen_useRepeater;
+    private long gen_metaListId;
+    private long gen_LAST_META_KEY_ID;
 
 
     public String Gen_tableName() { return GEN_TABLE_NAME; }
@@ -97,6 +109,12 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
     public void setKeepPassword(boolean arg_keepPassword) { gen_keepPassword = arg_keepPassword; }
     public boolean getFollowMouse() { return gen_followMouse; }
     public void setFollowMouse(boolean arg_followMouse) { gen_followMouse = arg_followMouse; }
+    public boolean getUseRepeater() { return gen_useRepeater; }
+    public void setUseRepeater(boolean arg_useRepeater) { gen_useRepeater = arg_useRepeater; }
+    public long getMetaListId() { return gen_metaListId; }
+    public void setMetaListId(long arg_metaListId) { gen_metaListId = arg_metaListId; }
+    public long getLastMetaKeyId() { return gen_LAST_META_KEY_ID; }
+    public void setLastMetaKeyId(long arg_LAST_META_KEY_ID) { gen_LAST_META_KEY_ID = arg_LAST_META_KEY_ID; }
 
     public android.content.ContentValues Gen_getValues() {
         android.content.ContentValues values=new android.content.ContentValues();
@@ -113,6 +131,9 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
         values.put(GEN_FIELD_USELOCALCURSOR,(this.gen_useLocalCursor ? "1" : "0"));
         values.put(GEN_FIELD_KEEPPASSWORD,(this.gen_keepPassword ? "1" : "0"));
         values.put(GEN_FIELD_FOLLOWMOUSE,(this.gen_followMouse ? "1" : "0"));
+        values.put(GEN_FIELD_USEREPEATER,(this.gen_useRepeater ? "1" : "0"));
+        values.put(GEN_FIELD_METALISTID,Long.toString(this.gen_metaListId));
+        values.put(GEN_FIELD_LAST_META_KEY_ID,Long.toString(this.gen_LAST_META_KEY_ID));
         return values;
     }
 
@@ -136,6 +157,9 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
         result[10] = cursor.getColumnIndex(GEN_FIELD_USELOCALCURSOR);
         result[11] = cursor.getColumnIndex(GEN_FIELD_KEEPPASSWORD);
         result[12] = cursor.getColumnIndex(GEN_FIELD_FOLLOWMOUSE);
+        result[13] = cursor.getColumnIndex(GEN_FIELD_USEREPEATER);
+        result[14] = cursor.getColumnIndex(GEN_FIELD_METALISTID);
+        result[15] = cursor.getColumnIndex(GEN_FIELD_LAST_META_KEY_ID);
         return result;
     }
 
@@ -182,6 +206,15 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
         if ( columnIndices[GEN_ID_FOLLOWMOUSE] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_FOLLOWMOUSE])) {
             gen_followMouse = (cursor.getInt(columnIndices[GEN_ID_FOLLOWMOUSE]) != 0);
         }
+        if ( columnIndices[GEN_ID_USEREPEATER] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_USEREPEATER])) {
+            gen_useRepeater = (cursor.getInt(columnIndices[GEN_ID_USEREPEATER]) != 0);
+        }
+        if ( columnIndices[GEN_ID_METALISTID] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_METALISTID])) {
+            gen_metaListId = cursor.getLong(columnIndices[GEN_ID_METALISTID]);
+        }
+        if ( columnIndices[GEN_ID_LAST_META_KEY_ID] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_LAST_META_KEY_ID])) {
+            gen_LAST_META_KEY_ID = cursor.getLong(columnIndices[GEN_ID_LAST_META_KEY_ID]);
+        }
     }
 
     /**
@@ -201,5 +234,8 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
         gen_useLocalCursor = (values.getAsInteger(GEN_FIELD_USELOCALCURSOR) != 0);
         gen_keepPassword = (values.getAsInteger(GEN_FIELD_KEEPPASSWORD) != 0);
         gen_followMouse = (values.getAsInteger(GEN_FIELD_FOLLOWMOUSE) != 0);
+        gen_useRepeater = (values.getAsInteger(GEN_FIELD_USEREPEATER) != 0);
+        gen_metaListId = values.getAsLong(GEN_FIELD_METALISTID);
+        gen_LAST_META_KEY_ID = values.getAsLong(GEN_FIELD_LAST_META_KEY_ID);
     }
 }

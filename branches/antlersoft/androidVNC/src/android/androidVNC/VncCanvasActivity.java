@@ -20,12 +20,16 @@
 //
 package android.androidVNC;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -114,6 +118,11 @@ public class VncCanvasActivity extends Activity {
 		}
 	}
 	
+	ConnectionBean getConnection()
+	{
+		return connection;
+	}
+	
 	/**
 	 * Make sure mouse is visible on displayable part of screen
 	 */
@@ -177,6 +186,23 @@ public class VncCanvasActivity extends Activity {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreateDialog(int)
+	 */
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		return new MetaKeyDialog(this);
+	}
+
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onPrepareDialog(int, android.app.Dialog)
+	 */
+	@Override
+	protected void onPrepareDialog(int id, Dialog dialog) {
+		super.onPrepareDialog(id, dialog);
+		((MetaKeyDialog)dialog).setConnection(connection);
+	}
+
 	@Override 
     public void onConfigurationChanged(Configuration newConfig) { 
       // ignore orientation/keyboard change 
@@ -297,9 +323,13 @@ public class VncCanvasActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		vncCanvas.afterMenu = true;
 		switch (item.getItemId()) {
 		case R.id.itemInfo:
 			vncCanvas.showConnectionInfo();
+			return true;
+		case R.id.itemSpecialKeys:
+			showDialog(R.layout.metakey);
 			return true;
 		case R.id.itemColorMode:
 			selectColorModel();
@@ -314,6 +344,7 @@ public class VncCanvasActivity extends Activity {
 			updateInputMenu();
 			// Reset the pan position to (0,0)
 			vncCanvas.scrollTo(-vncCanvas.getCenteredXOffset(),-vncCanvas.getCenteredYOffset());
+			connection.setInputMode(inputHandler.getName());
 			connection.save(database.getWritableDatabase());
 			return true;
 		case R.id.itemFitToScreen:
@@ -325,6 +356,7 @@ public class VncCanvasActivity extends Activity {
 			absoluteYPosition = 0;
 			updateInputMenu();
 			vncCanvas.scrollTo(absoluteXPosition, absoluteYPosition);
+			connection.setInputMode(inputHandler.getName());
 			connection.save(database.getWritableDatabase());
 			return true;
 		case R.id.itemCenterMouse:
@@ -336,7 +368,7 @@ public class VncCanvasActivity extends Activity {
 			finish();
 			return true;
 		case R.id.itemCtrlAltDel:
-			vncCanvas.ctrlAltDel();
+			vncCanvas.sendMetaKey(MetaKeyBean.keyCtrlAltDel);
 			return true;
 		case R.id.itemFollowMouse:
 			boolean newFollow = ! connection.getFollowMouse();
@@ -346,6 +378,21 @@ public class VncCanvasActivity extends Activity {
 				panToMouse();
 			}
 			connection.save(database.getWritableDatabase());
+			return true;
+		case R.id.itemArrowLeft :
+			vncCanvas.sendMetaKey(MetaKeyBean.keyArrowLeft);
+			return true;
+		case R.id.itemArrowUp :
+			vncCanvas.sendMetaKey(MetaKeyBean.keyArrowUp);
+			return true;
+		case R.id.itemArrowRight :
+			vncCanvas.sendMetaKey(MetaKeyBean.keyArrowRight);
+			return true;
+		case R.id.itemArrowDown :
+			vncCanvas.sendMetaKey(MetaKeyBean.keyArrowDown);
+			return true;
+		case R.id.itemSendKeyAgain :
+			sendSpecialKeyAgain();
 			return true;
 		default :
 			AbstractInputHandler input=getInputHandlerById(item.getItemId());
@@ -360,6 +407,35 @@ public class VncCanvasActivity extends Activity {
 			}
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	private MetaKeyBean lastSentKey;
+	
+	private void sendSpecialKeyAgain()
+	{
+		if (lastSentKey == null || lastSentKey.get_Id() != connection.getLastMetaKeyId())
+		{
+			ArrayList<MetaKeyBean> keys = new ArrayList<MetaKeyBean>();
+			Cursor c = database.getReadableDatabase().rawQuery(
+					MessageFormat.format("SELECT * FROM {0} WHERE {1} = {2}",
+							MetaKeyBean.GEN_TABLE_NAME,
+							MetaKeyBean.GEN_FIELD__ID,
+							connection.getLastMetaKeyId()),
+					MetaKeyDialog.EMPTY_ARGS);
+			MetaKeyBean.Gen_populateFromCursor(
+					c,
+					keys,
+					MetaKeyBean.NEW);
+			c.close();
+			if (keys.size() > 0) {
+				lastSentKey = keys.get(0);
+			}
+			else {
+				lastSentKey = null;
+			}
+		}
+		if (lastSentKey != null)
+			vncCanvas.sendMetaKey(lastSentKey);
 	}
 
 	@Override
@@ -593,13 +669,9 @@ public class VncCanvasActivity extends Activity {
 			switch (keyCode) {
 			case KeyEvent.KEYCODE_DPAD_CENTER :
 				inputHandler=getInputHandlerById(R.id.itemInputMouse);
-				for ( MenuItem item : inputModeMenuItems)
-				{
-					if ( item.getItemId()==R.id.itemInputMouse) {
-						item.setChecked( true );
-						break;
-					}
-				}
+				connection.setInputMode(inputHandler.getName());
+				connection.save(database.getWritableDatabase());
+				updateInputMenu();
 				showPanningState();
 				return true;
 			case KeyEvent.KEYCODE_DPAD_LEFT:
@@ -789,14 +861,10 @@ public class VncCanvasActivity extends Activity {
 			if ( keyCode==KeyEvent.KEYCODE_DPAD_CENTER)
 			{
 				inputHandler=getInputHandlerById( R.id.itemInputPan);
-				for ( MenuItem item : inputModeMenuItems)
-				{
-					if ( item.getItemId()==R.id.itemInputPan) {
-						item.setChecked( true );
-						break;
-					}
-				}
 				showPanningState();
+				connection.setInputMode(inputHandler.getName());
+				connection.save(database.getWritableDatabase());
+				updateInputMenu(); 
 				return true;
 			}
 			return defaultKeyDownHandler( keyCode, evt);

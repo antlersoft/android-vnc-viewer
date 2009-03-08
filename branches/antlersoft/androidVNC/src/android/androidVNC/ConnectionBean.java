@@ -31,6 +31,7 @@ class ConnectionBean extends AbstractConnectionBean implements Comparable<Connec
 		setScaleMode(ScaleType.FIT_CENTER);
 		setInputMode(VncCanvasActivity.FIT_SCREEN_NAME);
 		setRepeaterId("");
+		setMetaListId(1);
 	}
 	
 	boolean isNew()

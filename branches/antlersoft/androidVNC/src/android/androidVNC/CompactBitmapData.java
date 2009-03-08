@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.widget.ImageView;
 
 /**
  * @author Michael A. MacDonald
@@ -17,9 +16,24 @@ import android.widget.ImageView;
  */
 class CompactBitmapData extends AbstractBitmapData {
 
-	CompactBitmapData(RfbProto rfb)
+	class CompactBitmapDrawable extends AbstractBitmapDrawable
 	{
-		super(rfb);
+		CompactBitmapDrawable()
+		{
+			super(CompactBitmapData.this);
+		}
+		/* (non-Javadoc)
+		 * @see android.graphics.drawable.DrawableContainer#draw(android.graphics.Canvas)
+		 */
+		@Override
+		public void draw(Canvas canvas) {
+			draw(canvas, 0, 0);
+		}
+	}
+	
+	CompactBitmapData(RfbProto rfb, VncCanvas c)
+	{
+		super(rfb,c);
 		bitmapwidth=framebufferwidth=rfb.framebufferWidth;
 		bitmapheight=framebufferheight=rfb.framebufferHeight;
 		mbitmap = Bitmap.createBitmap(rfb.framebufferWidth, rfb.framebufferHeight, Bitmap.Config.RGB_565);
@@ -43,19 +57,19 @@ class CompactBitmapData extends AbstractBitmapData {
 	}
 
 	/* (non-Javadoc)
+	 * @see android.androidVNC.AbstractBitmapData#createDrawable()
+	 */
+	@Override
+	AbstractBitmapDrawable createDrawable() {
+		return new CompactBitmapDrawable();
+	}
+
+	/* (non-Javadoc)
 	 * @see android.androidVNC.AbstractBitmapData#updateBitmap(int, int, int, int)
 	 */
 	@Override
 	void updateBitmap(int x, int y, int w, int h) {
 		mbitmap.setPixels(bitmapPixels, offset(x,y), bitmapwidth, x, y, w, h);
-	}
-
-	/* (non-Javadoc)
-	 * @see android.androidVNC.AbstractBitmapData#updateView(android.widget.ImageView)
-	 */
-	@Override
-	void updateView(ImageView v) {
-		v.setImageBitmap(mbitmap);
 	}
 
 	/* (non-Javadoc)

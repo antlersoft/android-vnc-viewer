@@ -53,7 +53,7 @@ public class androidVNC extends Activity {
 	private ConnectionBean selected;
 	private EditText textNickname;
 	private CheckBox checkboxKeepPassword;
-	//private CheckBox checkboxLocalCursor;
+	private CheckBox checkboxLocalCursor;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -71,7 +71,7 @@ public class androidVNC extends Activity {
 		ArrayAdapter<COLORMODEL> colorSpinnerAdapter = new ArrayAdapter<COLORMODEL>(this, android.R.layout.simple_spinner_item, models);
 		checkboxForceFullScreen = (CheckBox)findViewById(R.id.checkboxForceFullScreen);
 		checkboxKeepPassword = (CheckBox)findViewById(R.id.checkboxKeepPassword);
-		// checkboxLocalCursor = (CheckBox)findViewById(R.id.checkboxUseLocalCursor);
+		checkboxLocalCursor = (CheckBox)findViewById(R.id.checkboxUseLocalCursor);
 		colorSpinner.setAdapter(colorSpinnerAdapter);
 		colorSpinner.setSelection(0);
 		spinnerConnection = (Spinner)findViewById(R.id.spinnerConnection);
@@ -144,6 +144,8 @@ public class androidVNC extends Activity {
 		switch (item.getItemId())
 		{
 		case R.id.itemSaveAsCopy :
+			if (selected.getNickname().equals(textNickname.getText().toString()))
+				textNickname.setText("Copy of "+selected.getNickname());
 			updateSelectedFromView();
 			selected.set_Id(0);
 			saveAndWriteRecent();
@@ -160,6 +162,9 @@ public class androidVNC extends Activity {
 				}
 			}, null);
 			break;
+		case R.id.itemOpenDoc :
+			Utils.showDocumentation(this);
+			break;
 		}
 		return true;
 	}
@@ -174,7 +179,7 @@ public class androidVNC extends Activity {
 		}
 		checkboxForceFullScreen.setChecked(selected.getForceFull());
 		checkboxKeepPassword.setChecked(selected.getKeepPassword());
-		//checkboxLocalCursor.setChecked(selected.getUseLocalCursor());
+		checkboxLocalCursor.setChecked(selected.getUseLocalCursor());
 		textNickname.setText(selected.getNickname());
 		COLORMODEL cm = COLORMODEL.valueOf(selected.getColorModel());
 		COLORMODEL[] colors=COLORMODEL.values();
@@ -204,7 +209,7 @@ public class androidVNC extends Activity {
 		selected.setForceFull(checkboxForceFullScreen.isChecked());
 		selected.setPassword(passwordText.getText().toString());
 		selected.setKeepPassword(checkboxKeepPassword.isChecked());
-		//selected.setUseLocalCursor(checkboxLocalCursor.isChecked());
+		selected.setUseLocalCursor(checkboxLocalCursor.isChecked());
 		selected.setColorModel(((COLORMODEL)colorSpinner.getSelectedItem()).nameString());
 	}
 	
