@@ -111,7 +111,7 @@ dialog to create a New list or to Copy your list to a new
 name.  This way you can have compact, application specific
 lists, if you want, for quick access to the keys you need.
 
-An entry on the [Vnc_Client] menu lets you re-send the
+An entry on the [#VNC_Client VNC Client] menu lets you re-send the
 last special key you sent with the shortcut Menu-G.
 
 You can operate this dialog from the keyboard as well as
