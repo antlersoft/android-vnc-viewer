@@ -75,11 +75,11 @@ device (i.e., a G1) as a VNC controller.
 
   * The volume control buttons simulate turning the mouse scroll wheel up or down.  (Holding them down doesn't work, to scroll further click repeatedly).
   
-  * To send control keys, function keys and other special keys and combinations see [Special_Keys].
+  * To send control keys, function keys and other special keys and combinations see [#Special_Keys Special Keys].
 
 === Other Menu Items ===
 
-  _Send Keys_ (Menu-S) This opens the [Special_Keys] dialog to let you configure and send special keys and combinations.
+  _Send Keys_ (Menu-S) This opens the [#Special_Keys Special Keys] dialog to let you configure and send special keys and combinations.
 
   _Mouse @_ (Menu-M) Warps the VNC mouse to the center of the portion of the display shown on your device.
 
@@ -93,7 +93,7 @@ device (i.e., a G1) as a VNC controller.
 
   _Info_ (Menu-I) Gives information about current configuration
 
-  _Send Key Again_ (Menu-G) Send the last sent [Special_Keys special key] again
+  _Send Key Again_ (Menu-G) Send the last sent [#Special_Keys special key] again
 
 == Special Keys ==
 
