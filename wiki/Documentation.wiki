@@ -21,10 +21,12 @@ The bottom section of the page is where you enter your connection configurations
 
   _*Color Format*_ The client supports a number of color formats, which are specified by number of colors/number of bits per pixel.  Formats with more bits per pixel provide greater fidelity to high color depth displays, but use more bandwidth (sometimes dramatically more because they don't compress as well) and more CPU on your Android device.  Not all VNC servers support all color depths-- if you are having trouble connecting to a server, try using 8-bit (256 colors) or 24-bit color.
 
+  _*Use local mouse pointer*_ (Experimental) Some VNC servers (notably OS/X desktop sharing) will not draw the mouse pointer on the client; it's hard to use them without knowing where the mouse is.  Checking this option will cause *android-vnc-viewer* to draw a small square cursor at the mouse position (it's not the actual mouse cursor, but it's better than nothing).
+
   _*Force full-screen bitmap*_ The VNC client requires a bitmap for it's representation of the display.  For a VNC server serving a large display, this bitmap might require more memory than Android allows in an application.  To work with these large displays, *android-vnc-client* breaks large display into smaller tiles and works with only one tile at a time.  Unfortunately, this will sometimes create some visual artifacts.  In particular, when a large display is in [#Scaling Fit to Screen] mode only a portion of it will be visible, and in [#Scaling 1:1] mode as you pan over a large display you might see different parts of the display flicker in.  *android-vnc-client* will only use tiling if it thinks the display is too large to fit in memory, but you can override this decision and always turn off tiling by checking *_Force full-screen bitmap_*.  This might cause the application to crash on connection.
 
-The menu on this page allows you to _Delete_ unneeded connection configurations,
-or to _Save as Copy_ an existing connection to base a different configuration from it.
+The menu on this page allows you to _Delete_ unneeded connection configurations;
+to _Save as Copy_ an existing connection to base a different configuration from it; or to open this _Manual/Wiki_.
 
 == VNC Client ==
 
@@ -37,7 +39,7 @@ generously-sized screen.  Because the Android device lacks these,
 === Scaling ===
 
 The served display can be shown on the Android device in two modes.  You
-can switch between the modes with the _Scaling_ menu item.
+can switch between the modes with the _Scaling_ (Menu-Z) menu item.
 
   _Fit to Screen_ mode scales the full display so it will fit on the device screen.  On connection, the screen starts in _Fit to Screen_ mode.
 
@@ -48,7 +50,7 @@ can switch between the modes with the _Scaling_ menu item.
 There are several modes for adapting the input controls of the Android device
 to the VNC display, to enable a style of interaction most convenient for the applications
 you are using.
-You can switch between these modes with the _Input Mode_ menu item.
+You can switch between these modes with the _Input Mode_ (Menu-P) menu item.
 
   _No Pan; Trackball Mouse_ This mode is only available in [#Scaling Fit to Screen] scaling and is the only input mode available then.  In this mode the touchscreen is not used.  Keyboard events are sent to the server and the trackball (if your device, like the G1, has a trackball) controls the VNC mouse.
 
@@ -67,20 +69,54 @@ device (i.e., a G1) as a VNC controller.
 
   * To send the _Esc_ key, press the *Back* button on the device.
 
-  * To send the arrow keys, roll the trackball in _Mouse Pointer Control Mode_.
+  * To send the arrow keys, roll the trackball in _Mouse Pointer Control Mode_ or use Menu-H,J,K,L for Left, Down, Up, Right
 
   * The Alt button generally is used to send the special symbols that aren't otherwise available on the keyboard, rather than sending the Alt meta-key over the VNC connection.
 
+  * The volume control buttons simulate turning the mouse scroll wheel up or down.  (Holding them down doesn't work, to scroll further click repeatedly).
+  
+  * To send control keys, function keys and other special keys and combinations see [Special Keys].
+
 === Other Menu Items ===
 
-  _Info_ Gives information about current configuration
+  _Send Keys_ (Menu-S) This opens the [Special Keys] dialog to let you configure and send special keys and combinations.
 
-  _Mouse @_ Warps the VNC mouse to the center of the portion of the display shown on your device.
+  _Mouse @_ (Menu-M) Warps the VNC mouse to the center of the portion of the display shown on your device.
 
-  _Color Mode_ Allows you to switch the [#Connection_Configuration Color Mode] of your connection.
+  _Color Mode_ (Menu-C) Allows you to switch the [#Connection_Configuration Color Mode] of your connection.
 
-  _Pan Follows Mouse_ The display will automatically pan to follow the mouse around the screen
+  _Pan Follows Mouse_ (Menu-F) The display will automatically pan to follow the mouse around the screen
   
-  _Disconnect_ Closes the current VNC connection, returning you to the configuration page.
+  _Disconnect_ (Menu-D) Closes the current VNC connection, returning you to the configuration page.
 
-  _Ctrl-Alt-Del_ Sends Ctrl-Alt-Del over the VNC connection.
+  _Ctrl-Alt-Del_ (Menu-A) Sends Ctrl-Alt-Del over the VNC connection.
+
+  _Info_ (Menu-I) Gives information about current configuration
+
+  _Send Key Again_ (Menu-G) Send the last sent [Special Keys special key] again
+
+== Special Keys ==
+
+The _Send Keys_ (Menu-S) button opens the *Send Special Keys* dialog.  This allows you to access all the keys on a full-sized keyboard, or to send keys with any combination of the modifiers Shift, Alt and Ctrl.  (You might even use it as a touch-screen keyboard, but you would have to
+be incredibly patient.)
+
+The dialog has checkboxes to select Shift, Alt and Ctrl, and a list of keys to select from.  When you have the desired
+key combination, press the Send button and it will be
+sent to the VNC server.
+
+Every time you send a special key in this way it is saved to a list.  As a shortcut you can select from that list instead of selecting from the list of all the keys.
+
+Actually, multiple lists of special keys are supported.  You can use the buttons at the bottom of the scrolling section of the
+dialog to create a New list or to Copy your list to a new
+name.  This way you can have compact, application specific
+lists, if you want, for quick access to the keys you need.
+
+An entry on the [Vnc Client] menu lets you re-send the
+last special key you sent with the shortcut Menu-G.
+
+You can operate this dialog from the keyboard as well as
+using the touch controls.  Press Alt and Shift to toggle
+those modifiers.  Press the Search button to toggle the
+Ctrl modifier.  When you type a regular key on the keyboard,
+that key plus the selected modifiers will be sent
+immediately to the server.
