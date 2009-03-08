@@ -32,7 +32,6 @@ import java.io.*;
 import java.net.Socket;
 //- import java.util.zip.*;
 import android.util.Log;
-import android.view.KeyEvent;
 
 /**
  * Access the RFB protocol through a socket.
@@ -1058,47 +1057,32 @@ class RfbProto {
 		  e.printStackTrace();
 	  }
   }
-  
+    
   //
   // Write a key event message.  We may need to send modifier key events
   // around it to set the correct modifier state.  Also we need to translate
   // from the Java key values to the X keysym values used by the RFB protocol.
   //
-  synchronized boolean writeKeyEvent(int keyCode, KeyEvent evt) throws IOException {
-
-   boolean down = (evt.getAction() == KeyEvent.ACTION_DOWN);
-   int key = evt.getDisplayLabel();
-   
-   switch(keyCode) {
-   	  case KeyEvent.KEYCODE_BACK :        key = 0xff1b; break;
-      case KeyEvent.KEYCODE_DPAD_LEFT:    key = 0xff51; break;
-   	  case KeyEvent.KEYCODE_DPAD_UP:      key = 0xff52; break;
-   	  case KeyEvent.KEYCODE_DPAD_RIGHT:   key = 0xff53; break;
-   	  case KeyEvent.KEYCODE_DPAD_DOWN:    key = 0xff54; break;
-      case KeyEvent.KEYCODE_DEL: 		  key = 0xff08; break;
-      case KeyEvent.KEYCODE_ENTER:        key = 0xff0d; break;
-      case KeyEvent.KEYCODE_DPAD_CENTER:  key = 0xff0d; break;
-      default: 							  key = evt.getUnicodeChar(); break;
-    }
-
+  synchronized void writeKeyEvent(int keySym, int metaState, boolean down) throws IOException {
     eventBufLen = 0;
-    writeModifierKeyEvents(key!=0 ? evt.getMetaState() & ~VncCanvas.ALT_MASK : evt.getMetaState());
-    writeKeyEvent(key, down);
+    writeModifierKeyEvents(metaState);
+    writeKeyEvent(keySym, down);
 
     // Always release all modifiers after an "up" event
     if (!down)
       writeModifierKeyEvents(0);
 
     os.write(eventBuf, 0, eventBufLen);
-    return true;
   }
+  
+  
 
 
   //
   // Add a raw key event with the given X keysym to eventBuf.
   //
 
-  void writeKeyEvent(int keysym, boolean down) {
+  private void writeKeyEvent(int keysym, boolean down) {
     eventBuf[eventBufLen++] = (byte) KeyboardEvent;
     eventBuf[eventBufLen++] = (byte) (down ? 1 : 0);
     eventBuf[eventBufLen++] = (byte) 0;

@@ -1,20 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">androidVNC</string>
-<string name="input_mode_panning">Desktop Panning Mode</string>
-<string name="input_mode_mouse">Mouse Pointer Control Mode</string>
-<string name="input_mode_fit_to_screen">No Pan; Trackball Mouse</string>
-<string name="input_mode_touchpad_pan_trackball_mouse">Touch Pan; Trackball Mouse</string>
-<string name="info">Info</string>
-<string name="color_mode">Color Mode</string>
-<string name="scaling">Scaling</string>
-<string name="disconnect">Disconnect</string>
-<string name="input_mode">Input Mode</string>
-<string name="one_to_one">1:1</string>
+    <string name="arrow_down">Down Arrow</string>
+    <string name="arrow_left">Left Arrow</string>
+    <string name="arrow_right">Right Arrow</string>
+    <string name="arrow_up">Up Arrow</string>
 <string name="center_mouse">Mouse @</string>
-<string name="fit_to_screen">Fit to Screen</string>
+<string name="color_mode">Color Mode</string>
 <string name="ctrl_alt_del">Ctrl-Alt-Del</string>
 <string name="delete_connection">Delete Connection</string>
-<string name="save_as_copy">Save as Copy</string>
+<string name="delete_key">Delete Selected Key</string>
+<string name="delete_key_list">Delete Key List</string>
+<string name="disconnect">Disconnect</string>
+<string name="fit_to_screen">Fit to Screen</string>
+<string name="info">Info</string>
+<string name="input_mode">Input Mode</string>
+<string name="input_mode_fit_to_screen">No Pan; Trackball Mouse</string>
+<string name="input_mode_mouse">Mouse Pointer Control Mode</string>
+<string name="input_mode_panning">Desktop Panning Mode</string>
+<string name="input_mode_touchpad_pan_trackball_mouse">Touch Pan; Trackball Mouse</string>
+<string name="meta_key_title">Send Special Keys</string>
+<string name="one_to_one">1:1</string>
+<string name="open_doc">Manual/Wiki</string>
 <string name="pan_follow_mouse">Pan Follows Mouse</string>
+<string name="save_as_copy">Save as Copy</string>
+<string name="scaling">Scaling</string>
+<string name="send_key_again">Send Key Again</string>
+<string name="special_keys">Send Keys</string>
 </resources>

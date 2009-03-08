@@ -28,15 +28,27 @@ abstract class AbstractBitmapData {
 	int bitmapPixels[];
 	Canvas memGraphics;
 	boolean waitingForInput;
-	
-	AbstractBitmapData( RfbProto p)
+	VncCanvas vncCanvas;
+	private AbstractBitmapDrawable drawable;
+
+	AbstractBitmapData( RfbProto p, VncCanvas c)
 	{
 		rfb=p;
+		vncCanvas = c;
 	}
 	
 	synchronized void doneWaiting()
 	{
 		waitingForInput=false;
+	}
+	
+	final void invalidateMousePosition()
+	{
+		if (vncCanvas.connection.getUseLocalCursor())
+		{
+			drawable.setCursorRect(vncCanvas.mouseX,vncCanvas.mouseY);
+			vncCanvas.invalidate(drawable.cursorRect);
+		}
 	}
 	
 	/**
@@ -74,10 +86,22 @@ abstract class AbstractBitmapData {
 	abstract void updateBitmap( int x, int y, int w, int h);
 	
 	/**
+	 * Create drawable appropriate for this data
+	 * @return drawable
+	 */
+	abstract AbstractBitmapDrawable createDrawable();
+	
+	/**
 	 * Call in UI thread; tell ImageView we've changed
 	 * @param v ImageView displaying bitmap data
 	 */
-	abstract void updateView(ImageView v);
+	void updateView(ImageView v)
+	{
+		if (drawable==null)
+			drawable = createDrawable();
+		v.setImageDrawable(drawable);
+		v.invalidate();
+	}
 	
 	/**
 	 * Copy a rectangle from one part of the bitmap to another
