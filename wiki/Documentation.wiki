@@ -97,7 +97,7 @@ device (i.e., a G1) as a VNC controller.
 
 == Special Keys ==
 
-The _Send Keys_ (Menu-S) button opens the *Send Special Keys* dialog.  This allows you to access all the keys on a full-sized keyboard, or to send keys with any combination of the modifiers Shift, Alt and Ctrl.  (You might even use it as a touch-screen keyboard, but you would have to
+The _Send Keys_ (Menu-S) button opens the *Send Special Keys* dialog.  This allows you to access all the keys on a full-sized keyboard, or to send keys or any mouse button with any combination of the modifiers Shift, Alt and Ctrl.  (You might even use it as a touch-screen keyboard, but you would have to
 be incredibly patient.)
 
 The dialog has checkboxes to select Shift, Alt and Ctrl, and a list of keys to select from.  When you have the desired
