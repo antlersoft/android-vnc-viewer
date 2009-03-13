@@ -77,20 +77,27 @@ import android.widget.Toast;
 
 public class VncCanvas extends ImageView {
 	private final static String TAG = "VncCanvas";
+	private final static boolean LOCAL_LOGV = true;
 	
 	// Available to activity
 	int mouseX, mouseY;
-
-	// User-provided connection settings
-	private String server;
-	private int port;
-	private String password;
-	private String repeaterID;
+	
+	// Connection parameters
+	ConnectionBean connection;
 
 	// Runtime control flags
 	private boolean maintainConnection = true;
 	private boolean showDesktopInfo = true;
 	private boolean repaintsEnabled = true;
+	
+	/**
+	 * Use camera button as meta key for right mouse button
+	 */
+	private boolean cameraButtonDown = false;
+	
+	// Keep track when a seeming key press was the result of a menu shortcut
+	int lastKeyDown;
+	boolean afterMenu;
 
 	// Color Model settings
 	private COLORMODEL pendingColorModel = COLORMODEL.C24bit;
@@ -132,13 +139,16 @@ public class VncCanvas extends ImageView {
 	private int zlibBufLen = 0;
 	private Inflater zlibInflater;
 
-	public VncCanvas(final Context context, String serverIP, int serverPort, String serverPassword, String repeaterid, COLORMODEL colorModel) {
+	/**
+	 * Create a view showing a VNC connection
+	 * @param context Containing context (activity)
+	 * @param bean Connection settings
+	 * @param setModes Callback to run on UI thread after connection is set up
+	 */
+	public VncCanvas(final Context context, ConnectionBean bean, final Runnable setModes) {
 		super(context);
-		this.server = serverIP;
-		this.port = serverPort;
-		this.password = serverPassword;
-		this.repeaterID = repeaterid;
-		this.pendingColorModel = colorModel;
+		connection = bean;
+		this.pendingColorModel = COLORMODEL.valueOf(bean.getColorModel());
 
 		// Startup the RFB thread with a nifty progess dialog
 		final ProgressDialog pd = ProgressDialog.show(context, "Connecting...", "Establishing handshake.\nPlease wait...", true, true, new DialogInterface.OnCancelListener() {
@@ -155,12 +165,12 @@ public class VncCanvas extends ImageView {
 		Thread t = new Thread() {
 			public void run() {
 				try {
-					if (repeaterID != null && !repeaterID.equals("")) {
+					if (connection.getRepeaterId() != null && connection.getRepeaterId().length()>0) {
 						// Connect to Repeater Session
 						// Passwords are irrelevant.
 						connectAndAuthenticate("");
 					} else {
-						connectAndAuthenticate(password);
+						connectAndAuthenticate(connection.getPassword());
 					}
 					doProtocolInitialisation();
 					handler.post(new Runnable() {
@@ -168,10 +178,10 @@ public class VncCanvas extends ImageView {
 							pd.setMessage("Downloading first frame.\nPlease wait...");
 						}
 					});
-					processNormalProtocol(context, pd);
+					processNormalProtocol(context, pd, setModes);
 				} catch (Throwable e) {
 					if (maintainConnection) {
-						Log.v(TAG, e.toString());
+						Log.e(TAG, e.toString());
 						e.printStackTrace();
 						// Ensure we dismiss the progress dialog
 						// before we fatal error finish
@@ -202,27 +212,27 @@ public class VncCanvas extends ImageView {
 	}
 
 	void connectAndAuthenticate(String pw) throws Exception {
-		Log.v(TAG, "Connecting to " + server + ", port " + port + "...");
+		Log.i(TAG, "Connecting to " + connection.getAddress() + ", port " + connection.getPort() + "...");
 
-		rfb = new RfbProto(server, port);
-		Log.v(TAG, "Connected to server");
+		rfb = new RfbProto(connection.getAddress(), connection.getPort());
+		if (LOCAL_LOGV) Log.v(TAG, "Connected to server");
 
 		// <RepeaterMagic>
-		if (repeaterID != null && !repeaterID.equals("")) {
-			Log.v(TAG, "Negotiating repeater/proxy connection");
+		if (connection.getRepeaterId() != null && connection.getRepeaterId().length()>0) {
+			Log.i(TAG, "Negotiating repeater/proxy connection");
 			byte[] protocolMsg = new byte[12];
 			rfb.is.read(protocolMsg);
 			byte[] buffer = new byte[250];
-			System.arraycopy(repeaterID.getBytes(), 0, buffer, 0, repeaterID.length());
+			System.arraycopy(connection.getRepeaterId().getBytes(), 0, buffer, 0, connection.getRepeaterId().length());
 			rfb.os.write(buffer);
 		}
 		// </RepeaterMagic>
 
 		rfb.readVersionMsg();
-		Log.v(TAG, "RFB server supports protocol version " + rfb.serverMajor + "." + rfb.serverMinor);
+		Log.i(TAG, "RFB server supports protocol version " + rfb.serverMajor + "." + rfb.serverMinor);
 
 		rfb.writeVersionMsg();
-		Log.v(TAG, "Using RFB protocol version " + rfb.clientMajor + "." + rfb.clientMinor);
+		Log.i(TAG, "Using RFB protocol version " + rfb.clientMajor + "." + rfb.clientMinor);
 
 		int secType = rfb.negotiateSecurity();
 		int authType;
@@ -236,11 +246,11 @@ public class VncCanvas extends ImageView {
 
 		switch (authType) {
 		case RfbProto.AuthNone:
-			Log.v(TAG, "No authentication needed");
+			Log.i(TAG, "No authentication needed");
 			rfb.authenticateNone();
 			break;
 		case RfbProto.AuthVNC:
-			Log.v(TAG, "VNC authentication needed");
+			Log.i(TAG, "VNC authentication needed");
 			rfb.authenticateVNC(pw);
 			break;
 		default:
@@ -252,17 +262,16 @@ public class VncCanvas extends ImageView {
 		rfb.writeClientInit();
 		rfb.readServerInit();
 
-		Log.v(TAG, "Desktop name is " + rfb.desktopName);
-		Log.v(TAG, "Desktop size is " + rfb.framebufferWidth + " x " + rfb.framebufferHeight);
+		Log.i(TAG, "Desktop name is " + rfb.desktopName);
+		Log.i(TAG, "Desktop size is " + rfb.framebufferWidth + " x " + rfb.framebufferHeight);
 
 		Display display=((VncCanvasActivity)getContext()).getWindowManager().getDefaultDisplay();
 		int dx=display.getWidth();
 		int dy=display.getHeight();
-		int max=(dx>dy) ? dx : dy;
-		if ( rfb.framebufferWidth>max*2 || rfb.framebufferHeight>max*2)
-			bitmapData=new LargeBitmapData(rfb,dx,dy);
+		if ((rfb.framebufferWidth > 1024 || rfb.framebufferHeight > 1024) && ! connection.getForceFull())
+			bitmapData=new LargeBitmapData(rfb,this,dx,dy);
 		else
-			bitmapData=new CompactBitmapData(rfb);
+			bitmapData=new CompactBitmapData(rfb,this);
 		mouseX=rfb.framebufferWidth/2;
 		mouseY=rfb.framebufferHeight/2;
 
@@ -287,10 +296,11 @@ public class VncCanvas extends ImageView {
 		return (colorModel != null) && colorModel.equals(cm);
 	}
 
-	public void processNormalProtocol(final Context context, ProgressDialog pd) throws Exception {
+	public void processNormalProtocol(final Context context, ProgressDialog pd, final Runnable setModes) throws Exception {
 		try {
 			bitmapData.writeFullUpdateRequest(false);
 
+			handler.post(setModes);
 			//
 			// main dispatch loop
 			//
@@ -331,6 +341,7 @@ public class VncCanvas extends ImageView {
 						}
 
 						if (rfb.updateRectEncoding == RfbProto.EncodingPointerPos) {
+							// This never actually happens
 							mouseX=rx;
 							mouseY=ry;
 							Log.v(TAG, "rfb.EncodingPointerPos");
@@ -424,6 +435,7 @@ public class VncCanvas extends ImageView {
 	public void onDestroy() {
 		Log.v(TAG, "Cleaning up resources");
 		if ( bitmapData!=null) bitmapData.dispose();
+		bitmapData = null;
 	}
 	
 	/**
@@ -433,8 +445,10 @@ public class VncCanvas extends ImageView {
 	 */
 	void warpMouse(int x, int y)
 	{
+		bitmapData.invalidateMousePosition();
 		mouseX=x;
 		mouseY=y;
+		bitmapData.invalidateMousePosition();
 		try
 		{
 			rfb.writePointerEvent(x, y, 0, MOUSE_BUTTON_NONE);
@@ -571,8 +585,12 @@ public class VncCanvas extends ImageView {
     final static int ALT_MASK   = KeyEvent.META_ALT_ON;
     
 	private static final int MOUSE_BUTTON_NONE = 0;
-	private static final int MOUSE_BUTTON_1 = 1;
-	private static final int MOUSE_BUTTON_2 = 2;
+	static final int MOUSE_BUTTON_LEFT = 1;
+	static final int MOUSE_BUTTON_MIDDLE = 2;
+	static final int MOUSE_BUTTON_RIGHT = 4;
+	static final int MOUSE_BUTTON_SCROLL_UP = 8;
+	static final int MOUSE_BUTTON_SCROLL_DOWN = 16;
+	
 	/**
 	 * Current state of "mouse" buttons
 	 * Alt meta means use second mouse button
@@ -585,45 +603,41 @@ public class VncCanvas extends ImageView {
 	/**
 	 * Convert a motion event to a format suitable for sending over the wire
 	 * @param evt motion event; x and y must already have been converted from screen coordinates
-	 * to remote frame buffer coordinates.  ALT meta state flag is interpreted as second mouse
+	 * to remote frame buffer coordinates.  cameraButton flag is interpreted as second mouse
 	 * button
+	 * @param downEvent True if "mouse button" (touch or trackball button) is down when this happens
 	 * @return true if event was actually sent
 	 */
-	public boolean processPointerEvent(MotionEvent evt) {
+	public boolean processPointerEvent(MotionEvent evt,boolean downEvent) {
 		if (rfb != null && rfb.inNormalProtocol) {
 		    int modifiers = evt.getMetaState();
 
-		    if (evt.getAction() == MotionEvent.ACTION_DOWN) {
-		      if ((modifiers & KeyEvent.META_ALT_ON) != 0) {
-		        pointerMask = MOUSE_BUTTON_2;
-		        modifiers &= ~ALT_MASK;
+		    if (evt.getAction() == MotionEvent.ACTION_DOWN || (downEvent && evt.getAction() == MotionEvent.ACTION_MOVE)) {
+		      if (cameraButtonDown) {
+		        pointerMask = MOUSE_BUTTON_RIGHT;
 //		      } else if ((modifiers & KeyEvent.META_SYM_ON) != 0) {
 //		        pointerMask = mask3;
 //		        modifiers &= ~META_MASK;
 		      } else {
-		        pointerMask = MOUSE_BUTTON_1;
+		        pointerMask = MOUSE_BUTTON_LEFT;
 		      }
 		    } else if (evt.getAction() == MotionEvent.ACTION_UP) {
 		      pointerMask = 0;
-		      if ((modifiers & KeyEvent.META_ALT_ON) != 0) {
-		        modifiers &= ~ALT_MASK;
-		      }
-//		      else if ((modifiers & KeyEvent.META_SYM_ON) != 0) {
-//		        modifiers &= ~META_MASK;
-//		      }
 		    }
+		    bitmapData.invalidateMousePosition();
 		    mouseX=(int)evt.getX();
 		    mouseY=(int)evt.getY();
 		    if ( mouseX<0) mouseX=0;
 		    else if ( mouseX>=rfb.framebufferWidth) mouseX=rfb.framebufferWidth-1;
 		    if ( mouseY<0) mouseY=0;
 		    else if ( mouseY>=rfb.framebufferHeight) mouseY=rfb.framebufferHeight-1;
+		    bitmapData.invalidateMousePosition();
 			try {
 				rfb.writePointerEvent(mouseX,mouseY,modifiers,pointerMask);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		    
+		    ((VncCanvasActivity)getContext()).panToMouse();
 			return true;
 		}
 		return false;
@@ -633,17 +647,63 @@ public class VncCanvas extends ImageView {
 		if (keyCode == KeyEvent.KEYCODE_MENU)
 			// Ignore menu key
 			return true;
-		if (rfb != null && rfb.inNormalProtocol) {
-			boolean result = false;
-			synchronized (rfb) {
-				try {
-					result = rfb.writeKeyEvent(keyCode, evt);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				rfb.notify();
+		if (keyCode == KeyEvent.KEYCODE_CAMERA)
+		{
+			cameraButtonDown = (evt.getAction() != KeyEvent.ACTION_UP);
+		}
+		else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP)
+		{
+			int mouseChange = keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ? MOUSE_BUTTON_SCROLL_DOWN : MOUSE_BUTTON_SCROLL_UP;
+			if (evt.getAction() == KeyEvent.ACTION_DOWN)
+			{
+				pointerMask |= mouseChange;
 			}
-			return result;
+			else
+			{
+				pointerMask &= ~mouseChange;
+			}
+			try
+			{
+				rfb.writePointerEvent(mouseX, mouseY, evt.getMetaState(), pointerMask);
+			}
+			catch (IOException ioe)
+			{
+				// TODO: do something with exception
+			}
+			return true;
+		}
+		if (rfb != null && rfb.inNormalProtocol) {
+		   boolean down = (evt.getAction() == KeyEvent.ACTION_DOWN);
+		   int key;
+		   int metaState = evt.getMetaState();
+		   
+		   switch(keyCode) {
+		   	  case KeyEvent.KEYCODE_BACK :        key = 0xff1b; break;
+		      case KeyEvent.KEYCODE_DPAD_LEFT:    key = 0xff51; break;
+		   	  case KeyEvent.KEYCODE_DPAD_UP:      key = 0xff52; break;
+		   	  case KeyEvent.KEYCODE_DPAD_RIGHT:   key = 0xff53; break;
+		   	  case KeyEvent.KEYCODE_DPAD_DOWN:    key = 0xff54; break;
+		      case KeyEvent.KEYCODE_DEL: 		  key = 0xff08; break;
+		      case KeyEvent.KEYCODE_ENTER:        key = 0xff0d; break;
+		      case KeyEvent.KEYCODE_DPAD_CENTER:  key = 0xff0d; break;
+		      default: 							  key = evt.getUnicodeChar(); break;
+		    }
+		    if (key!=0)
+		    	metaState = metaState & ~ALT_MASK;
+	    	try {
+	    		if (afterMenu)
+	    		{
+	    			afterMenu = false;
+	    			if (!down && key != lastKeyDown)
+	    				return true;
+	    		}
+	    		if (down)
+	    			lastKeyDown = key;
+	    		rfb.writeKeyEvent(key, metaState, down);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return true;
 		}
 		return false;
 	}
@@ -652,11 +712,28 @@ public class VncCanvas extends ImageView {
 		maintainConnection = false;
 	}
 	
-	public void ctrlAltDel() {
-		try {
-			rfb.writeCtrlAltDel();
-		} catch (IOException e) {
-			e.printStackTrace();
+	void sendMetaKey(MetaKeyBean meta)
+	{
+		if (meta.isMouseClick())
+		{
+			try {
+				rfb.writePointerEvent(mouseX, mouseY, meta.getMetaFlags(), meta.getMouseButtons());
+				rfb.writePointerEvent(mouseX, mouseY, meta.getMetaFlags(), 0);
+			}
+			catch (IOException ioe)
+			{
+				ioe.printStackTrace();
+			}
+		}
+		else {
+			try {
+				rfb.writeKeyEvent(meta.getKeySym(), meta.getMetaFlags(), true);
+				rfb.writeKeyEvent(meta.getKeySym(), meta.getMetaFlags(), false);
+			}
+			catch (IOException ioe)
+			{
+				ioe.printStackTrace();
+			}
 		}
 	}
 

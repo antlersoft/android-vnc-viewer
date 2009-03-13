@@ -7,6 +7,8 @@ import android.app.ActivityManager.MemoryInfo;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
+import android.net.Uri;
 
 public class Utils {
 
@@ -21,6 +23,8 @@ public class Utils {
 		builder.show();
 	}
 	
+	private static final Intent docIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://code.google.com/p/android-vnc-viewer/wiki/Documentation")); 
+	
 	public static MemoryInfo getMemoryInfo(Context _context) {
 		try {
 			MemoryInfo info = new MemoryInfo();
@@ -31,6 +35,10 @@ public class Utils {
 			e.printStackTrace();
 		}	
 		return null;
+	}
+	
+	public static void showDocumentation(Context c) {
+		c.startActivity(docIntent);
 	}
 
 	private static int nextNoticeID = 0;
