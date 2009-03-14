@@ -1,4 +1,5 @@
-﻿
+﻿[faq New to VNC?] See FAQ #0
+
 [Documentation User Documentation]
 Read The Fairly-complete Manual
 
