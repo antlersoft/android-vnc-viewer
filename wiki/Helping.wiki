@@ -1,0 +1,15 @@
+﻿
+*android-vnc-viewer* is an open-source project, and its quality depends
+on help from its community of users.
+
+You can help by:
+
+  * [http://code.google.com/p/android-vnc-viewer/issues/list Filing issue reports]-- not just for bugs, but also to suggest enhancements.  Please look to see if an existing bug covers your problem or suggestion.
+
+  * Providing patches-- Are you a developer who knows how to add a feature or fix a bug?  The source code for the currently available versions is in the antlersoft svn branch:  https://android-vnc-viewer.googlecode.com/svn/branches/antlersoft  Send a patch (googlecode@antlersoft.com) or post it to the issue report.  If you will be contributing on an ongoing basis, we'll add you to the project.
+
+  * Supporting other users-- Know a workaround for a reported issue?  Add it as a comment.  Check the [http://groups.google.com/group/android-vnc-viewer google group].
+
+  * Improving the documentation-- I know we need screen shots added to the documentation.  A wiz with wiki's?  Supply documentation patches.
+
+  * Providing translations-- Want to make the app accessible to non-english speakers?  Provide translations of the wiki pages or the app resources (Unfortunately, neither Android nor the application is not completely internationalizable yet)

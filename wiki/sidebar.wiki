@@ -1,11 +1,19 @@
 ﻿
 [Documentation User Documentation]
-How to use
+Read The Fairly-complete Manual
 
 [faq (FAQ) Frequently asked questions]
 Questions and answers about known issues
 
 [Uninstall Install/uninstall tips]
-Since the app is not in android-market, upgrades aren't as smooth as
-they might be.  See here if you need to know how to uninstall
+Upgrading to a new version will sometimes fail if you don't
+uninstall the old version first.
+See here if you need to know how to uninstall
 the old version before you install the new.
+
+[Helping How to help]
+
+*Acknowledgements*
+
+android-vnc-viewer uses code from [http://www.tightvnc.com TightVNC]
+and [http://www.antlersoft.com/freesoftwarenews.html antlersoft]

@@ -1,17 +1,19 @@
 ﻿= Frequently Asked Questions =
 
-== 1. Why isn't it on Android market? ==
+== 1. Should I install from this site or Android Market? ==
 
-  We haven't wanted to expose android-vnc-viewer to the larger Android Market
-  audience while it is still changing rapidly with potential sources
-  of confusion.  As we gain more confidence with the state of the code,
-  we supply a more complete set of features, and we
-  have better documentation, we will reach a point
-  where it makes sense to put it on Android Market.
-  (Also, none of us has yet ponied up the $25 to be an Android Developer :) )
-  In the meantime we will continue to have development builds
-  available from time to time here in Google Code.
-  
+  Android Market will have the latest version of the code
+  we consider stable.
+  You should always be able to upgrade the version in Market without
+  losing your settings.  If you want to help get the bugs
+  out and to have the very latest bleeding edge version, download
+  development versions from here in Google Code.  We'll try
+  and allow upgrades with the development version, but you may have
+  to uninstall from version to version, losing your settings.
+  When switching from the
+  development version to the market version (or back) you will
+  always have to Uninstall.
+
 == 2. It says the installation failed, and now I can't even access the old version! ==
 
   It is safest to Uninstall the android-vnc-viewer before installing
@@ -37,7 +39,16 @@
 
   Some VNC servers require the client to render the mouse cursor.  VNC can render a simple cursor in these cases; on the connection configuration screen, select "Local mouse pointer".
 
-== 5. How do I right click, or send special keys? ==
+== 5. I'm having trouble with connecting to Apple Remote Desktop on OS/X.
+
+  I don't have a Mac to test with, but *android-vnc-viewer*
+  does connect to Apple Remote Desktop on OS/X.  The default color
+  depth (64-colors) does not work, so you will have to [Documentation#Connection_Configuration configure
+  for 24-bit color] before you connect (I'm not sure if 256 colors works).
+
+  You will also need to turn on "Local mouse pointer".
+
+== 6. How do I right click, or send special keys? ==
 
   See the [Documentation User Manual].
   Hold down the camera button while clicking to
@@ -47,11 +58,11 @@
   Ctrl-Alt-Del is available as its own
   menu function.
 
-== 6. It doesn't work with my repeater ==
+== 7. It doesn't work with my repeater ==
 
   We hope to have support for the UltraVNC repeater soon.
 
-== 7. How do I connect to VNC from 3G without opening an insecure port to the internet? ==
+== 8. How do I connect to VNC from 3G without opening an insecure port to the internet? ==
 
   We recommend you tunnel your VNC connection over SSH with
   [http://code.google.com/p/connectbot connectbot].  Set up
@@ -60,7 +71,7 @@
   Then you can set up an android-vnc-viewer connection to
   5900 on localhost.
 
-== 8. Why can't I connect? ==
+== 9. Why can't I connect? ==
 
   There are a number of reasons a connection to your
   VNC server might fail.
@@ -75,6 +86,8 @@
 
 	* Your phone might be running out of memory RAM.  If *Force full-screen bitmap* is selected, de-select it.
 
+	* We've noticed that sometimes connections just seems to fail for a few minutes after you diconnect; we're not sure why.  Sometimes just waiting will make your server available again.
+
   If none of these suggestions work, you might have run into a bug in android-vnc-viewer.  Look at the submitted issues to see
   if someone has encountered a similar problem.
   You can help the project by submitting a bug report.
@@ -82,3 +95,5 @@
   to include LogCat output from the time
   you attempted your connection in your bug report.
   
+  In future versions of the code we'll try to be more specific in
+  the error messages about what's gone wrong.
