@@ -43,8 +43,8 @@
 
   I don't have a Mac to test with, but *android-vnc-viewer*
   does connect to Apple Remote Desktop on OS/X.  The default color
-  depth (64-colors) does not work, so you will have to [Documentation#Connection_Configuration configure
-  for 24-bit color] before you connect (I'm not sure if 256 colors works).
+  depth (64-colors) does not work, so you will have to configure
+  for 24-bit color before you connect (I'm not sure if 256 colors works).
 
   You will also need to turn on "Local mouse pointer".
 
