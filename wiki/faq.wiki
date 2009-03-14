@@ -39,7 +39,7 @@
 
   Some VNC servers require the client to render the mouse cursor.  VNC can render a simple cursor in these cases; on the connection configuration screen, select "Local mouse pointer".
 
-== 5. I'm having trouble with connecting to Apple Remote Desktop on OS/X.
+== 5. I'm having trouble with connecting to Apple Remote Desktop on OS/X. ==
 
   I don't have a Mac to test with, but *android-vnc-viewer*
   does connect to Apple Remote Desktop on OS/X.  The default color
