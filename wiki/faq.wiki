@@ -6,8 +6,7 @@
   (display, mouse and keyboard) from other computers over a network.  It
   is most useful if you have a computer that's always on (a server)
   that you want to control from its ordinary desktop interface.  We
-  can't explain everything about VNC here.  If you want to use
-  *android-vnc-viewer*, it's best to first set up so you can control
+  can't explain everything about VNC here.  If you want to use *android-vnc-viewer*, it's best to first set up so you can control
   your server from another PC client; then you'll know how you need
   to configure the phone as a client.  Please refer to the following
   instructions (these aren't ours):
