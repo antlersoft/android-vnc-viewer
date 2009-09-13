@@ -20,13 +20,16 @@
 //
 package android.androidVNC;
 
-import android.androidVNC.Provider.VncSettings;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -52,59 +55,154 @@ public class VncCanvasActivity extends Activity {
 	
 	VncCanvas vncCanvas;
 	
+	VncDatabase database;
 
 	private MenuItem[] inputModeMenuItems;
 	private AbstractInputHandler inputModeHandlers[];
+	private ConnectionBean connection;
+	private boolean trackballButtonDown;
 	private static final int inputModeIds[] = { R.id.itemInputFitToScreen, R.id.itemInputMouse, R.id.itemInputPan, R.id.itemInputTouchPanTrackballMouse };
 
 	@Override
 	public void onCreate(Bundle icicle) {
+
 		super.onCreate(icicle);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-		Intent intent = getIntent();
-		String host = null;
-		int port = 5900;
-		String password = null;
-		COLORMODEL colorModel = COLORMODEL.C64;
-		String repeaterID = null;
 		
-		if (intent.getData() != null) {
-		  VncSettings settings = VncSettings.getHelper(this, intent.getData());
-		  host = settings.getString(VncSettings.HOST);
-		  port = Integer.parseInt(settings.getString(VncSettings.PORT));
-		  password = settings.getString(VncSettings.PASSWORD);
-		  colorModel = COLORMODEL.values()[settings.getInt(VncSettings.COLORMODEL)];
-		  repeaterID = "";
-		} else {
-	    Bundle extras = getIntent().getExtras();
-	    host = extras.getString(VncConstants.HOST);
-	    if (host == null) 
-	      host = extras.getString(VncConstants.IP);
-	    port = extras.getInt(VncConstants.PORT);
-	    if (port == 0)
-	      port = 5900;
+		database = new VncDatabase(this);
 
-	    // Parse a HOST:PORT entry
-	    if (host.indexOf(':') > -1) {
-	      String p = host.substring(host.indexOf(':') + 1);
-	      try {
-	        port = Integer.parseInt(p);
-	      } catch (Exception e) {
-	      }
-	      host = host.substring(0, host.indexOf(':'));
-	    }
-	    password = extras.getString(VncConstants.PASSWORD);
-	    repeaterID = extras.getString(VncConstants.ID);
-	    colorModel = (COLORMODEL)extras.getSerializable(VncConstants.COLORMODEL);
+		Bundle extras = getIntent().getExtras();
+		
+		connection=new ConnectionBean();
+		connection.Gen_populate((ContentValues)extras.getParcelable(VncConstants.CONNECTION));
+		if (connection.getPort() == 0)
+			connection.setPort(5900);
+
+		// Parse a HOST:PORT entry
+		String host=connection.getAddress();
+		if (host.indexOf(':') > -1) {
+			String p = host.substring(host.indexOf(':') + 1);
+			try {
+				connection.setPort( Integer.parseInt(p) );
+			} catch (Exception e) {
+			}
+			connection.setAddress( host.substring(0, host.indexOf(':')));
 		}
-		vncCanvas = new VncCanvas(this, host, port, password, repeaterID, colorModel);
+
+		vncCanvas = new VncCanvas(this, connection, new Runnable() {
+			public void run() {
+				setModes();
+			}
+		});
 		setContentView(vncCanvas);
 		
 		inputHandler=getInputHandlerById(R.id.itemInputFitToScreen);
 	}
 	
+	/**
+	 * Set modes on start to match what is specified in the ConnectionBean; color mode (already done)
+	 * scaling, input mode
+	 */
+	void setModes() {
+		// If scale mode is not default
+		if ( connection.getScaleMode() != ScaleType.FIT_CENTER)
+		{
+			vncCanvas.setScaleType(connection.getScaleMode());
+			vncCanvas.scrollTo(-vncCanvas.getCenteredXOffset(),-vncCanvas.getCenteredYOffset());
+			AbstractInputHandler input = getInputHandlerByName(connection.getInputMode());
+			if (input != null) {
+				inputHandler = input;
+			}
+			updateInputMenu();
+		}
+	}
+	
+	ConnectionBean getConnection()
+	{
+		return connection;
+	}
+	
+	/**
+	 * Make sure mouse is visible on displayable part of screen
+	 */
+	void panToMouse()
+	{
+		if (! connection.getFollowMouse() || isFitToScreen())
+			return;
+		int x = vncCanvas.mouseX;
+		int y = vncCanvas.mouseY;
+		boolean panned = false;
+		Display display = getWindowManager().getDefaultDisplay();
+		int w = display.getWidth();
+		int h = display.getHeight();
+		AbstractBitmapData bitmapData = vncCanvas.bitmapData;
+		
+		int newX = absoluteXPosition;
+		int newY = absoluteYPosition;
+		
+		if (x - newX >= w)
+		{
+			newX = x - w/2;
+			if (newX + w > bitmapData.framebufferwidth)
+				newX = bitmapData.framebufferwidth - w;
+		}
+		else if (x < newX)
+		{
+			newX = x - w/2;
+			if (newX < 0)
+				newX = 0;
+		}
+		if ( newX != absoluteXPosition ) {
+			newX = newX - absoluteXPosition;
+			absoluteXPosition += newX;
+			panned = true;
+		} else {
+			newX = 0;
+		}
+		if (y - newY >= h)
+		{
+			newY = y - h/2;
+			if (newY + h > bitmapData.framebufferheight)
+				newY = bitmapData.framebufferheight - h;
+		}
+		else if (y < newY)
+		{
+			newY = y - h/2;
+			if (newY < 0)
+				newY = 0;
+		}
+		if ( newY != absoluteYPosition ) {
+			newY = newY - absoluteYPosition;;
+			absoluteYPosition += newY;
+			panned = true;
+		}
+		else {
+			newY = 0;
+		}
+		if (panned)
+		{
+			vncCanvas.scrollBy(newX, newY);
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreateDialog(int)
+	 */
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		return new MetaKeyDialog(this);
+	}
+
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onPrepareDialog(int, android.app.Dialog)
+	 */
+	@Override
+	protected void onPrepareDialog(int id, Dialog dialog) {
+		super.onPrepareDialog(id, dialog);
+		((MetaKeyDialog)dialog).setConnection(connection);
+	}
+
 	@Override 
     public void onConfigurationChanged(Configuration newConfig) { 
       // ignore orientation/keyboard change 
@@ -128,6 +226,9 @@ public class VncCanvasActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.vnccanvasactivitymenu, menu);
 		
+		menu.findItem(isFitToScreen() ? R.id.itemFitToScreen : R.id.itemOneToOne).setChecked(true);
+			
+		
 		Menu inputMenu = menu.findItem( R.id.itemInputMode).getSubMenu();
 		
 		inputModeMenuItems = new MenuItem[inputModeIds.length];
@@ -136,6 +237,7 @@ public class VncCanvasActivity extends Activity {
 			inputModeMenuItems[i]=inputMenu.findItem(inputModeIds[i]);
 		}
 		updateInputMenu();
+		menu.findItem(R.id.itemFollowMouse).setChecked(connection.getFollowMouse());
 		return true;
 	}
 	
@@ -144,6 +246,9 @@ public class VncCanvasActivity extends Activity {
 	 */
 	void updateInputMenu()
 	{
+		if ( inputModeMenuItems == null ) {
+			return;
+		}
 		if ( isFitToScreen())
 		{
 			for ( MenuItem item : inputModeMenuItems)
@@ -159,7 +264,7 @@ public class VncCanvasActivity extends Activity {
 			{
 				int id=item.getItemId();
 				item.setEnabled( id!=R.id.itemInputFitToScreen);
-				if ( id==R.id.itemInputPan)
+				if (inputHandler == getInputHandlerById(id))
 				{
 					item.setChecked(true);
 				}
@@ -193,8 +298,6 @@ public class VncCanvasActivity extends Activity {
 					case R.id.itemInputTouchPanTrackballMouse :
 						inputModeHandlers[i]=new TouchPanTrackballMouse();
 						break;
-					default:
-						throw new IllegalArgumentException("unknown id" + id);
 					}
 				}
 				return inputModeHandlers[i];
@@ -202,14 +305,31 @@ public class VncCanvasActivity extends Activity {
 		}
 		return null;
 	}
+	
+	AbstractInputHandler getInputHandlerByName(String name)
+	{
+		AbstractInputHandler result = null;
+		for (int id : inputModeIds) {
+			AbstractInputHandler handler = getInputHandlerById( id );
+			if (handler.getName().equals(name)) {
+				result = handler;
+				break;
+			}
+		}
+		return result;
+	}
 
 	int absoluteXPosition = 0, absoluteYPosition = 0;
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		vncCanvas.afterMenu = true;
 		switch (item.getItemId()) {
 		case R.id.itemInfo:
 			vncCanvas.showConnectionInfo();
+			return true;
+		case R.id.itemSpecialKeys:
+			showDialog(R.layout.metakey);
 			return true;
 		case R.id.itemColorMode:
 			selectColorModel();
@@ -220,19 +340,24 @@ public class VncCanvasActivity extends Activity {
 			showPanningState();
 			// Change to 1:1 scaling (which auto-centers)
 			vncCanvas.setScaleType(ScaleType.CENTER);
+			connection.setScaleMode(ScaleType.CENTER);
 			updateInputMenu();
-
 			// Reset the pan position to (0,0)
 			vncCanvas.scrollTo(-vncCanvas.getCenteredXOffset(),-vncCanvas.getCenteredYOffset());
+			connection.setInputMode(inputHandler.getName());
+			connection.save(database.getWritableDatabase());
 			return true;
 		case R.id.itemFitToScreen:
-			inputHandler = getInputHandlerById(R.id.itemFitToScreen);
+			inputHandler = getInputHandlerById(R.id.itemInputFitToScreen);
 			item.setChecked(true);
 			vncCanvas.setScaleType(ScaleType.FIT_CENTER);
+			connection.setScaleMode(ScaleType.FIT_CENTER);
 			absoluteXPosition = 0;
 			absoluteYPosition = 0;
 			updateInputMenu();
 			vncCanvas.scrollTo(absoluteXPosition, absoluteYPosition);
+			connection.setInputMode(inputHandler.getName());
+			connection.save(database.getWritableDatabase());
 			return true;
 		case R.id.itemCenterMouse:
 			Display display=getWindowManager().getDefaultDisplay();
@@ -243,19 +368,74 @@ public class VncCanvasActivity extends Activity {
 			finish();
 			return true;
 		case R.id.itemCtrlAltDel:
-			vncCanvas.ctrlAltDel();
+			vncCanvas.sendMetaKey(MetaKeyBean.keyCtrlAltDel);
+			return true;
+		case R.id.itemFollowMouse:
+			boolean newFollow = ! connection.getFollowMouse();
+			item.setChecked(newFollow);
+			connection.setFollowMouse(newFollow);
+			if (newFollow) {
+				panToMouse();
+			}
+			connection.save(database.getWritableDatabase());
+			return true;
+		case R.id.itemArrowLeft :
+			vncCanvas.sendMetaKey(MetaKeyBean.keyArrowLeft);
+			return true;
+		case R.id.itemArrowUp :
+			vncCanvas.sendMetaKey(MetaKeyBean.keyArrowUp);
+			return true;
+		case R.id.itemArrowRight :
+			vncCanvas.sendMetaKey(MetaKeyBean.keyArrowRight);
+			return true;
+		case R.id.itemArrowDown :
+			vncCanvas.sendMetaKey(MetaKeyBean.keyArrowDown);
+			return true;
+		case R.id.itemSendKeyAgain :
+			sendSpecialKeyAgain();
 			return true;
 		default :
 			AbstractInputHandler input=getInputHandlerById(item.getItemId());
 			if ( input != null)
 			{
 				inputHandler=input;
+				connection.setInputMode(input.getName());
 				item.setChecked(true);
 				showPanningState();
+				connection.save(database.getWritableDatabase());
 				return true;
 			}
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	private MetaKeyBean lastSentKey;
+	
+	private void sendSpecialKeyAgain()
+	{
+		if (lastSentKey == null || lastSentKey.get_Id() != connection.getLastMetaKeyId())
+		{
+			ArrayList<MetaKeyBean> keys = new ArrayList<MetaKeyBean>();
+			Cursor c = database.getReadableDatabase().rawQuery(
+					MessageFormat.format("SELECT * FROM {0} WHERE {1} = {2}",
+							MetaKeyBean.GEN_TABLE_NAME,
+							MetaKeyBean.GEN_FIELD__ID,
+							connection.getLastMetaKeyId()),
+					MetaKeyDialog.EMPTY_ARGS);
+			MetaKeyBean.Gen_populateFromCursor(
+					c,
+					keys,
+					MetaKeyBean.NEW);
+			c.close();
+			if (keys.size() > 0) {
+				lastSentKey = keys.get(0);
+			}
+			else {
+				lastSentKey = null;
+			}
+		}
+		if (lastSentKey != null)
+			vncCanvas.sendMetaKey(lastSentKey);
 	}
 
 	@Override
@@ -265,6 +445,7 @@ public class VncCanvasActivity extends Activity {
 		{
 			vncCanvas.closeConnection();
 			vncCanvas.onDestroy();
+			database.close();
 		}
 	}
 	
@@ -297,6 +478,15 @@ public class VncCanvasActivity extends Activity {
 	 */
 	@Override
 	public boolean onTrackballEvent(MotionEvent event) {
+		switch (event.getAction())
+		{
+		case MotionEvent.ACTION_DOWN:
+			trackballButtonDown = true;
+			break;
+		case MotionEvent.ACTION_UP:
+			trackballButtonDown = false;
+			break;
+		}
 		return inputHandler.onTrackballEvent(event);
 	}
 
@@ -330,6 +520,8 @@ public class VncCanvasActivity extends Activity {
 				dialog.dismiss();
 				COLORMODEL cm = COLORMODEL.values()[arg2];
 				vncCanvas.setColorModel(cm);
+				connection.setColorModel(cm.nameString());
+				connection.save(database.getWritableDatabase());
 				Toast.makeText(VncCanvasActivity.this, "Updating Color Model to " + cm.toString(), Toast.LENGTH_SHORT).show();
 			}
 		});
@@ -419,8 +611,9 @@ public class VncCanvasActivity extends Activity {
 		
 		evt.offsetLocation( vncCanvas.mouseX + dx - evt.getX(), vncCanvas.mouseY + dy - evt.getY());
 		
-		if (vncCanvas.processPointerEvent(evt))
+		if (vncCanvas.processPointerEvent(evt,trackballButtonDown)) {
 			return true;
+		}
 		return VncCanvasActivity.super.onTouchEvent(evt);		
 	}
 	
@@ -476,13 +669,9 @@ public class VncCanvasActivity extends Activity {
 			switch (keyCode) {
 			case KeyEvent.KEYCODE_DPAD_CENTER :
 				inputHandler=getInputHandlerById(R.id.itemInputMouse);
-				for ( MenuItem item : inputModeMenuItems)
-				{
-					if ( item.getItemId()==R.id.itemInputMouse) {
-						item.setChecked( true );
-						break;
-					}
-				}
+				connection.setInputMode(inputHandler.getName());
+				connection.save(database.getWritableDatabase());
+				updateInputMenu();
 				showPanningState();
 				return true;
 			case KeyEvent.KEYCODE_DPAD_LEFT:
@@ -519,6 +708,14 @@ public class VncCanvasActivity extends Activity {
 		@Override
 		public CharSequence getHandlerDescription() {
 			return getResources().getText(R.string.input_mode_panning);
+		}
+
+		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractInputHandler#getName()
+		 */
+		@Override
+		public String getName() {
+			return "PAN_MODE";
 		}
 		
 	}
@@ -569,9 +766,19 @@ public class VncCanvasActivity extends Activity {
 		public CharSequence getHandlerDescription() {
 			return getResources().getText(R.string.input_mode_touchpad_pan_trackball_mouse);
 		}
+
+		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractInputHandler#getName()
+		 */
+		@Override
+		public String getName() {
+			return "TOUCH_PAN_TRACKBALL_MOUSE";
+		}
 		
 	}
 
+	static final String FIT_SCREEN_NAME = "FIT_SCREEN";
+	
 	/**
 	 * In fit-to-screen mode, no panning.  Trackball and touchscreen work as mouse.
 	 * @author Michael A. MacDonald
@@ -600,7 +807,6 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public boolean onTouchEvent(MotionEvent evt) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
@@ -618,6 +824,14 @@ public class VncCanvasActivity extends Activity {
 		@Override
 		public CharSequence getHandlerDescription() {
 			return getResources().getText(R.string.input_mode_fit_to_screen);
+		}
+
+		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractInputHandler#getName()
+		 */
+		@Override
+		public String getName() {
+			return FIT_SCREEN_NAME;
 		}
 		
 	}
@@ -647,14 +861,10 @@ public class VncCanvasActivity extends Activity {
 			if ( keyCode==KeyEvent.KEYCODE_DPAD_CENTER)
 			{
 				inputHandler=getInputHandlerById( R.id.itemInputPan);
-				for ( MenuItem item : inputModeMenuItems)
-				{
-					if ( item.getItemId()==R.id.itemInputPan) {
-						item.setChecked( true );
-						break;
-					}
-				}
 				showPanningState();
+				connection.setInputMode(inputHandler.getName());
+				connection.save(database.getWritableDatabase());
+				updateInputMenu(); 
 				return true;
 			}
 			return defaultKeyDownHandler( keyCode, evt);
@@ -673,7 +883,7 @@ public class VncCanvasActivity extends Activity {
 
 			// Adjust coordinates for panning position.
 			event.offsetLocation(absoluteXPosition, absoluteYPosition);
-			if (vncCanvas.processPointerEvent(event))
+			if (vncCanvas.processPointerEvent(event,true))
 				return true;
 			return VncCanvasActivity.super.onTouchEvent(event);
 		}
@@ -692,6 +902,14 @@ public class VncCanvasActivity extends Activity {
 		@Override
 		public CharSequence getHandlerDescription() {
 			return getResources().getText(R.string.input_mode_mouse);
+		}
+
+		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractInputHandler#getName()
+		 */
+		@Override
+		public String getName() {
+			return "MOUSE";
 		}
 		
 	}

@@ -1,9 +1,8 @@
 package android.androidVNC;
 
 import java.io.IOException;
-import java.io.Serializable;
 
-public enum COLORMODEL implements Serializable {
+public enum COLORMODEL {
 	C24bit, C256, C64, C8, C4, C2;
 
 	public int bpp() {
@@ -32,6 +31,11 @@ public enum COLORMODEL implements Serializable {
 		default:
 			return ColorModel256.colors;
 		}
+	}
+	
+	public String nameString()
+	{
+		return super.toString();
 	}
 
 	public void setPixelFormat(RfbProto rfb) throws IOException {

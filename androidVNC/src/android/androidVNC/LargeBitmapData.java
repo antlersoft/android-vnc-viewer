@@ -5,14 +5,11 @@ package android.androidVNC;
 
 import java.io.IOException;
 
-import android.graphics.drawable.DrawableContainer;
-
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.widget.ImageView;
 
 /**
  * @author Michael A. MacDonald
@@ -26,13 +23,15 @@ class LargeBitmapData extends AbstractBitmapData {
 	int scrolledToY;
 	int origwidth;
 	int origheight;
-	private LargeBitmapDrawable drawable;
 	private Rect invalidRect;
 	private Rect bitmapRect;
 	
-	class LargeBitmapDrawable extends DrawableContainer
+	class LargeBitmapDrawable extends AbstractBitmapDrawable
 	{
-
+		LargeBitmapDrawable()
+		{
+			super(LargeBitmapData.this);
+		}
 		/* (non-Javadoc)
 		 * @see android.graphics.drawable.DrawableContainer#draw(android.graphics.Canvas)
 		 */
@@ -40,50 +39,18 @@ class LargeBitmapData extends AbstractBitmapData {
 		public void draw(Canvas canvas) {
 			//android.util.Log.i("LBM", "Drawing "+xoffset+" "+yoffset);
 			int xoff, yoff;
-			synchronized ( LargeBitmapDrawable.this )
+			synchronized ( LargeBitmapData.this )
 			{
 				xoff=xoffset;
 				yoff=yoffset;
 			}
-			canvas.drawBitmap(mbitmap, xoff, yoff, new Paint());
-		}
-
-		/* (non-Javadoc)
-		 * @see android.graphics.drawable.DrawableContainer#getIntrinsicHeight()
-		 */
-		@Override
-		public int getIntrinsicHeight() {
-			return framebufferheight;
-		}
-
-		/* (non-Javadoc)
-		 * @see android.graphics.drawable.DrawableContainer#getIntrinsicWidth()
-		 */
-		@Override
-		public int getIntrinsicWidth() {
-			return framebufferwidth;
-		}
-
-		/* (non-Javadoc)
-		 * @see android.graphics.drawable.DrawableContainer#getOpacity()
-		 */
-		@Override
-		public int getOpacity() {
-			return PixelFormat.OPAQUE;
-		}
-
-		/* (non-Javadoc)
-		 * @see android.graphics.drawable.DrawableContainer#isStateful()
-		 */
-		@Override
-		public boolean isStateful() {
-			return false;
+			draw(canvas, xoff, yoff);
 		}
 	}
 	
-	LargeBitmapData(RfbProto p, int displayWidth, int displayHeight)
+	LargeBitmapData(RfbProto p, VncCanvas c, int displayWidth, int displayHeight)
 	{
-		super(p);
+		super(p,c);
 		framebufferwidth=rfb.framebufferWidth;
 		framebufferheight=rfb.framebufferHeight;
 		origwidth=displayWidth;
@@ -93,9 +60,14 @@ class LargeBitmapData extends AbstractBitmapData {
 		mbitmap = Bitmap.createBitmap(bitmapwidth, bitmapheight, Bitmap.Config.RGB_565);
 		memGraphics = new Canvas(mbitmap);
 		bitmapPixels = new int[bitmapwidth * bitmapheight];
-		drawable=new LargeBitmapDrawable();
 		invalidRect=new Rect();
 		bitmapRect=new Rect(0,0,bitmapwidth,bitmapheight);
+	}
+	
+	@Override
+	AbstractBitmapDrawable createDrawable()
+	{
+		return new LargeBitmapDrawable();
 	}
 	
 	void clearInvalid()
@@ -191,16 +163,6 @@ class LargeBitmapData extends AbstractBitmapData {
 	}
 
 	/* (non-Javadoc)
-	 * @see android.androidVNC.AbstractBitmapData#updateView(android.widget.ImageView)
-	 */
-	@Override
-	void updateView(ImageView v) {
-		//android.util.Log.i("LBM","Setting drawable");
-		v.setImageDrawable(drawable);
-		v.invalidate();
-	}
-
-	/* (non-Javadoc)
 	 * @see android.androidVNC.AbstractBitmapData#validDraw(int, int, int, int)
 	 */
 	@Override
@@ -239,6 +201,7 @@ class LargeBitmapData extends AbstractBitmapData {
 			try
 			{
 				//android.util.Log.i("LBM","update req "+xoffset+" "+yoffset);
+				mbitmap.eraseColor(Color.BLACK);
 				writeFullUpdateRequest(false);
 			}
 			catch ( IOException ioe)
