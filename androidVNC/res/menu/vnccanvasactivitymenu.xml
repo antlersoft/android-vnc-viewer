@@ -24,11 +24,16 @@
     	<item android:numericShortcut="6" android:alphabeticShortcut="f" android:id="@+id/itemFollowMouse" android:title="@string/pan_follow_mouse"/>
     </group>
     <item android:numericShortcut="7" android:alphabeticShortcut="d" android:id="@+id/itemDisconnect" android:title="@string/disconnect" android:icon="@android:drawable/ic_menu_close_clear_cancel"></item>
+    <item android:id="@+id/itemEnterText" android:alphabeticShortcut="e" android:title="Enter text..."></item>
     <item android:numericShortcut="8" android:alphabeticShortcut="a" android:id="@+id/itemCtrlAltDel" android:title="@string/ctrl_alt_del" android:icon="@android:drawable/ic_menu_share"/>
     <item android:numericShortcut="9" android:alphabeticShortcut="i" android:id="@+id/itemInfo" android:title="@string/info" android:icon="@android:drawable/ic_menu_info_details"></item>
     <item android:alphabeticShortcut="g" android:id="@+id/itemSendKeyAgain" android:title="@string/send_key_again"/>
     <item android:alphabeticShortcut="h" android:id="@+id/itemArrowLeft" android:title="@string/arrow_left"/>
     <item android:alphabeticShortcut="j" android:id="@+id/itemArrowDown" android:title="@string/arrow_down"/>
     <item android:alphabeticShortcut="k" android:id="@+id/itemArrowUp" android:title="@string/arrow_up"/>
-    <item android:alphabeticShortcut="l" android:id="@+id/itemArrowRight" android:title="@string/arrow_right"/>
-   </menu>
+    <item android:alphabeticShortcut="l" android:id="@+id/itemArrowRight" android:title="@string/arrow_right"></item>
+   
+
+
+
+</menu>
