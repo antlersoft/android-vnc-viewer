@@ -49,7 +49,6 @@ class EnterTextDialog extends Dialog {
 				RfbProto rfb = _canvasActivity.vncCanvas.rfb;
 				String s = _textEnterText.getText().toString();
 				int l = s.length();
-				boolean prevControl = false;
 				for (int i = 0; i<l; i++)
 				{
 					char c = s.charAt(i);
@@ -57,19 +56,10 @@ class EnterTextDialog extends Dialog {
 					int keysym = c;
 					if (Character.isISOControl(c))
 					{
-						if (prevControl)
+						if (c=='\n')
+							keysym = MetaKeyBean.keysByKeyCode.get(KeyEvent.KEYCODE_ENTER).keySym;
+						else
 							continue;
-						prevControl = true;
-						keysym = MetaKeyBean.keysByKeyCode.get(KeyEvent.KEYCODE_ENTER).keySym;
-					}
-					else
-					{
-						prevControl = false;
-						if (Character.isUpperCase(c))
-						{
-							meta = VncCanvas.SHIFT_MASK;
-							keysym = Character.toLowerCase(c);
-						}
 					}
 					try
 					{
