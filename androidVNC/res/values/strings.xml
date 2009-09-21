@@ -27,4 +27,5 @@
 <string name="scaling">Scaling</string>
 <string name="send_key_again">Send Key Again</string>
 <string name="special_keys">Send Keys</string>
+<string name="enter_text_title">Enter Text to Send</string>
 </resources>
