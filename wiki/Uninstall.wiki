@@ -1,5 +1,4 @@
-﻿
-= To uninstall androidVNC =
+﻿= To uninstall androidVNC =
 
  * go to Settings from the menu at Home (or the Settings app)
 
@@ -20,3 +19,5 @@ to uninstall.  If you get in this situation, reinstall the old version
 you had (from the android-vnc-viewer downloads) and then you should
 be able to uninstall it.  After the uninstall, the installation
 of the new version will work._
+
+*If you have installed from Android Market, you _must_ uninstall before you can install a development version from this site.  If you've installed a development version from this site, you _must_ uninstall before you can install the Market version successfully.  Unfortunately, at this time uninstalls result in the loss of the VNC configurations you've added to your phone.*  
