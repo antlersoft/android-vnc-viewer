@@ -26,7 +26,7 @@
   to uninstall from version to version, losing your settings.
   When switching from the
   development version to the market version (or back) you will
-  always have to Uninstall.
+  always have to Uninstall. _The current Market version (0.2.2) corresponds to the r45 (090307) development build._
 
 == 2. It says the installation failed, and now I can't even access the old version! ==
 
@@ -68,7 +68,7 @@
   Hold down the camera button while clicking to
   do a right-click.
   Support for sending just about any special, Ctrl or Alt
-  key is available from the *[Documentation#Special_Keys Send Keys]* menu item.
+  key is available from the *[Documentation#Special_Keys Send Keys]* menu item.  You can also use this to send mouse clicks that are difficult to send directly, like middle-button clicks or right clicks when your phone doesn't have a camera button.
   Ctrl-Alt-Del is available as its own
   menu function.
 
