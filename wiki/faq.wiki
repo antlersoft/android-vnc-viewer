@@ -111,3 +111,10 @@
   
   In future versions of the code we'll try to be more specific in
   the error messages about what's gone wrong.
+
+== 10. My phone doesn't have buttons that Android VNC expects!  What do I do? ==
+  You can use the [Documentation#Special_Keys Send Keys] menu item to send just about any keystroke or mouse click that you want.  It might not be convenient, but it will get the job done.
+
+  We are adding a new menu item for phones that lack physical keyboards that will provide a text box where you can bring up the soft keyboard, type some text, and then have that text sent to the phone.  This should support all the keys on the soft keyboard, including the Enter key, and will work with phones where you can't pull up the keyboard with a long press on Menu.  This is currently available only in the development version.
+
+  If you have a phone with other needs that Android VNC doesn't cover, please submit (or add to an existing) bug report on the issues page.
