@@ -41,6 +41,19 @@ class EnterTextDialog extends Dialog {
 		_history = new ArrayList<String>();
 		_historyIndex = 0;
 	}
+	
+	private String saveText(boolean wasSent)
+	{
+		CharSequence cs = _textEnterText.getText();
+		if (cs.length()==0)
+			return "";
+		String s = cs.toString();
+		if (wasSent || _historyIndex>=_history.size() || ! s.equals(_history.get(_historyIndex)))
+		{
+			_history.add(s);
+		}
+		return s;
+	}
 
 	/* (non-Javadoc)
 	 * @see android.app.Dialog#onCreate(android.os.Bundle)
@@ -59,15 +72,21 @@ class EnterTextDialog extends Dialog {
 			 */
 			@Override
 			public void onClick(View v) {
-				if (_historyIndex < _history.size())
+				int oldSize = _history.size();
+				if (_historyIndex < oldSize)
+				{
+					saveText(false);
 					_historyIndex++;
-				if (_historyIndex < _history.size())
-				{
-				    _textEnterText.setText(_history.get(_historyIndex));
-				}
-				else
-				{
-					_textEnterText.setText("");
+					if (_history.size()>oldSize && _historyIndex==oldSize)
+						_historyIndex++;
+					if (_historyIndex < _history.size())
+					{
+					    _textEnterText.setText(_history.get(_historyIndex));
+					}
+					else
+					{
+						_textEnterText.setText("");
+					}
 				}
 				updateButtons();
 			}
@@ -82,8 +101,11 @@ class EnterTextDialog extends Dialog {
 			@Override
 			public void onClick(View v) {
 				if (_historyIndex > 0)
+				{
+					saveText(false);
 					_historyIndex--;
-			    _textEnterText.setText(_history.get(_historyIndex));
+				    _textEnterText.setText(_history.get(_historyIndex));
+				}
 				updateButtons();
 			}
 			
@@ -96,7 +118,7 @@ class EnterTextDialog extends Dialog {
 			@Override
 			public void onClick(View v) {
 				RfbProto rfb = _canvasActivity.vncCanvas.rfb;
-				String s = _textEnterText.getText().toString();
+				String s = saveText(true);
 				int l = s.length();
 				for (int i = 0; i<l; i++)
 				{
@@ -121,7 +143,6 @@ class EnterTextDialog extends Dialog {
 					}
 				}
 				_textEnterText.setText("");
-				_history.add(s);
 				_historyIndex = _history.size();
 				updateButtons();
 				dismiss();
