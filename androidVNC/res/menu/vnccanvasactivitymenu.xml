@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 	<item android:numericShortcut="1" android:alphabeticShortcut="s" android:id="@+id/itemSpecialKeys" android:title="@string/special_keys" android:icon="@android:drawable/ic_dialog_dialer"/>
     <item android:numericShortcut="2" android:alphabeticShortcut="m" android:id="@+id/itemCenterMouse" android:title="@string/center_mouse" android:icon="@android:drawable/ic_menu_mylocation"/>
-    <item android:numericShortcut="3" android:alphabeticShortcut="c" android:id="@+id/itemColorMode" android:title="@string/color_mode" android:icon="@android:drawable/ic_menu_preferences"></item>
+    <item android:id="@+id/itemEnterText" android:alphabeticShortcut="e" android:title="@string/enter_text" android:icon="@android:drawable/ic_menu_edit" />
     <item android:numericShortcut="4" android:alphabeticShortcut="z" android:id="@+id/itemScaling" android:title="@string/scaling" android:icon="@android:drawable/ic_menu_zoom">
     	<menu>
 	    	<group android:id="@+id/groupScaling" android:checkableBehavior="single">
@@ -23,8 +23,8 @@
     <group android:checkableBehavior="all">
     	<item android:numericShortcut="6" android:alphabeticShortcut="f" android:id="@+id/itemFollowMouse" android:title="@string/pan_follow_mouse"/>
     </group>
+    <item android:numericShortcut="3" android:alphabeticShortcut="c" android:id="@+id/itemColorMode" android:title="@string/color_mode" android:icon="@android:drawable/ic_menu_preferences"></item>
     <item android:numericShortcut="7" android:alphabeticShortcut="d" android:id="@+id/itemDisconnect" android:title="@string/disconnect" android:icon="@android:drawable/ic_menu_close_clear_cancel"></item>
-    <item android:id="@+id/itemEnterText" android:alphabeticShortcut="e" android:title="Enter text..."></item>
     <item android:numericShortcut="8" android:alphabeticShortcut="a" android:id="@+id/itemCtrlAltDel" android:title="@string/ctrl_alt_del" android:icon="@android:drawable/ic_menu_share"/>
     <item android:numericShortcut="9" android:alphabeticShortcut="i" android:id="@+id/itemInfo" android:title="@string/info" android:icon="@android:drawable/ic_menu_info_details"></item>
     <item android:alphabeticShortcut="g" android:id="@+id/itemSendKeyAgain" android:title="@string/send_key_again"/>
