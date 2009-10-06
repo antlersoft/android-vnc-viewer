@@ -149,6 +149,8 @@ class EnterTextDialog extends Dialog {
 			}
 			
 		});
+		
+		updateButtons();
 	}
 
 	private void updateButtons()
