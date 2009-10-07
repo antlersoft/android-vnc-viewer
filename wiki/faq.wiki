@@ -26,7 +26,7 @@
   to uninstall from version to version, losing your settings.
   When switching from the
   development version to the market version (or back) you will
-  always have to Uninstall. _The current Market version (0.2.2) corresponds to the r45 (090307) development build._
+  always have to Uninstall. _The current Market version (0.2.3) corresponds to the r72 (20091006) development build._
 
 == 2. It says the installation failed, and now I can't even access the old version! ==
 
