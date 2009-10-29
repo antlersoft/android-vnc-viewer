@@ -6,15 +6,20 @@ package android.androidVNC;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * @author Michael A. MacDonald
  *
  */
 class VncDatabase extends SQLiteOpenHelper {
+	static final int DBV_0_2_X = 9;
+	static final int DBV_0_2_4 = 10;
+	public final static String TAG = VncDatabase.class.toString();
+	
 	VncDatabase(Context context)
 	{
-		super(context,"VncDatabase",null,9);
+		super(context,"VncDatabase",null,DBV_0_2_4);
 	}
 
 	/* (non-Javadoc)
@@ -29,17 +34,35 @@ class VncDatabase extends SQLiteOpenHelper {
 		
 		db.execSQL("INSERT INTO "+MetaList.GEN_TABLE_NAME+" VALUES ( 1, 'DEFAULT')");
 	}
+	
+	private void defaultUpgrade(SQLiteDatabase db)
+	{
+		Log.i(TAG, "Doing default database upgrade (drop and create tables)");
+		db.execSQL("DROP TABLE IF EXISTS " + AbstractConnectionBean.GEN_TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + MostRecentBean.GEN_TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + MetaList.GEN_TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + AbstractMetaKeyBean.GEN_TABLE_NAME);
+		onCreate(db);		
+	}
 
 	/* (non-Javadoc)
 	 * @see android.database.sqlite.SQLiteOpenHelper#onUpgrade(android.database.sqlite.SQLiteDatabase, int, int)
 	 */
 	@Override
-	public void onUpgrade(SQLiteDatabase db, int arg1, int arg2) {
-		db.execSQL("DROP TABLE IF EXISTS " + AbstractConnectionBean.GEN_TABLE_NAME);
-		db.execSQL("DROP TABLE IF EXISTS " + MostRecentBean.GEN_TABLE_NAME);
-		db.execSQL("DROP TABLE IF EXISTS " + MetaList.GEN_TABLE_NAME);
-		db.execSQL("DROP TABLE IF EXISTS " + AbstractMetaKeyBean.GEN_TABLE_NAME);
-		onCreate(db);
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		if (oldVersion < DBV_0_2_X)
+		{
+			defaultUpgrade(db);
+		}
+		else {
+			Log.i(TAG, "Doing upgrade from 9 to 10");
+			db.execSQL("ALTER TABLE " + AbstractConnectionBean.GEN_TABLE_NAME + " RENAME TO OLD_" +
+					AbstractConnectionBean.GEN_TABLE_NAME);
+			db.execSQL(AbstractConnectionBean.GEN_CREATE);
+			db.execSQL("INSERT INTO " + AbstractConnectionBean.GEN_TABLE_NAME +
+					" SELECT *, 0 FROM OLD_" + AbstractConnectionBean.GEN_TABLE_NAME);
+			db.execSQL("DROP TABLE OLD_" + AbstractConnectionBean.GEN_TABLE_NAME);
+		}
 	}
 
 }

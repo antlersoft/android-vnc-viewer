@@ -13,19 +13,19 @@
 		<CheckBox android:id="@+id/checkboxShift"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Shift"
+			android:text="@string/shift_check"
 			android:layout_weight="0"
 		/>
 		<CheckBox android:id="@+id/checkboxCtrl"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Ctrl"
+			android:text="@string/control_check"
 			android:layout_weight="0"
 		/>
 		<CheckBox android:id="@+id/checkboxAlt"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Alt"
+			android:text="@string/alt_check"
 			android:layout_weight="0"
 		/>
 		<Spinner android:id="@+id/spinnerKeySelect"
@@ -41,7 +41,7 @@
 		<Button android:id="@+id/buttonSend"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Send"
+			android:text="@string/send_button"
 		/>
 		<TextView android:id="@+id/textKeyDesc"
 			android:layout_width="fill_parent"
@@ -65,15 +65,15 @@
 				android:padding="10dip"
 				>
 				<TableRow>
-					<TextView android:text="Keys" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+					<TextView android:text="@string/keys_caption" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
 					<Spinner android:id="@+id/spinnerKeysInList" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1" />
 				</TableRow>
 				<TableRow>
-					<TextView android:text="List" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+					<TextView android:text="@string/list_caption" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
 					<Spinner android:id="@+id/spinnerLists" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1" />
 				</TableRow>
 				<TableRow>
-					<TextView android:text="List Name" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+					<TextView android:text="@string/list_name_caption" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
 					<EditText android:id="@+id/textListName" android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
 				</TableRow>
 			</TableLayout>
@@ -89,7 +89,7 @@
 					android:layout_weight="1"
 					>
 					<Button android:id="@+id/buttonNewList"
-						android:text="New List"
+						android:text="@string/new_list_button"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						/>
@@ -101,7 +101,7 @@
 					android:layout_weight="1"
 					>
 					<Button android:id="@+id/buttonCopyList"
-						android:text="Copy List"
+						android:text="@string/copy_list_button"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						/>

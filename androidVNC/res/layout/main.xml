@@ -16,7 +16,7 @@
 			android:orientation="vertical"
 			>
 			<TextView
-				android:text="Connection"
+				android:text="@string/connection_caption"
 				android:textAppearance="?android:attr/textAppearanceMedium"
 				android:gravity="right|center_vertical"
 				android:paddingRight="10dip" 
@@ -25,7 +25,7 @@
 				/>
 			<Button 
 			    android:id="@+id/buttonGO" 
-			    android:text="Connect"
+			    android:text="@string/connect_button"
 			    android:textAppearance="?android:attr/textAppearanceMedium"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -55,11 +55,11 @@
 				android:padding="10dip"
 				>
 				<TableRow>
-					<TextView android:text="Nickname" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+					<TextView android:text="@string/nickname_caption" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
 					<EditText android:id="@+id/textNickname" android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
 				</TableRow>
 				<TableRow>
-					<TextView android:text="Password" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+					<TextView android:text="@string/password_caption" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
 					<LinearLayout
 						android:layout_width="fill_parent"
 						android:layout_height="wrap_content"
@@ -72,17 +72,17 @@
 						<CheckBox android:id="@+id/checkboxKeepPassword"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="Keep"
+							android:text="@string/keep_password_button"
 							android:layout_weight="0"
 						/>
 					</LinearLayout>
 				</TableRow>
 				<TableRow>
-					<TextView android:text="Address" android:hint="localhost" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+					<TextView android:text="@string/address_caption" android:hint="localhost" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
 					<EditText android:id="@+id/textIP" android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1" />
 				</TableRow>
 				<TableRow>
-					<TextView android:text="Port" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
+					<TextView android:text="@string/port_caption" android:paddingRight="10dip" android:gravity="right|center_vertical" android:textAppearance="?android:attr/textAppearanceMedium" />
 					<EditText android:id="@+id/textPORT"
 						android:text="5900"
 						android:layout_width="fill_parent"
@@ -94,7 +94,7 @@
 			    android:layout_width="wrap_content"
 			    android:layout_gravity="left|center_vertical"
 				android:textAppearance="?android:attr/textAppearanceMedium"
-				android:text="Color Format"
+				android:text="@string/color_format_caption"
 			/>
 			<Spinner 
 			    android:id="@+id/colorformat" 
@@ -107,14 +107,14 @@
 				>
 				<CheckBox
 					android:id="@+id/checkboxUseLocalCursor"
-				    android:text="Local mouse pointer"
+				    android:text="@string/local_mouse_check"
 				    android:layout_width="wrap_content"
 				    android:gravity="left|center_vertical"
 				    android:layout_height="wrap_content"
 				/>
 				<CheckBox
 					android:id="@+id/checkboxForceFullScreen"
-				    android:text="Force full-screen bitmap"
+				    android:text="@string/force_full_check"
 				    android:layout_width="wrap_content"
 				    android:gravity="right|center_vertical"
 				    android:layout_height="wrap_content"
