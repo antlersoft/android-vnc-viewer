@@ -876,7 +876,7 @@ public class VncCanvasActivity extends Activity {
 				updateInputMenu(); 
 				return true;
 			}
-			return defaultKeyDownHandler( keyCode, evt);
+			return defaultKeyUpHandler( keyCode, evt);
 		}
 
 		/* (non-Javadoc)
