@@ -68,7 +68,7 @@ abstract class AbstractBitmapData {
 	abstract boolean validDraw( int x, int y, int w, int h);
 	
 	/**
-	 * Return an offset in the bitmapPixels array of a point int full-frame coordinates
+	 * Return an offset in the bitmapPixels array of a point in full-frame coordinates
 	 * @param x
 	 * @param y
 	 * @return Offset in bitmapPixels array of color data for that point

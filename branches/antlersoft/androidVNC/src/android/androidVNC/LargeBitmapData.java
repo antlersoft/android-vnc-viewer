@@ -5,6 +5,10 @@ package android.androidVNC;
 
 import java.io.IOException;
 
+import com.antlersoft.android.drawing.OverlappingCopy;
+import com.antlersoft.android.drawing.RectList;
+import com.antlersoft.util.ObjectPool;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -23,8 +27,25 @@ class LargeBitmapData extends AbstractBitmapData {
 	int scrolledToY;
 	int origwidth;
 	int origheight;
-	private Rect invalidRect;
 	private Rect bitmapRect;
+	private Paint defaultPaint;
+	private RectList invalidList;
+	private RectList pendingList;
+	
+	/**
+	 * Pool of temporary rectangle objects.  Need to synchronize externally access from
+	 * multiple threads.
+	 */
+	private static ObjectPool<Rect> rectPool = new ObjectPool<Rect>() {
+
+		/* (non-Javadoc)
+		 * @see com.antlersoft.util.ObjectPool#itemForPool()
+		 */
+		@Override
+		protected Rect itemForPool() {
+			return new Rect();
+		}		
+	};
 	
 	class LargeBitmapDrawable extends AbstractBitmapDrawable
 	{
@@ -60,8 +81,10 @@ class LargeBitmapData extends AbstractBitmapData {
 		mbitmap = Bitmap.createBitmap(bitmapwidth, bitmapheight, Bitmap.Config.RGB_565);
 		memGraphics = new Canvas(mbitmap);
 		bitmapPixels = new int[bitmapwidth * bitmapheight];
-		invalidRect=new Rect();
+		invalidList = new RectList(rectPool);
+		pendingList = new RectList(rectPool);
 		bitmapRect=new Rect(0,0,bitmapwidth,bitmapheight);
+		defaultPaint = new Paint();
 	}
 	
 	@Override
@@ -70,12 +93,6 @@ class LargeBitmapData extends AbstractBitmapData {
 		return new LargeBitmapDrawable();
 	}
 	
-	void clearInvalid()
-	{
-		invalidRect.bottom=invalidRect.top=yoffset;
-		invalidRect.left=invalidRect.right=xoffset;
-	}
-
 	/* (non-Javadoc)
 	 * @see android.androidVNC.AbstractBitmapData#copyRect(android.graphics.Rect, android.graphics.Rect, android.graphics.Paint)
 	 */
@@ -166,14 +183,20 @@ class LargeBitmapData extends AbstractBitmapData {
 	 * @see android.androidVNC.AbstractBitmapData#validDraw(int, int, int, int)
 	 */
 	@Override
-	boolean validDraw(int x, int y, int w, int h) {
+	synchronized boolean validDraw(int x, int y, int w, int h) {
 		//android.util.Log.i("LBM", "Validate Drawing "+x+" "+y+" "+w+" "+h+" "+xoffset+" "+yoffset+" "+(x-xoffset>=0 && x-xoffset+w<=bitmapwidth && y-yoffset>=0 && y-yoffset+h<=bitmapheight));
 		boolean result = x-xoffset>=0 && x-xoffset+w<=bitmapwidth && y-yoffset>=0 && y-yoffset+h<=bitmapheight;
+		ObjectPool.Entry<Rect> entry = rectPool.reserve();
+		Rect r = entry.get();
+		r.set(x, y, x+w, y+h);
+		pendingList.subtract(r);
 		if ( ! result)
 		{
-			//android.util.Log.i("LBM", "Invalid "+x+" "+y+" "+w+" "+h+" "+xoffset+" "+yoffset);
-			invalidRect.union( x, y, x+w, y+h);
+			invalidList.add(r);
 		}
+		else
+			invalidList.subtract(r);
+		rectPool.release(entry);
 		return result;
 	}
 
@@ -181,7 +204,18 @@ class LargeBitmapData extends AbstractBitmapData {
 	 * @see android.androidVNC.AbstractBitmapData#writeFullUpdateRequest(boolean)
 	 */
 	@Override
-	void writeFullUpdateRequest(boolean incremental) throws IOException {
+	synchronized void writeFullUpdateRequest(boolean incremental) throws IOException {
+		if (! incremental) {
+			ObjectPool.Entry<Rect> entry = rectPool.reserve();
+			Rect r = entry.get();
+			r.left=xoffset;
+			r.top=yoffset;
+			r.right=xoffset + bitmapwidth;
+			r.bottom=yoffset + bitmapheight;
+			pendingList.add(r);
+			invalidList.add(r);
+			rectPool.release(entry);
+		}
 		rfb.writeFramebufferUpdateRequest(xoffset, yoffset, bitmapwidth, bitmapheight, incremental);
 	}
 
@@ -190,41 +224,87 @@ class LargeBitmapData extends AbstractBitmapData {
 	 */
 	@Override
 	synchronized void syncScroll() {
-		if ( xoffset!=scrolledToX || yoffset!=scrolledToY)
+		
+		int deltaX = xoffset - scrolledToX;
+		int deltaY = yoffset - scrolledToY;
+		xoffset=scrolledToX;
+		yoffset=scrolledToY;
+		bitmapRect.top=scrolledToY;
+		bitmapRect.bottom=scrolledToY+bitmapheight;
+		bitmapRect.left=scrolledToX;
+		bitmapRect.right=scrolledToX+bitmapwidth;
+		invalidList.intersect(bitmapRect);
+		if ( deltaX != 0 || deltaY != 0)
 		{
-			xoffset=scrolledToX;
-			yoffset=scrolledToY;
-			bitmapRect.top=scrolledToY;
-			bitmapRect.bottom=scrolledToY+bitmapheight;
-			bitmapRect.left=scrolledToX;
-			bitmapRect.right=scrolledToX+bitmapwidth;
-			try
-			{
-				//android.util.Log.i("LBM","update req "+xoffset+" "+yoffset);
-				mbitmap.eraseColor(Color.BLACK);
-				writeFullUpdateRequest(false);
+			boolean didOverlapping = false;
+			if (Math.abs(deltaX) < bitmapwidth && Math.abs(deltaY) < bitmapheight) {
+				ObjectPool.Entry<Rect> sourceEntry = rectPool.reserve();
+				ObjectPool.Entry<Rect> addedEntry = rectPool.reserve();
+				try
+				{
+					Rect added = addedEntry.get();
+					Rect sourceRect = sourceEntry.get();
+					sourceRect.set(deltaX<0 ? -deltaX : 0,
+							deltaY<0 ? -deltaY : 0,
+							deltaX<0 ? bitmapwidth : bitmapwidth - deltaX,
+							deltaY < 0 ? bitmapheight : bitmapheight - deltaY);
+					if (! invalidList.testIntersect(sourceRect)) {
+						didOverlapping = true;
+						OverlappingCopy.Copy(mbitmap, memGraphics, defaultPaint, sourceRect, deltaX + sourceRect.left, deltaY + sourceRect.top, rectPool);
+						// Write request for side pixels
+						if (deltaX != 0) {
+							added.left = deltaX < 0 ? bitmapRect.right + deltaX : bitmapRect.left;
+							added.right = added.left + Math.abs(deltaX);
+							added.top = bitmapRect.top;
+							added.bottom = bitmapRect.bottom;
+							invalidList.add(added);
+						}
+						if (deltaY != 0) {
+							added.left = deltaX < 0 ? bitmapRect.left : bitmapRect.left + deltaX;
+							added.top = deltaY < 0 ? bitmapRect.bottom + deltaY : bitmapRect.top;
+							added.right = added.left + bitmapwidth - Math.abs(deltaX);
+							added.bottom = added.top + Math.abs(deltaY);
+							invalidList.add(added);
+						}
+					}
+				}
+				finally {
+					rectPool.release(addedEntry);
+					rectPool.release(sourceEntry);
+				}
 			}
-			catch ( IOException ioe)
-			{
-				// TODO log this
-			}
-		}
-		else
-		{			
-			if ( invalidRect.intersect( bitmapRect))
+			if (! didOverlapping)
 			{
 				try
 				{
-					//android.util.Log.i("LBM","invalid rect "+invalidRect.toString()+" "+bitmapRect.toString());
-					rfb.writeFramebufferUpdateRequest(invalidRect.left, invalidRect.top, invalidRect.right-invalidRect.left, invalidRect.bottom-invalidRect.top, false);
+					//android.util.Log.i("LBM","update req "+xoffset+" "+yoffset);
+					mbitmap.eraseColor(Color.GREEN);
+					writeFullUpdateRequest(false);
 				}
 				catch ( IOException ioe)
 				{
 					// TODO log this
 				}
 			}
-			clearInvalid();
+		}
+		int size = pendingList.getSize();
+		for (int i=0; i<size; i++) {
+			invalidList.subtract(pendingList.get(i));
+		}
+		size = invalidList.getSize();
+		for (int i=0; i<size; i++) {
+			Rect invalidRect = invalidList.get(i);
+			try
+			{
+				rfb.writeFramebufferUpdateRequest(invalidRect.left, invalidRect.top, invalidRect.right-invalidRect.left, invalidRect.bottom-invalidRect.top, false);
+				pendingList.add(invalidRect);
+			}
+			catch (IOException ioe)
+			{
+				//TODO Log this
+			}
 		}
 		waitingForInput=true;
+		//android.util.Log.i("LBM", "pending "+pendingList.toString() + "invalid "+invalidList.toString());
 	}
 }

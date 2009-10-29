@@ -61,6 +61,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.zip.Inflater;
 
+import android.androidVNC.VncCanvasActivity.PanMode;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -68,6 +69,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -138,6 +140,15 @@ public class VncCanvas extends ImageView {
 	private byte[] zlibBuf;
 	private int zlibBufLen = 0;
 	private Inflater zlibInflater;
+	
+	/**
+	 * Constructor used by the inflation apparatus
+	 * @param context
+	 */
+	public VncCanvas(final Context context, AttributeSet attrs)
+	{
+		super(context, attrs);
+	}
 
 	/**
 	 * Create a view showing a VNC connection
@@ -145,19 +156,18 @@ public class VncCanvas extends ImageView {
 	 * @param bean Connection settings
 	 * @param setModes Callback to run on UI thread after connection is set up
 	 */
-	public VncCanvas(final Context context, ConnectionBean bean, final Runnable setModes) {
-		super(context);
+	void initializeVncCanvas(ConnectionBean bean, final Runnable setModes) {
 		connection = bean;
 		this.pendingColorModel = COLORMODEL.valueOf(bean.getColorModel());
 
 		// Startup the RFB thread with a nifty progess dialog
-		final ProgressDialog pd = ProgressDialog.show(context, "Connecting...", "Establishing handshake.\nPlease wait...", true, true, new DialogInterface.OnCancelListener() {
+		final ProgressDialog pd = ProgressDialog.show(getContext(), "Connecting...", "Establishing handshake.\nPlease wait...", true, true, new DialogInterface.OnCancelListener() {
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				closeConnection();
 				handler.post(new Runnable() {
 					public void run() {
-						Utils.showErrorMessage(context, "VNC connection aborted!");
+						Utils.showErrorMessage(getContext(), "VNC connection aborted!");
 					}
 				});
 			}
@@ -178,7 +188,7 @@ public class VncCanvas extends ImageView {
 							pd.setMessage("Downloading first frame.\nPlease wait...");
 						}
 					});
-					processNormalProtocol(context, pd, setModes);
+					processNormalProtocol(getContext(), pd, setModes);
 				} catch (Throwable e) {
 					if (maintainConnection) {
 						Log.e(TAG, e.toString());
@@ -200,7 +210,7 @@ public class VncCanvas extends ImageView {
 							final String error_ = error;
 							handler.post(new Runnable() {
 								public void run() {
-									Utils.showFatalErrorMessage(context, error_);
+									Utils.showFatalErrorMessage(getContext(), error_);
 								}
 							});
 						}
@@ -295,6 +305,24 @@ public class VncCanvas extends ImageView {
 	public boolean isColorModel(COLORMODEL cm) {
 		return (colorModel != null) && colorModel.equals(cm);
 	}
+	
+	private void mouseFollowPan()
+	{
+		if (connection.getFollowPan() && getScaleType() != ScaleType.FIT_CENTER)
+		{
+			VncCanvasActivity activity = (VncCanvasActivity)getContext();
+			Display d = activity.getWindowManager().getDefaultDisplay();
+			int scrollx = activity.absoluteXPosition;
+			int scrolly = activity.absoluteYPosition;
+			int width = d.getWidth();
+			int height = d.getHeight();
+			if (mouseX < scrollx || mouseX >= scrollx + width || mouseY < scrolly || mouseY >= scrolly + height)
+			{
+				//Log.i(TAG,"warp to " + scrollx+width/2 + "," + scrolly + height/2);
+				warpMouse(scrollx + width/2, scrolly + height / 2);
+			}
+		}
+	}
 
 	public void processNormalProtocol(final Context context, ProgressDialog pd, final Runnable setModes) throws Exception {
 		try {
@@ -306,6 +334,7 @@ public class VncCanvas extends ImageView {
 			//
 			while (maintainConnection) {
 				bitmapData.syncScroll();
+				mouseFollowPan();
 				// Read message type from the server.
 				int msgType = rfb.readServerMessageType();
 				bitmapData.doneWaiting();

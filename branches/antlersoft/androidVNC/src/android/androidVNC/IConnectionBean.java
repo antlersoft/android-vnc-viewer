@@ -43,4 +43,6 @@ interface IConnectionBean {
 	long getMetaListId();
 	@FieldAccessor(Name="LAST_META_KEY_ID")
 	long getLastMetaKeyId();
+	@FieldAccessor(DefaultValue="0")
+	boolean getFollowPan();
 }

@@ -31,8 +31,10 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Display;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,6 +48,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView.ScaleType;
+import android.widget.ZoomControls;
 
 public class VncCanvasActivity extends Activity {
 
@@ -63,6 +66,8 @@ public class VncCanvasActivity extends Activity {
 	private boolean trackballButtonDown;
 	private static final int inputModeIds[] = { R.id.itemInputFitToScreen, R.id.itemInputMouse, R.id.itemInputPan, R.id.itemInputTouchPanTrackballMouse };
 
+	ZoomControls zoomer;
+	
 	@Override
 	public void onCreate(Bundle icicle) {
 
@@ -89,13 +94,17 @@ public class VncCanvasActivity extends Activity {
 			}
 			connection.setAddress( host.substring(0, host.indexOf(':')));
 		}
+		
+		setContentView(R.layout.canvas);
 
-		vncCanvas = new VncCanvas(this, connection, new Runnable() {
+		vncCanvas = (VncCanvas)findViewById(R.id.vnc_canvas);
+		vncCanvas.initializeVncCanvas(connection, new Runnable() {
 			public void run() {
 				setModes();
 			}
 		});
-		setContentView(vncCanvas);
+		zoomer = (ZoomControls)findViewById(R.id.zoomer);
+		zoomer.hide();
 		
 		inputHandler=getInputHandlerById(R.id.itemInputFitToScreen);
 	}
@@ -191,6 +200,11 @@ public class VncCanvasActivity extends Activity {
 	 */
 	@Override
 	protected Dialog onCreateDialog(int id) {
+		switch (id) {
+		case R.layout.entertext    :
+			return new EnterTextDialog(this);
+		}
+		// Default to meta key dialog
 		return new MetaKeyDialog(this);
 	}
 
@@ -200,7 +214,8 @@ public class VncCanvasActivity extends Activity {
 	@Override
 	protected void onPrepareDialog(int id, Dialog dialog) {
 		super.onPrepareDialog(id, dialog);
-		((MetaKeyDialog)dialog).setConnection(connection);
+		if (dialog instanceof MetaKeyDialog)
+			((MetaKeyDialog)dialog).setConnection(connection);
 	}
 
 	@Override 
@@ -238,6 +253,7 @@ public class VncCanvasActivity extends Activity {
 		}
 		updateInputMenu();
 		menu.findItem(R.id.itemFollowMouse).setChecked(connection.getFollowMouse());
+		menu.findItem(R.id.itemFollowPan).setChecked(connection.getFollowPan());
 		return true;
 	}
 	
@@ -367,6 +383,9 @@ public class VncCanvasActivity extends Activity {
 			vncCanvas.closeConnection();
 			finish();
 			return true;
+		case R.id.itemEnterText:
+			showDialog(R.layout.entertext);
+			return true;
 		case R.id.itemCtrlAltDel:
 			vncCanvas.sendMetaKey(MetaKeyBean.keyCtrlAltDel);
 			return true;
@@ -377,6 +396,12 @@ public class VncCanvasActivity extends Activity {
 			if (newFollow) {
 				panToMouse();
 			}
+			connection.save(database.getWritableDatabase());
+			return true;
+		case R.id.itemFollowPan:
+			boolean newFollowPan = ! connection.getFollowPan();
+			item.setChecked(newFollowPan);
+			connection.setFollowPan(newFollowPan);
 			connection.save(database.getWritableDatabase());
 			return true;
 		case R.id.itemArrowLeft :
@@ -617,6 +642,26 @@ public class VncCanvasActivity extends Activity {
 		return VncCanvasActivity.super.onTouchEvent(evt);		
 	}
 	
+	long hideZoomAfterMs;
+	static final long ZOOM_HIDE_DELAY_MS = 2500;
+	HideZoomRunnable hideZoomInstance = new HideZoomRunnable();
+	
+    private void showZoomer(boolean force) {
+        if (force || zoomer.getVisibility() != View.VISIBLE) {
+            zoomer.show();
+            hideZoomAfterMs = SystemClock.uptimeMillis() + ZOOM_HIDE_DELAY_MS;
+            vncCanvas.handler.postAtTime(hideZoomInstance, hideZoomAfterMs + 10);
+        }
+    }
+
+    private class HideZoomRunnable implements Runnable {
+        public void run() {
+            if (SystemClock.uptimeMillis() >= hideZoomAfterMs) {
+                zoomer.hide();
+            }
+        }
+
+    }
 	/**
 	 * Touches and dpad (trackball) pan the screen
 	 * @author Michael A. MacDonald
@@ -867,7 +912,7 @@ public class VncCanvasActivity extends Activity {
 				updateInputMenu(); 
 				return true;
 			}
-			return defaultKeyDownHandler( keyCode, evt);
+			return defaultKeyUpHandler( keyCode, evt);
 		}
 
 		/* (non-Javadoc)
