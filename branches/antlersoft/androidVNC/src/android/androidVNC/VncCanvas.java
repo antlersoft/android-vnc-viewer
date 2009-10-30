@@ -316,6 +316,7 @@ public class VncCanvas extends ImageView {
 			int scrolly = activity.absoluteYPosition;
 			int width = d.getWidth();
 			int height = d.getHeight();
+			//Log.i(TAG,"scrollx " + scrollx + " scrolly " + scrolly + " mouseX " + mouseX +" Y " + mouseY + " w " + width + " h " + height);
 			if (mouseX < scrollx || mouseX >= scrollx + width || mouseY < scrolly || mouseY >= scrolly + height)
 			{
 				//Log.i(TAG,"warp to " + scrollx+width/2 + "," + scrolly + height/2);
@@ -334,7 +335,6 @@ public class VncCanvas extends ImageView {
 			//
 			while (maintainConnection) {
 				bitmapData.syncScroll();
-				mouseFollowPan();
 				// Read message type from the server.
 				int msgType = rfb.readServerMessageType();
 				bitmapData.doneWaiting();
@@ -495,6 +495,7 @@ public class VncCanvas extends ImageView {
 	protected void onScrollChanged(int l, int t, int oldl, int oldt) {
 		super.onScrollChanged(l, t, oldl, oldt);
 		bitmapData.scrollChanged(l, t);
+		mouseFollowPan();
 	}
 
 	void handleRawRect(int x, int y, int w, int h) throws IOException {
