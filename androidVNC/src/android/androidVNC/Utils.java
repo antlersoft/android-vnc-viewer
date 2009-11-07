@@ -24,17 +24,19 @@ public class Utils {
 	}
 	
 	private static final Intent docIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://code.google.com/p/android-vnc-viewer/wiki/Documentation")); 
+
+	public static ActivityManager getActivityManager(Context context)
+	{
+		ActivityManager result = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
+		if (result == null)
+			throw new UnsupportedOperationException("Could not retrieve ActivityManager");
+		return result;
+	}
 	
 	public static MemoryInfo getMemoryInfo(Context _context) {
-		try {
-			MemoryInfo info = new MemoryInfo();
-			ActivityManager manager = (ActivityManager) _context.getSystemService(Context.ACTIVITY_SERVICE);
-			manager.getMemoryInfo(info);
-			return info;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}	
-		return null;
+		MemoryInfo info = new MemoryInfo();
+		getActivityManager(_context).getMemoryInfo(info);
+		return info;
 	}
 	
 	public static void showDocumentation(Context c) {

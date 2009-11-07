@@ -21,6 +21,12 @@ import android.graphics.Rect;
  */
 class LargeBitmapData extends AbstractBitmapData {
 	
+	/**
+	 * Multiply this times total number of pixels to get estimate of process size with all buffers plus
+	 * safety factor
+	 */
+	static final int CAPACITY_MULTIPLIER = 21;
+	
 	int xoffset;
 	int yoffset;
 	int scrolledToX;
@@ -69,15 +75,31 @@ class LargeBitmapData extends AbstractBitmapData {
 		}
 	}
 	
-	LargeBitmapData(RfbProto p, VncCanvas c, int displayWidth, int displayHeight)
+	/**
+	 * 
+	 * @param p Protocol implementation
+	 * @param c View that will display screen
+	 * @param displayWidth
+	 * @param displayHeight
+	 * @param capacity Max process heap size in bytes
+	 */
+	LargeBitmapData(RfbProto p, VncCanvas c, int displayWidth, int displayHeight, int capacity)
 	{
 		super(p,c);
 		framebufferwidth=rfb.framebufferWidth;
 		framebufferheight=rfb.framebufferHeight;
 		origwidth=displayWidth;
 		origheight=displayHeight;
-		bitmapwidth=origwidth * 2;
-		bitmapheight=origheight * 2;
+		double scaleMultiplier = Math.sqrt((double)(capacity * 1024 * 1024) / (double)(CAPACITY_MULTIPLIER * framebufferwidth * framebufferheight));
+		if (scaleMultiplier > 1)
+			scaleMultiplier = 1;
+		bitmapwidth=(int)((double)framebufferwidth * scaleMultiplier);
+		if (bitmapwidth < origwidth)
+			bitmapwidth = origwidth;
+		bitmapheight=(int)((double)framebufferheight * scaleMultiplier);
+		if (bitmapheight < origheight)
+			bitmapheight = origheight;
+		android.util.Log.i("LBM", "bitmapsize = ("+bitmapwidth+","+bitmapheight+")");
 		mbitmap = Bitmap.createBitmap(bitmapwidth, bitmapheight, Bitmap.Config.RGB_565);
 		memGraphics = new Canvas(mbitmap);
 		bitmapPixels = new int[bitmapwidth * bitmapheight];
@@ -128,44 +150,36 @@ class LargeBitmapData extends AbstractBitmapData {
 		//android.util.Log.i("LBM","scroll "+newx+" "+newy);
 		newx+=(framebufferwidth-origwidth)/2;
 		newy+=(framebufferheight-origheight)/2;
-		if ( ! ( newx-xoffset>=0 && newx-xoffset+origwidth<=bitmapwidth && newy-yoffset>=0 && newy-yoffset+origheight<=bitmapheight))
+		int newScrolledToX = scrolledToX;
+		int newScrolledToY = scrolledToY;
+		if (newx - xoffset < 0 )
 		{
-			//android.util.Log.i("LBM","scroll "+newx+" "+newy);
-			int xindex, yindex;
-			xindex = -1;
-			yindex = -1;
-			if ( newx<xoffset)
-			{
-				xindex=newx/origwidth-1;
-				if ( xindex<0)
-					xindex=0;
-			}
-			else if ( newx-xoffset+origwidth>bitmapwidth)
-			{
-				xindex=newx/origwidth;
-			}
-			if ( newy<yoffset)
-			{
-				yindex=newy/origheight-1;
-				if ( yindex<0)
-					yindex=0;
-			}
-			else if ( newy-yoffset+origheight>bitmapheight)
-			{
-				yindex=newy/origheight;
-			}
-			if ( xindex != -1)
-			{
-				scrolledToX=xindex*origwidth;
-				if ( scrolledToX+bitmapwidth>framebufferwidth)
-					scrolledToX=framebufferwidth-bitmapwidth;
-			}
-			if ( yindex != -1)
-			{
-				scrolledToY=yindex*origheight;
-				if ( scrolledToY+bitmapheight>framebufferheight)
-					scrolledToY=framebufferheight-bitmapheight;
-			}
+			newScrolledToX = newx + origwidth / 2 - bitmapwidth / 2;
+			if (newScrolledToX < 0)
+				newScrolledToX = 0;
+		}
+		else if (newx - xoffset + origwidth > bitmapwidth)
+		{
+			newScrolledToX = newx + origwidth / 2 - bitmapwidth / 2;
+			if (newScrolledToX + bitmapwidth > framebufferwidth)
+				newScrolledToX = framebufferwidth - bitmapwidth;
+		}
+		if (newy - yoffset < 0 )
+		{
+			newScrolledToY = newy + origheight / 2 - bitmapheight / 2;
+			if (newScrolledToY < 0)
+				newScrolledToY = 0;
+		}
+		else if (newy - yoffset + origheight > bitmapheight)
+		{
+			newScrolledToY = newy + origheight / 2 - bitmapheight / 2;
+			if (newScrolledToY + bitmapheight > framebufferheight)
+				newScrolledToY = framebufferheight - bitmapheight;
+		}
+		if (newScrolledToX != scrolledToX || newScrolledToY != scrolledToY)
+		{
+			scrolledToX = newScrolledToX;
+			scrolledToY = newScrolledToY;
 			if ( waitingForInput)
 				syncScroll();
 		}

@@ -77,6 +77,8 @@ import android.view.MotionEvent;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.antlersoft.android.bc.BCFactory;
+
 public class VncCanvas extends ImageView {
 	private final static String TAG = "VncCanvas";
 	private final static boolean LOCAL_LOGV = true;
@@ -278,8 +280,16 @@ public class VncCanvas extends ImageView {
 		Display display=((VncCanvasActivity)getContext()).getWindowManager().getDefaultDisplay();
 		int dx=display.getWidth();
 		int dy=display.getHeight();
-		if ((rfb.framebufferWidth > 1024 || rfb.framebufferHeight > 1024) && ! connection.getForceFull())
-			bitmapData=new LargeBitmapData(rfb,this,dx,dy);
+		boolean useCompact = connection.getForceFull();
+		int capacity = 0;
+		if (! useCompact)
+		{
+			capacity = BCFactory.getInstance().getBCActivityManager().getMemoryClass(Utils.getActivityManager(getContext()));
+			if (rfb.framebufferWidth * rfb.framebufferHeight * LargeBitmapData.CAPACITY_MULTIPLIER > capacity * 1024 * 1024)
+				useCompact = true;
+		}
+		if (useCompact)
+			bitmapData=new LargeBitmapData(rfb,this,dx,dy,capacity);
 		else
 			bitmapData=new CompactBitmapData(rfb,this);
 		mouseX=rfb.framebufferWidth/2;
