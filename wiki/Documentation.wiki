@@ -83,13 +83,15 @@ device (i.e., a G1) as a VNC controller.
 
   _Mouse @_ (Menu-M) Warps the VNC mouse to the center of the portion of the display shown on your device.
 
+  _Send Text_ (Menu-E) Opens a dialog that lets you enter a block of text that can then be sent to the server.  Useful for phones without a physical keyboard.
+
   _Color Mode_ (Menu-C) Allows you to switch the [#Connection_Configuration Color Mode] of your connection.
 
   _Pan Follows Mouse_ (Menu-F) The display will automatically pan to follow the mouse around the screen
   
+  _Mouse follow pan_ If you pan the display so the mouse moves off the visible portion of the screen, the mouse will be warped to the middle of the screen.  You can use both follow modes together.
+  
   _Disconnect_ (Menu-D) Closes the current VNC connection, returning you to the configuration page.
-
-  _Enter Text_ (Menu-E) Opens a dialog that lets you enter a block of text that can then be sent to the server.  Useful for phones without a physical keyboard.
 
   _Ctrl-Alt-Del_ (Menu-A) Sends Ctrl-Alt-Del over the VNC connection.
 

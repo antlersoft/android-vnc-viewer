@@ -12,4 +12,9 @@ You can help by:
 
   * Improving the documentation-- I know we need screen shots added to the documentation.  A wiz with wiki's?  Supply documentation patches.
 
-  * Providing translations-- Want to make the app accessible to non-english speakers?  Provide translations of the wiki pages or the app resources (Unfortunately, neither Android nor the application is not completely internationalizable yet)
+  * Providing translations-- Want to make the app accessible to non-english speakers?  Provide translations of the wiki pages or the app resources.Android apps store their user-interface elements in XML files.
+  Most user visible text is specified in the strings.xml file, so that's a good place to start.  The one you should be looking at is in Subversion at http://android-vnc-viewer.googlecode.com/svn/branches/antlersoft/androidVNC/res/values/strings.xml (You can browse the file here: http://code.google.com/p/android-vnc-viewer/source/browse/#svn/branches/antlersoft/androidVNC/res/values)      
+
+  Of course, not all the text that needs translation is in that file.  There's some English text embedded in the program source code.  The developers will have to take the lead on getting that out into the xml files where it can be properly translated.
+
+
