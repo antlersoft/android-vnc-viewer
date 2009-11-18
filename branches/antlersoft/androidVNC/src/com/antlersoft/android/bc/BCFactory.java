@@ -14,6 +14,7 @@ public class BCFactory {
 	private static BCFactory _theInstance = new BCFactory();
 	
 	private IBCActivityManager bcActivityManager;
+	private IBCGestureDetector bcGestureDetector;
 	
 	/**
 	 * This is here so checking the static doesn't get optimized away;
@@ -64,6 +65,46 @@ public class BCFactory {
 			}
 		}
 		return bcActivityManager;
+	}
+	
+	/**
+	 * Return the implementation of IBCGestureDetector appropriate for this SDK level
+	 * @return
+	 */
+	public IBCGestureDetector getBCGestureDetector()
+	{
+		if (bcGestureDetector == null)
+		{
+			synchronized (this)
+			{
+				if (bcGestureDetector == null)
+				{
+					if (getSdkVersion() >= 3)
+					{
+						try
+						{
+							bcGestureDetector = (IBCGestureDetector)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCGestureDetectorDefault").newInstance();
+						}
+						catch (Exception ie)
+						{
+							throw new RuntimeException("Error instantiating", ie);
+						}
+					}
+					else
+					{
+						try
+						{
+							bcGestureDetector = (IBCGestureDetector)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCGestureDetectorOld").newInstance();
+						}
+						catch (Exception ie)
+						{
+							throw new RuntimeException("Error instantiating", ie);
+						}
+					}
+				}
+			}
+		}
+		return bcGestureDetector;
 	}
 	
 	public static BCFactory getInstance()

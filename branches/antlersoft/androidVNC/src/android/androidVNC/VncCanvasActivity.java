@@ -30,11 +30,11 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.Display;
-import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -64,9 +64,10 @@ public class VncCanvasActivity extends Activity {
 	private AbstractInputHandler inputModeHandlers[];
 	private ConnectionBean connection;
 	private boolean trackballButtonDown;
-	private static final int inputModeIds[] = { R.id.itemInputFitToScreen, R.id.itemInputMouse, R.id.itemInputPan, R.id.itemInputTouchPanTrackballMouse };
+	private static final int inputModeIds[] = { R.id.itemInputFitToScreen, R.id.itemInputMouse, R.id.itemInputPan, R.id.itemInputTouchPanTrackballMouse, R.id.itemInputDPadPanTouchMouse };
 
 	ZoomControls zoomer;
+	Panner panner;
 	
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -105,6 +106,7 @@ public class VncCanvasActivity extends Activity {
 		});
 		zoomer = (ZoomControls)findViewById(R.id.zoomer);
 		zoomer.hide();
+		panner = new Panner(this,vncCanvas.handler);
 		
 		inputHandler=getInputHandlerById(R.id.itemInputFitToScreen);
 	}
@@ -314,6 +316,8 @@ public class VncCanvasActivity extends Activity {
 					case R.id.itemInputTouchPanTrackballMouse :
 						inputModeHandlers[i]=new TouchPanTrackballMouse();
 						break;
+					case R.id.itemInputDPadPanTouchMouse :
+						inputModeHandlers[i] = new DPadPanTouchMouseMode();
 					}
 				}
 				return inputModeHandlers[i];
@@ -349,6 +353,8 @@ public class VncCanvasActivity extends Activity {
 			return true;
 		case R.id.itemColorMode:
 			selectColorModel();
+			return true;
+		case R.id.itemZoomable:
 			return true;
 		case R.id.itemOneToOne:
 			inputHandler = getInputHandlerById(R.id.itemInputPan);
@@ -568,11 +574,22 @@ public class VncCanvasActivity extends Activity {
 	 * Pan based on touch motions
 	 * @param event
 	 */
-	private void pan(MotionEvent event) {
+	private boolean pan(MotionEvent event) {
 		float curX = event.getX();
 		float curY = event.getY();
 		int dX = (int) (panTouchX - curX);
 		int dY = (int) (panTouchY - curY);
+		
+		return pan(dX,dY);
+	}
+	
+	/**
+	 * Pan by a number of pixels (relative pan)
+	 * @param dX
+	 * @param dY
+	 * @return True if the pan changed the view (did not move view out of bounds); false otherwise
+	 */
+	boolean pan(int dX, int dY) {
 
 		// Prevent panning left or above desktop image
 		if (absoluteXPosition + dX < 0)
@@ -590,7 +607,12 @@ public class VncCanvasActivity extends Activity {
 
 		absoluteXPosition += dX;
 		absoluteYPosition += dY;
-		vncCanvas.scrollBy(dX, dY);
+		if (dX != 0 || dY != 0)
+		{
+			vncCanvas.scrollBy(dX, dY);
+			return true;
+		}
+		return false;
 	}
 
 	boolean defaultKeyDownHandler( int keyCode, KeyEvent evt)
@@ -955,6 +977,129 @@ public class VncCanvasActivity extends Activity {
 		@Override
 		public String getName() {
 			return "MOUSE";
+		}
+		
+	}
+	/**
+	 * Touch screen controls, clicks the mouse.  DPad pans the screen
+	 * @author Michael A. MacDonald
+	 *
+	 */
+	class DPadPanTouchMouseMode implements AbstractInputHandler {
+
+		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractInputHandler#onKeyDown(int, android.view.KeyEvent)
+		 */
+		@Override
+		public boolean onKeyDown(int keyCode, KeyEvent evt) {
+			int xv = 0;
+			int yv = 0;
+			boolean result=true;
+			switch (keyCode) {
+			case KeyEvent.KEYCODE_DPAD_LEFT:
+				xv = -1;
+				break;
+			case KeyEvent.KEYCODE_DPAD_RIGHT:
+				xv = 1;
+				break;
+			case KeyEvent.KEYCODE_DPAD_UP:
+				yv = -1;
+				break;
+			case KeyEvent.KEYCODE_DPAD_DOWN:
+				yv = 1;
+				break;
+			default:
+				result=defaultKeyDownHandler( keyCode, evt);
+				break;
+			}
+			if (xv != 0 || yv != 0)
+			{
+				final int x = xv;
+				final int y = yv;
+				
+				panner.start(x, y, new Panner.VelocityUpdater() {
+
+					/* (non-Javadoc)
+					 * @see android.androidVNC.Panner.VelocityUpdater#updateVelocity(android.graphics.Point, long)
+					 */
+					@Override
+					public boolean updateVelocity(Point p, long interval) {
+						if (Math.abs(p.x) < 100)
+							p.x += x;
+						if (Math.abs(p.y) < 100)
+							p.y += y;
+						return true;
+					}
+					
+				});
+				pan(x,y);
+			}
+			return result;
+		}
+
+
+		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractInputHandler#onKeyUp(int, android.view.KeyEvent)
+		 */
+		@Override
+		public boolean onKeyUp(int keyCode, KeyEvent evt) {
+			boolean result = false;
+			
+			switch (keyCode) {
+			case KeyEvent.KEYCODE_DPAD_LEFT:
+			case KeyEvent.KEYCODE_DPAD_RIGHT:
+			case KeyEvent.KEYCODE_DPAD_UP:
+			case KeyEvent.KEYCODE_DPAD_DOWN:
+				panner.stop();
+				result = true;
+				break;
+			default:
+				result=defaultKeyDownHandler( keyCode, evt);
+				break;
+			}
+			return result;
+		}
+
+		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractInputHandler#onTouchEvent(android.view.MotionEvent)
+		 */
+		@Override
+		public boolean onTouchEvent(MotionEvent event) {
+			// Mouse Pointer Control Mode
+			// Pointer event is absolute coordinates.
+
+			// Adjust coordinates for Android notification bar.
+			event.offsetLocation(0, -1f * vncCanvas.getTop());
+
+			// Adjust coordinates for panning position.
+			event.offsetLocation(absoluteXPosition, absoluteYPosition);
+			if (vncCanvas.processPointerEvent(event,true))
+				return true;
+			return VncCanvasActivity.super.onTouchEvent(event);
+		}
+
+		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractInputHandler#onTrackballEvent(android.view.MotionEvent)
+		 */
+		@Override
+		public boolean onTrackballEvent(MotionEvent evt) {
+			return false;
+		}
+
+		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractInputHandler#handlerDescription()
+		 */
+		@Override
+		public CharSequence getHandlerDescription() {
+			return getResources().getText(R.string.input_mode_dpad_pan_touchpad_mouse);
+		}
+
+		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractInputHandler#getName()
+		 */
+		@Override
+		public String getName() {
+			return "DPAD_PAN_TOUCH_MOUSE";
 		}
 		
 	}

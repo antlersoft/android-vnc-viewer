@@ -46,6 +46,8 @@ abstract class AbstractBitmapData {
 	{
 		if (vncCanvas.connection.getUseLocalCursor())
 		{
+			if (drawable==null)
+				drawable = createDrawable();
 			drawable.setCursorRect(vncCanvas.mouseX,vncCanvas.mouseY);
 			vncCanvas.invalidate(drawable.cursorRect);
 		}
