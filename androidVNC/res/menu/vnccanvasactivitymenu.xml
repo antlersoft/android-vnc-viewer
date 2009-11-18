@@ -7,6 +7,7 @@
 	    	<group android:id="@+id/groupScaling" android:checkableBehavior="single">
 	    		<item android:id="@+id/itemOneToOne" android:title="@string/one_to_one"/>
 	    		<item android:id="@+id/itemFitToScreen" android:title="@string/fit_to_screen" android:checked="true"/>
+	    		<item android:id="@+id/itemZoomable" android:title="@string/scaling_zoomable" />
 	    	</group>
     	</menu>
     </item>
@@ -17,6 +18,7 @@
 	    		<item android:id="@+id/itemInputPan" android:title="@string/input_mode_panning"/>
 	    		<item android:id="@+id/itemInputMouse" android:title="@string/input_mode_mouse"/>
 	    		<item android:id="@+id/itemInputTouchPanTrackballMouse" android:title="@string/input_mode_touchpad_pan_trackball_mouse"/>
+	    		<item android:id="@+id/itemInputDPadPanTouchMouse" android:title="@string/input_mode_dpad_pan_touchpad_mouse"/>
 	    	</group>
 	    </menu>
     </item>
