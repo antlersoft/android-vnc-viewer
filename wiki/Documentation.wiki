@@ -21,7 +21,7 @@ The bottom section of the page is where you enter your connection configurations
 
   _*Color Format*_ The client supports a number of color formats, which are specified by number of colors/number of bits per pixel.  Formats with more bits per pixel provide greater fidelity to high color depth displays, but use more bandwidth (sometimes dramatically more because they don't compress as well) and more CPU on your Android device.  Not all VNC servers support all color depths-- if you are having trouble connecting to a server, try using 8-bit (256 colors) or 24-bit color.
 
-  _*Use local mouse pointer*_ (Experimental) Some VNC servers (notably OS/X desktop sharing) will not draw the mouse pointer on the client; it's hard to use them without knowing where the mouse is.  Checking this option will cause *android-vnc-viewer* to draw a small square cursor at the mouse position (it's not the actual mouse cursor, but it's better than nothing).
+  _*Use local mouse pointer*_ Some VNC servers (notably OS/X desktop sharing) will not draw the mouse pointer on the client; it's hard to use them without knowing where the mouse is.  Checking this option will cause *android-vnc-viewer* to draw a small square cursor at the mouse position (it's not the actual mouse cursor, but it's better than nothing).
 
   _*Force full-screen bitmap*_ The VNC client requires a bitmap for it's representation of the display.  For a VNC server serving a large display, this bitmap might require more memory than Android allows in an application.  To work with these large displays, *android-vnc-client* breaks large display into smaller tiles and works with only one tile at a time.  Unfortunately, this will sometimes create some visual artifacts.  In particular, when a large display is in [#Scaling Fit to Screen] mode only a portion of it will be visible, and in [#Scaling 1:1] mode as you pan over a large display you might see different parts of the display flicker in.  *android-vnc-client* will only use tiling if it thinks the display is too large to fit in memory, but you can override this decision and always turn off tiling by checking *_Force full-screen bitmap_*.  This might cause the application to crash on connection.
 
@@ -59,6 +59,8 @@ You can switch between these modes with the _Input Mode_ (Menu-P) menu item.
   _Mouse Control Mode_ In this mode, use the touchscreen to control the mouse.  Touching the screen generates a mouse click at that point; dragging on the screen creates a mouse drag.  Keyboard events are sent as normal.  The trackball is used to send arrow-key events to the VNC server.  Pressing the trackball toggles between _Mouse Pointer Control_ and _Desktop Panning_ modes.
 
   _Touch Pan; Trackball Mouse_ In this mode, drag on the touchscreen to pan the device display over the VNC display.  Keyboard events are sent to the server.  The trackball controls the VNC mouse.  Pressing the trackball sends a mouse click; holding the ball down while rolling accomplishes a click and drag.
+
+  _DPad Pan; Touch Mouse_ In this mode, use the directional pad (available on some devices) to pan the display over the VNC display.  Touch the screen to send a mouse click; touch and slide to send a mouse drag.  Use the camera button while touching the screen to simulate a right-button click or drag.
 
 === Special Controls ===
 
