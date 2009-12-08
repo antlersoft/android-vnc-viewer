@@ -116,17 +116,10 @@ public class VncCanvasActivity extends Activity {
 	 * scaling, input mode
 	 */
 	void setModes() {
-		// If scale mode is not default
-		if ( connection.getScaleMode() != ScaleType.FIT_CENTER)
-		{
-			vncCanvas.setScaleType(connection.getScaleMode());
-			vncCanvas.scrollTo(-vncCanvas.getCenteredXOffset(),-vncCanvas.getCenteredYOffset());
-			AbstractInputHandler input = getInputHandlerByName(connection.getInputMode());
-			if (input != null) {
-				inputHandler = input;
-			}
-			updateInputMenu();
-		}
+		AbstractInputHandler handler = getInputHandlerByName(connection.getInputMode());
+		AbstractScaling.getByScaleType(connection.getScaleMode()).setScaleTypeForActivity(this);
+		this.inputHandler = handler;
+		showPanningState();
 	}
 	
 	ConnectionBean getConnection()
@@ -139,7 +132,7 @@ public class VncCanvasActivity extends Activity {
 	 */
 	void panToMouse()
 	{
-		if (! connection.getFollowMouse() || isFitToScreen())
+		if (! connection.getFollowMouse() || (vncCanvas.scaling != null && ! vncCanvas.scaling.isAbleToPan()))
 			return;
 		int x = vncCanvas.mouseX;
 		int y = vncCanvas.mouseY;
@@ -243,8 +236,7 @@ public class VncCanvasActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.vnccanvasactivitymenu, menu);
 		
-		menu.findItem(isFitToScreen() ? R.id.itemFitToScreen : R.id.itemOneToOne).setChecked(true);
-			
+		menu.findItem(vncCanvas.scaling.getId()).setChecked(true);
 		
 		Menu inputMenu = menu.findItem( R.id.itemInputMode).getSubMenu();
 		
@@ -267,29 +259,19 @@ public class VncCanvasActivity extends Activity {
 		if ( inputModeMenuItems == null ) {
 			return;
 		}
-		if ( isFitToScreen())
+		for ( MenuItem item : inputModeMenuItems)
 		{
-			for ( MenuItem item : inputModeMenuItems)
-			{
-				item.setEnabled(false);
-				if ( item.getItemId()==R.id.itemInputFitToScreen)
-					item.setChecked(true);
-			}
-		}
-		else
-		{
-			for ( MenuItem item : inputModeMenuItems)
-			{
-				int id=item.getItemId();
-				item.setEnabled( id!=R.id.itemInputFitToScreen);
-				if (inputHandler == getInputHandlerById(id))
-				{
-					item.setChecked(true);
-				}
-			}
+			item.setEnabled(vncCanvas.scaling.isValidInputMode(item.getItemId()));
+			if (getInputHandlerById(item.getItemId()) == inputHandler)
+				item.setChecked(true);
 		}
 	}
 	
+	/**
+	 * If id represents an input handler, return that; otherwise return null
+	 * @param id
+	 * @return
+	 */
 	AbstractInputHandler getInputHandlerById( int id)
 	{
 		if ( inputModeHandlers==null)
@@ -357,29 +339,12 @@ public class VncCanvasActivity extends Activity {
 		case R.id.itemZoomable:
 			return true;
 		case R.id.itemOneToOne:
-			inputHandler = getInputHandlerById(R.id.itemInputPan);
-			item.setChecked(true);
+			AbstractScaling.getById(item.getItemId()).setScaleTypeForActivity(this);
 			showPanningState();
-			// Change to 1:1 scaling (which auto-centers)
-			vncCanvas.setScaleType(ScaleType.CENTER);
-			connection.setScaleMode(ScaleType.CENTER);
-			updateInputMenu();
-			// Reset the pan position to (0,0)
-			vncCanvas.scrollTo(-vncCanvas.getCenteredXOffset(),-vncCanvas.getCenteredYOffset());
-			connection.setInputMode(inputHandler.getName());
-			connection.save(database.getWritableDatabase());
 			return true;
 		case R.id.itemFitToScreen:
-			inputHandler = getInputHandlerById(R.id.itemInputFitToScreen);
-			item.setChecked(true);
-			vncCanvas.setScaleType(ScaleType.FIT_CENTER);
-			connection.setScaleMode(ScaleType.FIT_CENTER);
-			absoluteXPosition = 0;
-			absoluteYPosition = 0;
-			updateInputMenu();
-			vncCanvas.scrollTo(absoluteXPosition, absoluteYPosition);
-			connection.setInputMode(inputHandler.getName());
-			connection.save(database.getWritableDatabase());
+			AbstractScaling.getById(item.getItemId()).setScaleTypeForActivity(this);
+			showPanningState();
 			return true;
 		case R.id.itemCenterMouse:
 			Display display=getWindowManager().getDefaultDisplay();
@@ -498,10 +463,6 @@ public class VncCanvasActivity extends Activity {
 
 	public void showPanningState() {
 		Toast.makeText(this, inputHandler.getHandlerDescription(), Toast.LENGTH_SHORT).show();
-	}
-
-	private boolean isFitToScreen() {
-		return vncCanvas.getScaleType() == ScaleType.FIT_CENTER;
 	}
 
 	/* (non-Javadoc)
