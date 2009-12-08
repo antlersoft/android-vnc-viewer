@@ -83,6 +83,8 @@ public class VncCanvas extends ImageView {
 	private final static String TAG = "VncCanvas";
 	private final static boolean LOCAL_LOGV = true;
 	
+	AbstractScaling scaling;
+	
 	// Available to activity
 	int mouseX, mouseY;
 	
@@ -318,7 +320,7 @@ public class VncCanvas extends ImageView {
 	
 	private void mouseFollowPan()
 	{
-		if (connection.getFollowPan() && getScaleType() != ScaleType.FIT_CENTER)
+		if (connection.getFollowPan() && scaling.isAbleToPan())
 		{
 			VncCanvasActivity activity = (VncCanvasActivity)getContext();
 			Display d = activity.getWindowManager().getDefaultDisplay();
