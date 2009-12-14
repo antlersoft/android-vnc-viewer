@@ -30,7 +30,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.graphics.Point;
+import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
@@ -47,10 +47,128 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ImageView.ScaleType;
 import android.widget.ZoomControls;
 
 public class VncCanvasActivity extends Activity {
+
+	/**
+	 * @author Michael A. MacDonald
+	 */
+	class ZoomInputHandler extends AbstractGestureInputHandler {
+
+		/**
+		 * @param c
+		 */
+		ZoomInputHandler() {
+			super(VncCanvasActivity.this);
+		}
+
+		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractInputHandler#getHandlerDescription()
+		 */
+		@Override
+		public CharSequence getHandlerDescription() {
+			return getResources().getString(R.string.input_mode_touch_pan_zoom_mouse);
+		}
+
+		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractInputHandler#getName()
+		 */
+		@Override
+		public String getName() {
+			return "TOUCH_ZOOM_MODE";
+		}
+
+		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractInputHandler#onKeyDown(int, android.view.KeyEvent)
+		 */
+		@Override
+		public boolean onKeyDown(int keyCode, KeyEvent evt) {
+			return defaultKeyDownHandler(keyCode, evt);
+		}
+
+		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractInputHandler#onKeyUp(int, android.view.KeyEvent)
+		 */
+		@Override
+		public boolean onKeyUp(int keyCode, KeyEvent evt) {
+			return defaultKeyUpHandler(keyCode, evt);
+		}
+
+		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractInputHandler#onTrackballEvent(android.view.MotionEvent)
+		 */
+		@Override
+		public boolean onTrackballEvent(MotionEvent evt) {
+			return trackballMouse(evt);
+		}
+
+		/* (non-Javadoc)
+		 * @see android.view.GestureDetector.SimpleOnGestureListener#onDown(android.view.MotionEvent)
+		 */
+		@Override
+		public boolean onDown(MotionEvent e) {
+			panner.stop();
+			return true;
+		}
+
+		/* (non-Javadoc)
+		 * @see android.view.GestureDetector.SimpleOnGestureListener#onFling(android.view.MotionEvent, android.view.MotionEvent, float, float)
+		 */
+		@Override
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+				float velocityY) {
+			showZoomer(false);
+			panner.start(-(int)(velocityX/4.0), -(int)(velocityY/4.0),
+					new Panner.VelocityUpdater() {
+				
+						/* (non-Javadoc)
+						 * @see android.androidVNC.Panner.VelocityUpdater#updateVelocity(android.graphics.Point, long)
+						 */
+						@Override
+						public boolean updateVelocity(PointF p, long interval) {
+							double scale = Math.pow(0.8, interval/50.0);
+							p.x *= scale;
+							p.y *= scale;
+							return (Math.abs(p.x) > 0.5 || Math.abs(p.y) > 0.5);
+						}
+				
+			});
+			return true;
+		}
+
+		/* (non-Javadoc)
+		 * @see android.view.GestureDetector.SimpleOnGestureListener#onLongPress(android.view.MotionEvent)
+		 */
+		@Override
+		public void onLongPress(MotionEvent e) {
+			// TODO Auto-generated method stub
+			super.onLongPress(e);
+		}
+
+		/* (non-Javadoc)
+		 * @see android.view.GestureDetector.SimpleOnGestureListener#onScroll(android.view.MotionEvent, android.view.MotionEvent, float, float)
+		 */
+		@Override
+		public boolean onScroll(MotionEvent e1, MotionEvent e2,
+				float distanceX, float distanceY) {
+			showZoomer(false);
+			return pan((int)distanceX, (int)distanceY);
+		}
+
+		/* (non-Javadoc)
+		 * @see android.view.GestureDetector.SimpleOnGestureListener#onSingleTapConfirmed(android.view.MotionEvent)
+		 */
+		@Override
+		public boolean onSingleTapConfirmed(MotionEvent e) {
+			// Adjust coordinates for panning position.
+			e.offsetLocation(absoluteXPosition, absoluteYPosition);
+			vncCanvas.processPointerEvent(e,true);
+			e.setAction(MotionEvent.ACTION_UP);
+			return vncCanvas.processPointerEvent(e, false);
+		}
+
+	}
 
 	private final static String TAG = "VncCanvasActivity";
 
@@ -64,7 +182,7 @@ public class VncCanvasActivity extends Activity {
 	private AbstractInputHandler inputModeHandlers[];
 	private ConnectionBean connection;
 	private boolean trackballButtonDown;
-	private static final int inputModeIds[] = { R.id.itemInputFitToScreen, R.id.itemInputMouse, R.id.itemInputPan, R.id.itemInputTouchPanTrackballMouse, R.id.itemInputDPadPanTouchMouse };
+	private static final int inputModeIds[] = { R.id.itemInputFitToScreen, R.id.itemInputMouse, R.id.itemInputPan, R.id.itemInputTouchPanTrackballMouse, R.id.itemInputDPadPanTouchMouse, R.id.itemInputTouchPanZoomMouse };
 
 	ZoomControls zoomer;
 	Panner panner;
@@ -106,6 +224,30 @@ public class VncCanvasActivity extends Activity {
 		});
 		zoomer = (ZoomControls)findViewById(R.id.zoomer);
 		zoomer.hide();
+		zoomer.setOnZoomInClickListener(new View.OnClickListener() {
+
+			/* (non-Javadoc)
+			 * @see android.view.View.OnClickListener#onClick(android.view.View)
+			 */
+			@Override
+			public void onClick(View v) {
+				vncCanvas.scaling.zoomIn(VncCanvasActivity.this);
+				
+			}
+			
+		});
+		zoomer.setOnZoomOutClickListener(new View.OnClickListener() {
+
+			/* (non-Javadoc)
+			 * @see android.view.View.OnClickListener#onClick(android.view.View)
+			 */
+			@Override
+			public void onClick(View v) {
+				vncCanvas.scaling.zoomOut(VncCanvasActivity.this);
+				
+			}
+			
+		});
 		panner = new Panner(this,vncCanvas.handler);
 		
 		inputHandler=getInputHandlerById(R.id.itemInputFitToScreen);
@@ -300,6 +442,10 @@ public class VncCanvasActivity extends Activity {
 						break;
 					case R.id.itemInputDPadPanTouchMouse :
 						inputModeHandlers[i] = new DPadPanTouchMouseMode();
+						break;
+					case R.id.itemInputTouchPanZoomMouse :
+						inputModeHandlers[i] = new ZoomInputHandler();
+						break;
 					}
 				}
 				return inputModeHandlers[i];
@@ -337,6 +483,8 @@ public class VncCanvasActivity extends Activity {
 			selectColorModel();
 			return true;
 		case R.id.itemZoomable:
+			AbstractScaling.getById(item.getItemId()).setScaleTypeForActivity(this);
+			showPanningState();
 			return true;
 		case R.id.itemOneToOne:
 			AbstractScaling.getById(item.getItemId()).setScaleTypeForActivity(this);
@@ -609,13 +757,15 @@ public class VncCanvasActivity extends Activity {
 		return true;		
 	}
 	
+	private static int convertTrackballDelta(double delta)
+	{
+		return (int)Math.pow(Math.abs(delta) * 6.01, 2.5) * (delta < 0.0 ? -1 : 1);
+	}
+	
 	boolean trackballMouse( MotionEvent evt)
 	{
-		int dx = (int)(evt.getX() * 6.01);
-		int dy = (int)(evt.getY() * 6.01);
-		
-		dx = dx * dx * dx;
-		dy = dy * dy * dy;
+		int dx = convertTrackballDelta(evt.getX());
+		int dy = convertTrackballDelta(evt.getY());
 		
 		evt.offsetLocation( vncCanvas.mouseX + dx - evt.getX(), vncCanvas.mouseY + dy - evt.getY());
 		
@@ -947,6 +1097,8 @@ public class VncCanvasActivity extends Activity {
 	 *
 	 */
 	class DPadPanTouchMouseMode implements AbstractInputHandler {
+		
+		private boolean isPanning;
 
 		/* (non-Javadoc)
 		 * @see android.androidVNC.AbstractInputHandler#onKeyDown(int, android.view.KeyEvent)
@@ -973,22 +1125,23 @@ public class VncCanvasActivity extends Activity {
 				result=defaultKeyDownHandler( keyCode, evt);
 				break;
 			}
-			if (xv != 0 || yv != 0)
+			if ((xv != 0 || yv != 0) && ! isPanning)
 			{
 				final int x = xv;
 				final int y = yv;
-				
+				isPanning = true;
 				panner.start(x, y, new Panner.VelocityUpdater() {
 
 					/* (non-Javadoc)
 					 * @see android.androidVNC.Panner.VelocityUpdater#updateVelocity(android.graphics.Point, long)
 					 */
 					@Override
-					public boolean updateVelocity(Point p, long interval) {
-						if (Math.abs(p.x) < 100)
-							p.x += x;
-						if (Math.abs(p.y) < 100)
-							p.y += y;
+					public boolean updateVelocity(PointF p, long interval) {
+						double scale = (2.0 * (double)interval / 50.0);
+						if (Math.abs(p.x) < 500)
+							p.x += (int)(scale * x);
+						if (Math.abs(p.y) < 500)
+							p.y += (int)(scale * y);
 						return true;
 					}
 					
@@ -1012,6 +1165,7 @@ public class VncCanvasActivity extends Activity {
 			case KeyEvent.KEYCODE_DPAD_UP:
 			case KeyEvent.KEYCODE_DPAD_DOWN:
 				panner.stop();
+				isPanning = false;
 				result = true;
 				break;
 			default:
