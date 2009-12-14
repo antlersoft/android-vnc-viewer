@@ -3,11 +3,7 @@
  */
 package android.androidVNC;
 
-import android.androidVNC.VncCanvasActivity.DPadPanTouchMouseMode;
-import android.androidVNC.VncCanvasActivity.FitToScreenMode;
-import android.androidVNC.VncCanvasActivity.MouseMode;
-import android.androidVNC.VncCanvasActivity.PanMode;
-import android.androidVNC.VncCanvasActivity.TouchPanTrackballMouse;
+import android.view.MotionEvent;
 import android.widget.ImageView;
 
 /**
@@ -41,7 +37,7 @@ abstract class AbstractScaling {
 						scalings[i]=new OneToOneScaling();
 						break;
 					case R.id.itemZoomable :
-						//scalings[i]=new ZoomableScaling();
+						scalings[i]=new ZoomScaling();
 						break;
 					}
 				}
@@ -50,6 +46,9 @@ abstract class AbstractScaling {
 		}
 		throw new IllegalArgumentException("Unknown scaling id " + id);
 	}
+	
+	void zoomIn(VncCanvasActivity activity) {}
+	void zoomOut(VncCanvasActivity activity) {}
 	
 	static AbstractScaling getByScaleType(ImageView.ScaleType scaleType)
 	{
@@ -71,8 +70,6 @@ abstract class AbstractScaling {
 		this.scaleType = scaleType;
 	}
 	
-	
-	
 	/**
 	 * 
 	 * @return Id corresponding to menu item that sets this scale type
@@ -88,6 +85,7 @@ abstract class AbstractScaling {
 	 */
 	void setScaleTypeForActivity(VncCanvasActivity activity)
 	{
+		activity.zoomer.hide();
 		activity.vncCanvas.scaling = this;
 		activity.vncCanvas.setScaleType(scaleType);
 		activity.getConnection().setScaleMode(scaleType);

@@ -3,9 +3,10 @@
  */
 package android.androidVNC;
 
-import android.graphics.Point;
+import android.graphics.PointF;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.util.Log;
 
 /**
  * Handles panning the screen continuously over a period of time
@@ -15,9 +16,11 @@ class Panner implements Runnable {
 	
 	private VncCanvasActivity activity;
 	private Handler handler;
-	private Point velocity;
+	private PointF velocity;
 	private long lastSent;
 	private VelocityUpdater updater;
+	
+	private static final String TAG = "PANNER";
 	
 	/**
 	 * Specify how the panning velocity changes over time
@@ -25,12 +28,12 @@ class Panner implements Runnable {
 	 */
 	interface VelocityUpdater {
 		/**
-		 * Called approximately every 20 ms to update the velocity of panning
+		 * Called approximately every 50 ms to update the velocity of panning
 		 * @param p X and Y components to update
 		 * @param interval Milliseconds since last update
 		 * @return False if the panning should stop immediately; true otherwise
 		 */
-		boolean updateVelocity(Point p, long interval);
+		boolean updateVelocity(PointF p, long interval);
 	}
 
 	static class DefaultUpdater implements VelocityUpdater {
@@ -41,7 +44,7 @@ class Panner implements Runnable {
 		 * Don't change velocity
 		 */
 		@Override
-		public boolean updateVelocity(Point p, long interval) {
+		public boolean updateVelocity(PointF p, long interval) {
 			return true;
 		}
 		
@@ -49,7 +52,7 @@ class Panner implements Runnable {
 	
 	Panner(VncCanvasActivity act, Handler hand) {
 		activity = act;
-		velocity = new Point();
+		velocity = new PointF();
 		handler = hand;
 	}
 	
@@ -58,15 +61,17 @@ class Panner implements Runnable {
 		handler.removeCallbacks(this);
 	}
 	
-	void start(int xv, int yv, VelocityUpdater update)
+	void start(float xv, float yv, VelocityUpdater update)
 	{
 		if (update == null)
 			update = DefaultUpdater.instance;
 		updater = update;
 		velocity.x = xv;
 		velocity.y = yv;
+		Log.v(TAG, String.format("pan start %f %f", velocity.x, velocity.y));
+		lastSent = SystemClock.uptimeMillis();
 		
-		handler.postDelayed(this, 20);
+		handler.postDelayed(this, 50);
 	}
 	
 	/* (non-Javadoc)
@@ -76,18 +81,25 @@ class Panner implements Runnable {
 	public void run() {
 		long interval = SystemClock.uptimeMillis() - lastSent;
 		lastSent += interval;
-		double scale = (double)interval / 20.0;
+		double scale = (double)interval / 50.0;
+		Log.v(TAG, String.format("panning %f %d %d", scale, (int)((double)velocity.x * scale), (int)((double)velocity.y * scale)));
 		if ( activity.pan((int)((double)velocity.x * scale), (int)((double)velocity.y * scale)))
 		{
 			if (updater.updateVelocity(velocity, interval))
 			{
-				handler.postDelayed(this, 20);
+				handler.postDelayed(this, 50);
 			}
 			else
+			{
+				Log.v(TAG, "Updater requests stop");
 				stop();
+			}
 		}
 		else
+		{
+			Log.v(TAG, "Panning failed");
 			stop();
+		}
 	}
 
 }
