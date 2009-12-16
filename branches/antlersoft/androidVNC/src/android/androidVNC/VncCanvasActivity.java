@@ -23,6 +23,8 @@ package android.androidVNC;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 
+import com.antlersoft.android.bc.BCFactory;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ContentValues;
@@ -55,6 +57,12 @@ public class VncCanvasActivity extends Activity {
 	 * @author Michael A. MacDonald
 	 */
 	class ZoomInputHandler extends AbstractGestureInputHandler {
+		
+		/**
+		 * In drag mode (entered with long press) you process mouse events
+		 * without sending them through the gesture detector
+		 */
+		private boolean dragMode;
 
 		/**
 		 * @param c
@@ -119,7 +127,7 @@ public class VncCanvasActivity extends Activity {
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 				float velocityY) {
 			showZoomer(false);
-			panner.start(-(int)(velocityX/4.0), -(int)(velocityY/4.0),
+			panner.start(-(velocityX/(float)6.0), -(velocityY/(float)6.0),
 					new Panner.VelocityUpdater() {
 				
 						/* (non-Javadoc)
@@ -138,11 +146,39 @@ public class VncCanvasActivity extends Activity {
 		}
 
 		/* (non-Javadoc)
+		 * @see android.androidVNC.AbstractGestureInputHandler#onTouchEvent(android.view.MotionEvent)
+		 */
+		@Override
+		public boolean onTouchEvent(MotionEvent e) {
+			if (dragMode)
+			{
+				float scale = vncCanvas.getScale();
+				// Adjust coordinates for Android notification bar.
+				e.offsetLocation(0, -1f * vncCanvas.getTop());
+
+				e.setLocation(absoluteXPosition + e.getX() / scale, absoluteYPosition + e.getY() / scale);
+				if (e.getAction() == MotionEvent.ACTION_UP)
+					dragMode = false;
+				return vncCanvas.processPointerEvent(e, true);
+			}
+			else
+				return super.onTouchEvent(e);
+		}
+
+		/* (non-Javadoc)
 		 * @see android.view.GestureDetector.SimpleOnGestureListener#onLongPress(android.view.MotionEvent)
 		 */
 		@Override
 		public void onLongPress(MotionEvent e) {
 			showZoomer(true);
+			BCFactory.getInstance().getBCHaptic().performLongPressHaptic(vncCanvas);
+			float scale = vncCanvas.getScale();
+			dragMode = true;
+			// Adjust coordinates for Android notification bar.
+			e.offsetLocation(0, -1f * vncCanvas.getTop());
+
+			e.setLocation(absoluteXPosition + e.getX() / scale, absoluteYPosition + e.getY() / scale);
+			vncCanvas.processPointerEvent(e,true);
 		}
 
 		/* (non-Javadoc)
@@ -160,12 +196,32 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent e) {
-			// Adjust coordinates for panning position.
-			Log.v(TAG, String.format("tap at %f,%f", e.getX(), e.getY()));
-			e.offsetLocation(absoluteXPosition, absoluteYPosition);
+			//Log.v(TAG, String.format("tap at %f,%f", e.getX(), e.getY()));
+			float scale = vncCanvas.getScale();
+			
+			// Adjust coordinates for Android notification bar.
+			e.offsetLocation(0, -1f * vncCanvas.getTop());
+
+			e.setLocation(absoluteXPosition + e.getX() / scale, absoluteYPosition + e.getY() / scale);
 			vncCanvas.processPointerEvent(e,true);
 			e.setAction(MotionEvent.ACTION_UP);
 			return vncCanvas.processPointerEvent(e, false);
+		}
+
+		/* (non-Javadoc)
+		 * @see android.view.GestureDetector.SimpleOnGestureListener#onDoubleTap(android.view.MotionEvent)
+		 */
+		@Override
+		public boolean onDoubleTap(MotionEvent e) {
+			float scale = vncCanvas.getScale();
+			
+			// Adjust coordinates for Android notification bar.
+			e.offsetLocation(0, -1f * vncCanvas.getTop());
+
+			e.setLocation(absoluteXPosition + e.getX() / scale, absoluteYPosition + e.getY() / scale);
+			vncCanvas.processPointerEvent(e,true,true);
+			e.setAction(MotionEvent.ACTION_UP);
+			return vncCanvas.processPointerEvent(e, false,true);
 		}
 
 	}
@@ -282,56 +338,48 @@ public class VncCanvasActivity extends Activity {
 		int x = vncCanvas.mouseX;
 		int y = vncCanvas.mouseY;
 		boolean panned = false;
-		int w = vncCanvas.getWidth();
-		int h = vncCanvas.getHeight();
-		AbstractBitmapData bitmapData = vncCanvas.bitmapData;
+		int w = vncCanvas.getVisibleWidth();
+		int h = vncCanvas.getVisibleHeight();
+		int iw = vncCanvas.getImageWidth();
+		int ih = vncCanvas.getImageHeight();
 		
 		int newX = absoluteXPosition;
 		int newY = absoluteYPosition;
 		
-		if (x - newX >= w)
+		if (x - newX >= (9 * w) / 10)
 		{
 			newX = x - w/2;
-			if (newX + w > bitmapData.framebufferwidth)
-				newX = bitmapData.framebufferwidth - w;
+			if (newX + w > iw)
+				newX = iw - w;
 		}
-		else if (x < newX)
+		else if (x < newX + w / 10)
 		{
 			newX = x - w/2;
 			if (newX < 0)
 				newX = 0;
 		}
 		if ( newX != absoluteXPosition ) {
-			
-			newX = newX - absoluteXPosition;
-			absoluteXPosition += newX;
-			panned = true;
-		} else {
-			newX = 0;
+			absoluteXPosition = newX;
 		}
-		if (y - newY >= h)
+		if (y - newY >= (9 * h) / 10)
 		{
 			newY = y - h/2;
-			if (newY + h > bitmapData.framebufferheight)
-				newY = bitmapData.framebufferheight - h;
+			if (newY + h > ih)
+				newY = ih - h;
 		}
-		else if (y < newY)
+		else if (y < newY + h / 10)
 		{
 			newY = y - h/2;
 			if (newY < 0)
 				newY = 0;
 		}
 		if ( newY != absoluteYPosition ) {
-			newY = newY - absoluteYPosition;;
-			absoluteYPosition += newY;
+			absoluteYPosition = newY;
 			panned = true;
-		}
-		else {
-			newY = 0;
 		}
 		if (panned)
 		{
-			vncCanvas.scrollBy(newX, newY);
+			vncCanvas.scrollToAbsolute(absoluteXPosition, absoluteYPosition);
 		}
 	}
 	

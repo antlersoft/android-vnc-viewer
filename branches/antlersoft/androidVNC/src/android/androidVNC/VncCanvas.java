@@ -323,8 +323,8 @@ public class VncCanvas extends ImageView {
 			VncCanvasActivity activity = (VncCanvasActivity)getContext();
 			int scrollx = activity.absoluteXPosition;
 			int scrolly = activity.absoluteYPosition;
-			int width = getWidth();
-			int height = getHeight();
+			int width = getVisibleWidth();
+			int height = getVisibleHeight();
 			//Log.i(TAG,"scrollx " + scrollx + " scrolly " + scrolly + " mouseX " + mouseX +" Y " + mouseY + " w " + width + " h " + height);
 			if (mouseX < scrollx || mouseX >= scrollx + width || mouseY < scrolly || mouseY >= scrolly + height)
 			{
@@ -674,12 +674,25 @@ public class VncCanvas extends ImageView {
 	 * @param downEvent True if "mouse button" (touch or trackball button) is down when this happens
 	 * @return true if event was actually sent
 	 */
-	public boolean processPointerEvent(MotionEvent evt,boolean downEvent) {
+	public boolean processPointerEvent(MotionEvent evt,boolean downEvent)
+	{
+		return processPointerEvent(evt,downEvent,cameraButtonDown);
+	}
+	
+	/**
+	 * Convert a motion event to a format suitable for sending over the wire
+	 * @param evt motion event; x and y must already have been converted from screen coordinates
+	 * to remote frame buffer coordinates.
+	 * @param downEvent True if "mouse button" (touch or trackball button) is down when this happens
+	 * @param useRightButton If true, event is interpreted as happening with right mouse button
+	 * @return true if event was actually sent
+	 */
+	public boolean processPointerEvent(MotionEvent evt,boolean downEvent,boolean useRightButton) {
 		if (rfb != null && rfb.inNormalProtocol) {
 		    int modifiers = evt.getMetaState();
 
 		    if (evt.getAction() == MotionEvent.ACTION_DOWN || (downEvent && evt.getAction() == MotionEvent.ACTION_MOVE)) {
-		      if (cameraButtonDown) {
+		      if (useRightButton) {
 		        pointerMask = MOUSE_BUTTON_RIGHT;
 //		      } else if ((modifiers & KeyEvent.META_SYM_ON) != 0) {
 //		        pointerMask = mask3;
