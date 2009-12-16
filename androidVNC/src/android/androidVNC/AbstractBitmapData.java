@@ -54,6 +54,24 @@ abstract class AbstractBitmapData {
 	}
 	
 	/**
+	 * 
+	 * @return The smallest scale supported by the implementation; the scale at which
+	 * the bitmap would be smaller than the screen
+	 */
+	float getMinimumScale()
+	{
+		double scale = 0.75;
+		int displayWidth = vncCanvas.getWidth();
+		int displayHeight = vncCanvas.getHeight();
+		for (; scale >= 0; scale -= 0.25)
+		{
+			if (scale * bitmapwidth < displayWidth || scale * bitmapheight < displayHeight)
+				break;
+		}
+		return (float)(scale + 0.25);
+	}
+	
+	/**
 	 * Send a request through the protocol to get the data for the currently held bitmap
 	 * @param incremental True if we want incremental update; false for full update
 	 */
@@ -128,8 +146,8 @@ abstract class AbstractBitmapData {
 	 * <p>
 	 * This method is called in the UI thread-- it updates internal status, but does
 	 * not change the bitmap data or send a network request until syncScroll is called
-	 * @param newx Position of left edge of visible part
-	 * @param newy Position of right edge of visible part
+	 * @param newx Position of left edge of visible part in full-frame coordinates
+	 * @param newy Position of right edge of visible part in full-frame coordinates
 	 */
 	abstract void scrollChanged( int newx, int newy);
 	

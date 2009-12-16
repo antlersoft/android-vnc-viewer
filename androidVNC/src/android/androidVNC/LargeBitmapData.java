@@ -31,8 +31,6 @@ class LargeBitmapData extends AbstractBitmapData {
 	int yoffset;
 	int scrolledToX;
 	int scrolledToY;
-	int origwidth;
-	int origheight;
 	private Rect bitmapRect;
 	private Paint defaultPaint;
 	private RectList invalidList;
@@ -88,17 +86,15 @@ class LargeBitmapData extends AbstractBitmapData {
 		super(p,c);
 		framebufferwidth=rfb.framebufferWidth;
 		framebufferheight=rfb.framebufferHeight;
-		origwidth=displayWidth;
-		origheight=displayHeight;
 		double scaleMultiplier = Math.sqrt((double)(capacity * 1024 * 1024) / (double)(CAPACITY_MULTIPLIER * framebufferwidth * framebufferheight));
 		if (scaleMultiplier > 1)
 			scaleMultiplier = 1;
 		bitmapwidth=(int)((double)framebufferwidth * scaleMultiplier);
-		if (bitmapwidth < origwidth)
-			bitmapwidth = origwidth;
+		if (bitmapwidth < displayWidth)
+			bitmapwidth = displayWidth;
 		bitmapheight=(int)((double)framebufferheight * scaleMultiplier);
-		if (bitmapheight < origheight)
-			bitmapheight = origheight;
+		if (bitmapheight < displayHeight)
+			bitmapheight = displayHeight;
 		android.util.Log.i("LBM", "bitmapsize = ("+bitmapwidth+","+bitmapheight+")");
 		mbitmap = Bitmap.createBitmap(bitmapwidth, bitmapheight, Bitmap.Config.RGB_565);
 		memGraphics = new Canvas(mbitmap);
@@ -148,31 +144,31 @@ class LargeBitmapData extends AbstractBitmapData {
 	@Override
 	synchronized void scrollChanged(int newx, int newy) {
 		//android.util.Log.i("LBM","scroll "+newx+" "+newy);
-		newx+=(framebufferwidth-origwidth)/2;
-		newy+=(framebufferheight-origheight)/2;
 		int newScrolledToX = scrolledToX;
 		int newScrolledToY = scrolledToY;
+		int visibleWidth = vncCanvas.getVisibleWidth();
+		int visibleHeight = vncCanvas.getVisibleHeight();
 		if (newx - xoffset < 0 )
 		{
-			newScrolledToX = newx + origwidth / 2 - bitmapwidth / 2;
+			newScrolledToX = newx + visibleWidth / 2 - bitmapwidth / 2;
 			if (newScrolledToX < 0)
 				newScrolledToX = 0;
 		}
-		else if (newx - xoffset + origwidth > bitmapwidth)
+		else if (newx - xoffset + visibleWidth > bitmapwidth)
 		{
-			newScrolledToX = newx + origwidth / 2 - bitmapwidth / 2;
+			newScrolledToX = newx + visibleWidth / 2 - bitmapwidth / 2;
 			if (newScrolledToX + bitmapwidth > framebufferwidth)
 				newScrolledToX = framebufferwidth - bitmapwidth;
 		}
 		if (newy - yoffset < 0 )
 		{
-			newScrolledToY = newy + origheight / 2 - bitmapheight / 2;
+			newScrolledToY = newy + visibleHeight / 2 - bitmapheight / 2;
 			if (newScrolledToY < 0)
 				newScrolledToY = 0;
 		}
-		else if (newy - yoffset + origheight > bitmapheight)
+		else if (newy - yoffset + visibleHeight > bitmapheight)
 		{
-			newScrolledToY = newy + origheight / 2 - bitmapheight / 2;
+			newScrolledToY = newy + visibleHeight / 2 - bitmapheight / 2;
 			if (newScrolledToY + bitmapheight > framebufferheight)
 				newScrolledToY = framebufferheight - bitmapheight;
 		}

@@ -142,8 +142,7 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public void onLongPress(MotionEvent e) {
-			// TODO Auto-generated method stub
-			super.onLongPress(e);
+			showZoomer(true);
 		}
 
 		/* (non-Javadoc)
@@ -162,6 +161,7 @@ public class VncCanvasActivity extends Activity {
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent e) {
 			// Adjust coordinates for panning position.
+			Log.v(TAG, String.format("tap at %f,%f", e.getX(), e.getY()));
 			e.offsetLocation(absoluteXPosition, absoluteYPosition);
 			vncCanvas.processPointerEvent(e,true);
 			e.setAction(MotionEvent.ACTION_UP);
@@ -217,12 +217,13 @@ public class VncCanvasActivity extends Activity {
 		setContentView(R.layout.canvas);
 
 		vncCanvas = (VncCanvas)findViewById(R.id.vnc_canvas);
+		zoomer = (ZoomControls)findViewById(R.id.zoomer);
+
 		vncCanvas.initializeVncCanvas(connection, new Runnable() {
 			public void run() {
 				setModes();
 			}
 		});
-		zoomer = (ZoomControls)findViewById(R.id.zoomer);
 		zoomer.hide();
 		zoomer.setOnZoomInClickListener(new View.OnClickListener() {
 
@@ -231,6 +232,7 @@ public class VncCanvasActivity extends Activity {
 			 */
 			@Override
 			public void onClick(View v) {
+				showZoomer(true);
 				vncCanvas.scaling.zoomIn(VncCanvasActivity.this);
 				
 			}
@@ -243,6 +245,7 @@ public class VncCanvasActivity extends Activity {
 			 */
 			@Override
 			public void onClick(View v) {
+				showZoomer(true);
 				vncCanvas.scaling.zoomOut(VncCanvasActivity.this);
 				
 			}
@@ -279,9 +282,8 @@ public class VncCanvasActivity extends Activity {
 		int x = vncCanvas.mouseX;
 		int y = vncCanvas.mouseY;
 		boolean panned = false;
-		Display display = getWindowManager().getDefaultDisplay();
-		int w = display.getWidth();
-		int h = display.getHeight();
+		int w = vncCanvas.getWidth();
+		int h = vncCanvas.getHeight();
 		AbstractBitmapData bitmapData = vncCanvas.bitmapData;
 		
 		int newX = absoluteXPosition;
@@ -300,6 +302,7 @@ public class VncCanvasActivity extends Activity {
 				newX = 0;
 		}
 		if ( newX != absoluteXPosition ) {
+			
 			newX = newX - absoluteXPosition;
 			absoluteXPosition += newX;
 			panned = true;
@@ -467,6 +470,10 @@ public class VncCanvasActivity extends Activity {
 		return result;
 	}
 
+	/**
+	 * Position of the top left portion of the <i>visible</i> part of the screen, in
+	 * full-frame coordinates
+	 */
 	int absoluteXPosition = 0, absoluteYPosition = 0;
 
 	@Override
@@ -495,8 +502,7 @@ public class VncCanvasActivity extends Activity {
 			showPanningState();
 			return true;
 		case R.id.itemCenterMouse:
-			Display display=getWindowManager().getDefaultDisplay();
-			vncCanvas.warpMouse( absoluteXPosition + display.getWidth()/2, absoluteYPosition + display.getHeight()/2);
+			vncCanvas.warpMouse( absoluteXPosition + vncCanvas.getWidth()/2, absoluteYPosition + vncCanvas.getHeight()/2);
 			return true;
 		case R.id.itemDisconnect:
 			vncCanvas.closeConnection();
@@ -699,26 +705,29 @@ public class VncCanvasActivity extends Activity {
 	 * @return True if the pan changed the view (did not move view out of bounds); false otherwise
 	 */
 	boolean pan(int dX, int dY) {
-
-		// Prevent panning left or above desktop image
-		if (absoluteXPosition + dX < 0)
+		
+		double scale = vncCanvas.getScale();
+		
+		double sX = (double)dX / scale;
+		double sY = (double)dY / scale;
+		
+		if (absoluteXPosition + sX < 0)
 			// dX = diff to 0
-			dX = absoluteXPosition * -1;
-		if (absoluteYPosition + dY < 0)
-			// dY = diff to 0
-			dY = absoluteYPosition * -1;
+			sX = -absoluteXPosition;
+		if (absoluteYPosition + sY < 0)
+			sY = -absoluteYPosition;
 
 		// Prevent panning right or below desktop image
-		if (absoluteXPosition + vncCanvas.getWidth() + dX > vncCanvas.getImageWidth())
-			dX = 0;
-		if (absoluteYPosition + vncCanvas.getHeight() + dY > vncCanvas.getImageHeight())
-			dY = 0;
+		if (absoluteXPosition + vncCanvas.getVisibleWidth() + sX > vncCanvas.getImageWidth())
+			sX = vncCanvas.getImageWidth() - vncCanvas.getVisibleWidth() - absoluteXPosition;
+		if (absoluteYPosition + vncCanvas.getVisibleHeight() + sY > vncCanvas.getImageHeight())
+			sY = vncCanvas.getImageHeight() - vncCanvas.getVisibleHeight() - absoluteYPosition;
 
-		absoluteXPosition += dX;
-		absoluteYPosition += dY;
-		if (dX != 0 || dY != 0)
+		absoluteXPosition += sX;
+		absoluteYPosition += sY;
+		if (sX != 0.0 || sY != 0.0)
 		{
-			vncCanvas.scrollBy(dX, dY);
+			vncCanvas.scrollToAbsolute(absoluteXPosition,absoluteYPosition);
 			return true;
 		}
 		return false;
