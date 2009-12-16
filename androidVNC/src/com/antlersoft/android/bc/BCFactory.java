@@ -15,6 +15,7 @@ public class BCFactory {
 	
 	private IBCActivityManager bcActivityManager;
 	private IBCGestureDetector bcGestureDetector;
+	private IBCHaptic bcHaptic;
 	
 	/**
 	 * This is here so checking the static doesn't get optimized away;
@@ -107,6 +108,51 @@ public class BCFactory {
 		return bcGestureDetector;
 	}
 	
+	/**
+	 * Return the implementation of IBCHaptic appropriate for this SDK level
+	 * @return
+	 */
+	public IBCHaptic getBCHaptic()
+	{
+		if (bcHaptic == null)
+		{
+			synchronized (this)
+			{
+				if (bcHaptic == null)
+				{
+					if (getSdkVersion() >= 3)
+					{
+						try
+						{
+							bcHaptic = (IBCHaptic)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCHapticDefault").newInstance();
+						}
+						catch (Exception ie)
+						{
+							throw new RuntimeException("Error instantiating", ie);
+						}
+					}
+					else
+					{
+						try
+						{
+							bcHaptic = (IBCHaptic)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCHapticOld").newInstance();
+						}
+						catch (Exception ie)
+						{
+							throw new RuntimeException("Error instantiating", ie);
+						}
+					}
+				}
+			}
+		}
+		return bcHaptic;
+	}
+	
+	/**
+	 * Returns the only instance of this class, which manages the SDK specific interface
+	 * implementations
+	 * @return Factory instance
+	 */
 	public static BCFactory getInstance()
 	{
 		return _theInstance;
