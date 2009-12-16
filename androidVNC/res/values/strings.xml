@@ -28,8 +28,8 @@
 <string name="input_mode_mouse">Mouse Pointer Control Mode</string>
 <string name="input_mode_panning">Desktop Panning Mode</string>
 <string name="input_mode_touchpad_pan_trackball_mouse">Touch Pan; Trackball Mouse</string>
-<string name="input_mode_dpad_pan_touchpad_mouse">Touch Mouse, D-Pad Pan</string>
-<string name="input_mode_touch_pan_zoom_mouse">Touch Mouse, Pan Zoom</string>
+<string name="input_mode_dpad_pan_touchpad_mouse">Touch Mouse; D-Pad Pan</string>
+<string name="input_mode_touch_pan_zoom_mouse">Touch Mouse Pan and Zoom</string>
 <string name="keep_password_button">Keep</string>
 <string name="keys_caption">Keys</string>
 <string name="list_caption">List</string>
@@ -46,7 +46,7 @@
 <string name="port_caption">Port</string>
 <string name="save_as_copy">Save as Copy</string>
 <string name="scaling">Scaling</string>
-<string name="scaling_zoomable">Zoomable (not working)</string>
+<string name="scaling_zoomable">Zoomable</string>
 <!-- Send selected metakey -->
 <string name="send_button">Send</string>
 <string name="send_key_again">Send Key Again</string>
