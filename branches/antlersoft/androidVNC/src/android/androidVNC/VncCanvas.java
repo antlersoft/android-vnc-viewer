@@ -61,7 +61,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.zip.Inflater;
 
-import android.androidVNC.VncCanvasActivity.PanMode;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -71,13 +70,13 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.antlersoft.android.bc.BCFactory;
+
 
 public class VncCanvas extends ImageView {
 	private final static String TAG = "VncCanvas";
@@ -279,9 +278,8 @@ public class VncCanvas extends ImageView {
 		Log.i(TAG, "Desktop name is " + rfb.desktopName);
 		Log.i(TAG, "Desktop size is " + rfb.framebufferWidth + " x " + rfb.framebufferHeight);
 
-		Display display=((VncCanvasActivity)getContext()).getWindowManager().getDefaultDisplay();
-		int dx=display.getWidth();
-		int dy=display.getHeight();
+		int dx=getWidth();
+		int dy=getHeight();
 		boolean useCompact = connection.getForceFull();
 		int capacity = 0;
 		if (! useCompact)
@@ -323,11 +321,10 @@ public class VncCanvas extends ImageView {
 		if (connection.getFollowPan() && scaling.isAbleToPan())
 		{
 			VncCanvasActivity activity = (VncCanvasActivity)getContext();
-			Display d = activity.getWindowManager().getDefaultDisplay();
 			int scrollx = activity.absoluteXPosition;
 			int scrolly = activity.absoluteYPosition;
-			int width = d.getWidth();
-			int height = d.getHeight();
+			int width = getWidth();
+			int height = getHeight();
 			//Log.i(TAG,"scrollx " + scrollx + " scrolly " + scrolly + " mouseX " + mouseX +" Y " + mouseY + " w " + width + " h " + height);
 			if (mouseX < scrollx || mouseX >= scrollx + width || mouseY < scrolly || mouseY >= scrolly + height)
 			{
@@ -500,13 +497,40 @@ public class VncCanvas extends ImageView {
 		}
 	}
 
+	/**
+	 * f(x,s) is a function that returns the coordinate in screen/scroll space corresponding
+	 * to the coordinate x in full-frame space with scaling s.
+	 * 
+	 * This function returns the difference between f(x,s1) and f(x,s2)
+	 * 
+	 * f(x,s) = (x - i/2) * s + ((i - w)/2)) * s
+	 *        = s (x - i/2 + i/2 + w/2)
+	 *        = s (x + w/2)
+	 * 
+	 * 
+	 * f(x,s) = (x - ((i - w)/2)) * s
+	 * @param oldscaling
+	 * @param scaling
+	 * @param imageDim
+	 * @param windowDim
+	 * @param offset
+	 * @return
+	 */
+	void scrollToAbsolute(int x, int y)
+	{
+		float scale = getScale();
+		scrollTo((int)((x + ((float)getWidth() - getImageWidth()) / 2 ) * scale),
+				(int)((y + ((float)getHeight() - getImageHeight()) / 2 ) * scale));
+	}
+
 	/* (non-Javadoc)
 	 * @see android.view.View#onScrollChanged(int, int, int, int)
 	 */
 	@Override
 	protected void onScrollChanged(int l, int t, int oldl, int oldt) {
 		super.onScrollChanged(l, t, oldl, oldt);
-		bitmapData.scrollChanged(l, t);
+		VncCanvasActivity activity = (VncCanvasActivity)getContext();
+		bitmapData.scrollChanged(activity.absoluteXPosition, activity.absoluteYPosition);
 		mouseFollowPan();
 	}
 
@@ -778,6 +802,21 @@ public class VncCanvas extends ImageView {
 			}
 		}
 	}
+	
+	float getScale()
+	{
+		if (scaling == null)
+			return 1;
+		return scaling.getScale();
+	}
+	
+	public int getVisibleWidth() {
+		return (int)((double)getWidth() / getScale() + 0.5);
+	}
+
+	public int getVisibleHeight() {
+		return (int)((double)getHeight() / getScale() + 0.5);
+	}
 
 	public int getImageWidth() {
 		return bitmapData.framebufferwidth;
@@ -786,7 +825,7 @@ public class VncCanvas extends ImageView {
 	public int getImageHeight() {
 		return bitmapData.framebufferheight;
 	}
-
+	
 	public int getCenteredXOffset() {
 		int xoffset = (bitmapData.framebufferwidth - getWidth()) / 2;
 		return xoffset;

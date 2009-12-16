@@ -68,7 +68,7 @@ class Panner implements Runnable {
 		updater = update;
 		velocity.x = xv;
 		velocity.y = yv;
-		Log.v(TAG, String.format("pan start %f %f", velocity.x, velocity.y));
+		//Log.v(TAG, String.format("pan start %f %f", velocity.x, velocity.y));
 		lastSent = SystemClock.uptimeMillis();
 		
 		handler.postDelayed(this, 50);
@@ -82,7 +82,7 @@ class Panner implements Runnable {
 		long interval = SystemClock.uptimeMillis() - lastSent;
 		lastSent += interval;
 		double scale = (double)interval / 50.0;
-		Log.v(TAG, String.format("panning %f %d %d", scale, (int)((double)velocity.x * scale), (int)((double)velocity.y * scale)));
+		//Log.v(TAG, String.format("panning %f %d %d", scale, (int)((double)velocity.x * scale), (int)((double)velocity.y * scale)));
 		if ( activity.pan((int)((double)velocity.x * scale), (int)((double)velocity.y * scale)))
 		{
 			if (updater.updateVelocity(velocity, interval))
@@ -91,13 +91,13 @@ class Panner implements Runnable {
 			}
 			else
 			{
-				Log.v(TAG, "Updater requests stop");
+				//Log.v(TAG, "Updater requests stop");
 				stop();
 			}
 		}
 		else
 		{
-			Log.v(TAG, "Panning failed");
+			//Log.v(TAG, "Panning failed");
 			stop();
 		}
 	}

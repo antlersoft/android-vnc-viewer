@@ -47,6 +47,8 @@ abstract class AbstractScaling {
 		throw new IllegalArgumentException("Unknown scaling id " + id);
 	}
 	
+	float getScale() { return 1; }
+	
 	void zoomIn(VncCanvasActivity activity) {}
 	void zoomOut(VncCanvasActivity activity) {}
 	
