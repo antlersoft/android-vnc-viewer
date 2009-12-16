@@ -41,4 +41,14 @@ public class TestBCFactory extends TestCase {
 			fail("Unexpected class for "+getSdkVersion()+" "+ibc.getClass().getName());
 	}
 
+	/**
+	 * Test method for {@link com.antlersoft.android.bc.BCFactory#getBCGestureDetector()}.
+	 */
+	public void testGetBCGestureDetector() {
+		IBCGestureDetector ibc=BCFactory.getInstance().getBCGestureDetector();
+		if ((getSdkVersion()<3 && ! ibc.getClass().getName().equals("com.antlersoft.android.bc.BCGestureDetectorOld") )||
+				(getSdkVersion()>=3 && ! ibc.getClass().getName().equals("com.antlersoft.android.bc.BCGestureDetectorDefault")))
+			fail("Unexpected class for "+getSdkVersion()+" "+ibc.getClass().getName());
+	}
+
 }
