@@ -83,7 +83,7 @@ class Panner implements Runnable {
 		lastSent += interval;
 		double scale = (double)interval / 50.0;
 		//Log.v(TAG, String.format("panning %f %d %d", scale, (int)((double)velocity.x * scale), (int)((double)velocity.y * scale)));
-		if ( activity.pan((int)((double)velocity.x * scale), (int)((double)velocity.y * scale)))
+		if ( activity.vncCanvas.pan((int)((double)velocity.x * scale), (int)((double)velocity.y * scale)))
 		{
 			if (updater.updateVelocity(velocity, interval))
 			{

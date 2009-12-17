@@ -61,6 +61,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.zip.Inflater;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -144,6 +145,12 @@ public class VncCanvas extends ImageView {
 	private int zlibBufLen = 0;
 	private Inflater zlibInflater;
 	
+	/**
+	 * Position of the top left portion of the <i>visible</i> part of the screen, in
+	 * full-frame coordinates
+	 */
+	int absoluteXPosition = 0, absoluteYPosition = 0;
+
 	/**
 	 * Constructor used by the inflation apparatus
 	 * @param context
@@ -320,9 +327,8 @@ public class VncCanvas extends ImageView {
 	{
 		if (connection.getFollowPan() && scaling.isAbleToPan())
 		{
-			VncCanvasActivity activity = (VncCanvasActivity)getContext();
-			int scrollx = activity.absoluteXPosition;
-			int scrolly = activity.absoluteYPosition;
+			int scrollx = absoluteXPosition;
+			int scrolly = absoluteYPosition;
 			int width = getVisibleWidth();
 			int height = getVisibleHeight();
 			//Log.i(TAG,"scrollx " + scrollx + " scrolly " + scrolly + " mouseX " + mouseX +" Y " + mouseY + " w " + width + " h " + height);
@@ -469,6 +475,25 @@ public class VncCanvas extends ImageView {
 			rfb.close();
 		}
 	}
+	
+	/**
+	 * Apply scroll offset and scaling to convert touch-space coordinates to the corresponding
+	 * point on the full frame.
+	 * @param e MotionEvent with the original, touch space coordinates.  This event is altered in place.
+	 * @return e -- The same event passed in, with the coordinates mapped
+	 */
+	MotionEvent changeTouchCoordinatesToFullFrame(MotionEvent e)
+	{
+		//Log.v(TAG, String.format("tap at %f,%f", e.getX(), e.getY()));
+		float scale = getScale();
+		
+		// Adjust coordinates for Android notification bar.
+		e.offsetLocation(0, -1f * getTop());
+
+		e.setLocation(absoluteXPosition + e.getX() / scale, absoluteYPosition + e.getY() / scale);
+		
+		return e;
+	}
 
 	public void onDestroy() {
 		Log.v(TAG, "Cleaning up resources");
@@ -516,11 +541,101 @@ public class VncCanvas extends ImageView {
 	 * @param offset
 	 * @return
 	 */
-	void scrollToAbsolute(int x, int y)
+	void scrollToAbsolute()
 	{
 		float scale = getScale();
-		scrollTo((int)((x + ((float)getWidth() - getImageWidth()) / 2 ) * scale),
-				(int)((y + ((float)getHeight() - getImageHeight()) / 2 ) * scale));
+		scrollTo((int)((absoluteXPosition + ((float)getWidth() - getImageWidth()) / 2 ) * scale),
+				(int)((absoluteYPosition + ((float)getHeight() - getImageHeight()) / 2 ) * scale));
+	}
+
+	/**
+	 * Make sure mouse is visible on displayable part of screen
+	 */
+	void panToMouse()
+	{
+		if (! connection.getFollowMouse() || (scaling != null && ! scaling.isAbleToPan()))
+			return;
+		int x = mouseX;
+		int y = mouseY;
+		boolean panned = false;
+		int w = getVisibleWidth();
+		int h = getVisibleHeight();
+		int iw = getImageWidth();
+		int ih = getImageHeight();
+		
+		int newX = absoluteXPosition;
+		int newY = absoluteYPosition;
+		
+		if (x - newX >= (9 * w) / 10)
+		{
+			newX = x - w/2;
+			if (newX + w > iw)
+				newX = iw - w;
+		}
+		else if (x < newX + w / 10)
+		{
+			newX = x - w/2;
+			if (newX < 0)
+				newX = 0;
+		}
+		if ( newX != absoluteXPosition ) {
+			absoluteXPosition = newX;
+		}
+		if (y - newY >= (9 * h) / 10)
+		{
+			newY = y - h/2;
+			if (newY + h > ih)
+				newY = ih - h;
+		}
+		else if (y < newY + h / 10)
+		{
+			newY = y - h/2;
+			if (newY < 0)
+				newY = 0;
+		}
+		if ( newY != absoluteYPosition ) {
+			absoluteYPosition = newY;
+			panned = true;
+		}
+		if (panned)
+		{
+			scrollToAbsolute();
+		}
+	}
+	
+	/**
+	 * Pan by a number of pixels (relative pan)
+	 * @param dX
+	 * @param dY
+	 * @return True if the pan changed the view (did not move view out of bounds); false otherwise
+	 */
+	boolean pan(int dX, int dY) {
+		
+		double scale = getScale();
+		
+		double sX = (double)dX / scale;
+		double sY = (double)dY / scale;
+		
+		if (absoluteXPosition + sX < 0)
+			// dX = diff to 0
+			sX = -absoluteXPosition;
+		if (absoluteYPosition + sY < 0)
+			sY = -absoluteYPosition;
+
+		// Prevent panning right or below desktop image
+		if (absoluteXPosition + getVisibleWidth() + sX > getImageWidth())
+			sX = getImageWidth() - getVisibleWidth() - absoluteXPosition;
+		if (absoluteYPosition + getVisibleHeight() + sY > getImageHeight())
+			sY = getImageHeight() - getVisibleHeight() - absoluteYPosition;
+
+		absoluteXPosition += sX;
+		absoluteYPosition += sY;
+		if (sX != 0.0 || sY != 0.0)
+		{
+			scrollToAbsolute();
+			return true;
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)
@@ -529,8 +644,7 @@ public class VncCanvas extends ImageView {
 	@Override
 	protected void onScrollChanged(int l, int t, int oldl, int oldt) {
 		super.onScrollChanged(l, t, oldl, oldt);
-		VncCanvasActivity activity = (VncCanvasActivity)getContext();
-		bitmapData.scrollChanged(activity.absoluteXPosition, activity.absoluteYPosition);
+		bitmapData.scrollChanged(absoluteXPosition, absoluteYPosition);
 		mouseFollowPan();
 	}
 
@@ -716,7 +830,7 @@ public class VncCanvas extends ImageView {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		    ((VncCanvasActivity)getContext()).panToMouse();
+		    panToMouse();
 			return true;
 		}
 		return false;

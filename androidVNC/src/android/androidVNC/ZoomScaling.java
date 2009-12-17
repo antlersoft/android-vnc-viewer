@@ -60,8 +60,8 @@ class ZoomScaling extends AbstractScaling {
 	 */
 	private void resolveZoom(VncCanvasActivity activity)
 	{
-		activity.vncCanvas.scrollToAbsolute(activity.absoluteXPosition,activity.absoluteYPosition);
-		activity.pan(0,0);
+		activity.vncCanvas.scrollToAbsolute();
+		activity.vncCanvas.pan(0,0);
 	}
 	
 	/* (non-Javadoc)
