@@ -23,7 +23,7 @@
   out and to have the very latest bleeding edge version, download
   development versions from here in Google Code.  We'll try
   and allow upgrades with the development version.  The development versions
-  are not certificate-compatible with the Market versions, so
+  are now certificate-compatible with the Market versions, so
   you won't have to uninstall to go from one to the other.
 
 == 2. It says the installation failed, and now I can't even access the old version! ==
