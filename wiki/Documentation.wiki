@@ -19,7 +19,7 @@ The bottom section of the page is where you enter your connection configurations
 
   _*Port*_ Here you should enter the port number of the VNC server.  This field will default to the first VNC port number, 5900.
 
-  _*Color Format*_ The client supports a number of color formats, which are specified by number of colors/number of bits per pixel.  Formats with more bits per pixel provide greater fidelity to high color depth displays, but use more bandwidth (sometimes dramatically more because they don't compress as well) and more CPU on your Android device.  Not all VNC servers support all color depths-- if you are having trouble connecting to a server, try using 8-bit (256 colors) or 24-bit color.
+  _*Color Format*_ The client supports a number of color formats, which are specified by number of colors/number of bits per pixel.  Formats with more bits per pixel provide greater fidelity to high color depth displays, but use more bandwidth (sometimes dramatically more because they don't compress as well) and more CPU on your Android device.  Not all VNC servers support all color depths; OS/X Remote Desktop for example requires 24-bit color.  If you are having trouble connecting, try another color depth.
 
   _*Use local mouse pointer*_ Some VNC servers (notably OS/X desktop sharing) will not draw the mouse pointer on the client; it's hard to use them without knowing where the mouse is.  Checking this option will cause *android-vnc-viewer* to draw a small square cursor at the mouse position (it's not the actual mouse cursor, but it's better than nothing).
 
@@ -38,12 +38,14 @@ generously-sized screen.  Because the Android device lacks these,
 
 === Scaling ===
 
-The served display can be shown on the Android device in two modes.  You
+The served display can be shown on the Android device in three modes.  You
 can switch between the modes with the _Scaling_ (Menu-Z) menu item.
 
-  _Fit to Screen_ mode scales the full display so it will fit on the device screen.  On connection, the screen starts in _Fit to Screen_ mode.
+  _Zoomable_ is the default mode with the latest version of *android-vnc-viewer*.  It allows you to select one of a number of zoom levels on the fly, so you can see more of your screen or zoom in for more accurate touch control.  To some extent it supercedes the other modes, but it will use slightly more battery power.
 
   _1:1_ mode shows the display with pixels mapped one-to-one.  Typically, only a portion of the served display will show on the Android device; you can pan around the display with the device controls.
+
+  _Fit to Screen_ mode scales the full display so it will fit on the device screen.  This doesn't work properly with large displays, since the phone can't fit them all into its memory.
 
 === Input Modes ===
 
@@ -52,13 +54,15 @@ to the VNC display, to enable a style of interaction most convenient for the app
 you are using.
 You can switch between these modes with the _Input Mode_ (Menu-P) menu item.
 
+  _Touch Mouse Pan and Zoom_ This is the default input mode and is designed to work like the Android browser.  You can both pan the display and control the mouse using the touchscreen and gestures. You pan by dragging or flicking on the touchscreen; you click the mouse by tapping on it. You right-click by double-tapping (or by holding down the camera button while tapping). You drag the mouse by doing a long press on the display, and then dragging.  In this mode the trackball (if your phone has one) can also be used to control the mouse; this may give you finer control.
+
   _No Pan; Trackball Mouse_ This mode is only available in [#Scaling Fit to Screen] scaling and is the only input mode available then.  In this mode the touchscreen is not used.  Keyboard events are sent to the server and the trackball (if your device, like the G1, has a trackball) controls the VNC mouse.
 
   _Desktop Panning Mode_ In this mode, both the touchscreen and the trackball are used to pan the device display over the larger VNC display.  Keyboard events are sent to the server.  Pressing the trackball toggles between _Desktop Panning_ and _Mouse Pointer Control_ modes.
 
   _Mouse Control Mode_ In this mode, use the touchscreen to control the mouse.  Touching the screen generates a mouse click at that point; dragging on the screen creates a mouse drag.  Keyboard events are sent as normal.  The trackball is used to send arrow-key events to the VNC server.  Pressing the trackball toggles between _Mouse Pointer Control_ and _Desktop Panning_ modes.
 
-  _Touch Pan; Trackball Mouse_ In this mode, drag on the touchscreen to pan the device display over the VNC display.  Keyboard events are sent to the server.  The trackball controls the VNC mouse.  Pressing the trackball sends a mouse click; holding the ball down while rolling accomplishes a click and drag.
+  _Touch Pan; Trackball Mouse_ In this mode, drag on the touchscreen to pan the device display over the VNC display.  Keyboard events are sent to the server.  The trackball controls the VNC mouse.  Pressing the trackball sends a mouse click; holding the ball down while rolling accomplishes a click and drag.  This is the default input mode when scaling is set to One-to-One.
 
   _DPad Pan; Touch Mouse_ In this mode, use the directional pad (available on some devices) to pan the display over the VNC display.  Touch the screen to send a mouse click; touch and slide to send a mouse drag.  Use the camera button while touching the screen to simulate a right-button click or drag.
 
@@ -67,7 +71,7 @@ You can switch between these modes with the _Input Mode_ (Menu-P) menu item.
 Some special controls try to make up for missing features of an Android
 device (i.e., a G1) as a VNC controller.
 
-  * To use the right mouse button, hold down the *Camera* button while clicking as appropriate for the selected input mode (touching the screen or clicking the trackball)
+  * To use the right mouse button, hold down the *Camera* button while clicking as appropriate for the selected input mode (touching the screen or clicking the trackball).  If your phone has no dedicated camera button, you can send a right click by double-tapping or with the [#Special_Keys _Send Keys_] menu item.
 
   * To send the _Esc_ key, press the *Back* button on the device.
 

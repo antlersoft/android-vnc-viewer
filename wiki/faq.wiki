@@ -22,15 +22,13 @@
   losing your settings.  If you want to help get the bugs
   out and to have the very latest bleeding edge version, download
   development versions from here in Google Code.  We'll try
-  and allow upgrades with the development version, but you may have
-  to uninstall from version to version, losing your settings.
-  When switching from the
-  development version to the market version (or back) you will
-  always have to Uninstall.
+  and allow upgrades with the development version.  The development versions
+  are not certificate-compatible with the Market versions, so
+  you won't have to uninstall to go from one to the other.
 
 == 2. It says the installation failed, and now I can't even access the old version! ==
 
-  It is safest to Uninstall the android-vnc-viewer before installing
+  This problem should only happen with very old versions of the software.  Yo may need toUninstall the android-vnc-viewer before installing
   a new development version.  Upgrade installations may not work.  An
   upgrade installation that fails will leave you unable to run the old
   version or install a new one-- We've found that if you re-install the
@@ -55,12 +53,15 @@
 
 == 5. I'm having trouble with connecting to Apple Remote Desktop on OS/X. ==
 
-  I don't have a Mac to test with, but *android-vnc-viewer*
+  The *android-vnc-viewer*
   does connect to Apple Remote Desktop on OS/X.  The default color
   depth (64-colors) does not work, so you will have to configure
-  for 24-bit color before you connect (I'm not sure if 256 colors works).
+  for 24-bit color before you connect.
 
   You will also need to turn on "Local mouse pointer".
+
+  The viewer does not seem to always update properly when working with medium or
+  large Mac screens.  I'm still looking at this issue.
 
 == 6. How do I right click, or send special keys? ==
 
@@ -115,6 +116,6 @@
 == 10. My phone doesn't have buttons that Android VNC expects!  What do I do? ==
   You can use the [Documentation#Special_Keys Send Keys] menu item to send just about any keystroke or mouse click that you want.  It might not be convenient, but it will get the job done.
 
-  We are adding a new menu item for phones that lack physical keyboards that will provide a text box where you can bring up the soft keyboard, type some text, and then have that text sent to the phone.  This should support all the keys on the soft keyboard, including the Enter key, and will work with phones where you can't pull up the keyboard with a long press on Menu.  This is currently available only in the development version.
+  There is a menu item _Send Text_ for phones that lack physical keyboards that will provide a text box where you can bring up the soft keyboard, type some text, and then have that text sent to the phone.  This should support all the keys on the soft keyboard, including the Enter key, and will work with phones where you can't pull up the keyboard with a long press on Menu.
 
   If you have a phone with other needs that Android VNC doesn't cover, please submit (or add to an existing) bug report on the issues page.
