@@ -48,7 +48,7 @@ class FitToScreenScaling extends AbstractScaling {
 	@Override
 	void setScaleTypeForActivity(VncCanvasActivity activity) {
 		super.setScaleTypeForActivity(activity);
-		activity.absoluteXPosition = activity.absoluteYPosition = 0;
+		activity.vncCanvas.absoluteXPosition = activity.vncCanvas.absoluteYPosition = 0;
 		activity.vncCanvas.scrollTo(0, 0);
 	}
 

@@ -84,7 +84,7 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public String getName() {
-			return "TOUCH_ZOOM_MODE";
+			return TOUCH_ZOOM_MODE;
 		}
 
 		/* (non-Javadoc)
@@ -152,11 +152,7 @@ public class VncCanvasActivity extends Activity {
 		public boolean onTouchEvent(MotionEvent e) {
 			if (dragMode)
 			{
-				float scale = vncCanvas.getScale();
-				// Adjust coordinates for Android notification bar.
-				e.offsetLocation(0, -1f * vncCanvas.getTop());
-
-				e.setLocation(absoluteXPosition + e.getX() / scale, absoluteYPosition + e.getY() / scale);
+				vncCanvas.changeTouchCoordinatesToFullFrame(e);
 				if (e.getAction() == MotionEvent.ACTION_UP)
 					dragMode = false;
 				return vncCanvas.processPointerEvent(e, true);
@@ -172,13 +168,8 @@ public class VncCanvasActivity extends Activity {
 		public void onLongPress(MotionEvent e) {
 			showZoomer(true);
 			BCFactory.getInstance().getBCHaptic().performLongPressHaptic(vncCanvas);
-			float scale = vncCanvas.getScale();
 			dragMode = true;
-			// Adjust coordinates for Android notification bar.
-			e.offsetLocation(0, -1f * vncCanvas.getTop());
-
-			e.setLocation(absoluteXPosition + e.getX() / scale, absoluteYPosition + e.getY() / scale);
-			vncCanvas.processPointerEvent(e,true);
+			vncCanvas.processPointerEvent(vncCanvas.changeTouchCoordinatesToFullFrame(e),true);
 		}
 
 		/* (non-Javadoc)
@@ -188,7 +179,7 @@ public class VncCanvasActivity extends Activity {
 		public boolean onScroll(MotionEvent e1, MotionEvent e2,
 				float distanceX, float distanceY) {
 			showZoomer(false);
-			return pan((int)distanceX, (int)distanceY);
+			return vncCanvas.pan((int)distanceX, (int)distanceY);
 		}
 
 		/* (non-Javadoc)
@@ -196,13 +187,7 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent e) {
-			//Log.v(TAG, String.format("tap at %f,%f", e.getX(), e.getY()));
-			float scale = vncCanvas.getScale();
-			
-			// Adjust coordinates for Android notification bar.
-			e.offsetLocation(0, -1f * vncCanvas.getTop());
-
-			e.setLocation(absoluteXPosition + e.getX() / scale, absoluteYPosition + e.getY() / scale);
+			vncCanvas.changeTouchCoordinatesToFullFrame(e);
 			vncCanvas.processPointerEvent(e,true);
 			e.setAction(MotionEvent.ACTION_UP);
 			return vncCanvas.processPointerEvent(e, false);
@@ -213,12 +198,7 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public boolean onDoubleTap(MotionEvent e) {
-			float scale = vncCanvas.getScale();
-			
-			// Adjust coordinates for Android notification bar.
-			e.offsetLocation(0, -1f * vncCanvas.getTop());
-
-			e.setLocation(absoluteXPosition + e.getX() / scale, absoluteYPosition + e.getY() / scale);
+			vncCanvas.changeTouchCoordinatesToFullFrame(e);
 			vncCanvas.processPointerEvent(e,true,true);
 			e.setAction(MotionEvent.ACTION_UP);
 			return vncCanvas.processPointerEvent(e, false,true);
@@ -326,61 +306,6 @@ public class VncCanvasActivity extends Activity {
 	ConnectionBean getConnection()
 	{
 		return connection;
-	}
-	
-	/**
-	 * Make sure mouse is visible on displayable part of screen
-	 */
-	void panToMouse()
-	{
-		if (! connection.getFollowMouse() || (vncCanvas.scaling != null && ! vncCanvas.scaling.isAbleToPan()))
-			return;
-		int x = vncCanvas.mouseX;
-		int y = vncCanvas.mouseY;
-		boolean panned = false;
-		int w = vncCanvas.getVisibleWidth();
-		int h = vncCanvas.getVisibleHeight();
-		int iw = vncCanvas.getImageWidth();
-		int ih = vncCanvas.getImageHeight();
-		
-		int newX = absoluteXPosition;
-		int newY = absoluteYPosition;
-		
-		if (x - newX >= (9 * w) / 10)
-		{
-			newX = x - w/2;
-			if (newX + w > iw)
-				newX = iw - w;
-		}
-		else if (x < newX + w / 10)
-		{
-			newX = x - w/2;
-			if (newX < 0)
-				newX = 0;
-		}
-		if ( newX != absoluteXPosition ) {
-			absoluteXPosition = newX;
-		}
-		if (y - newY >= (9 * h) / 10)
-		{
-			newY = y - h/2;
-			if (newY + h > ih)
-				newY = ih - h;
-		}
-		else if (y < newY + h / 10)
-		{
-			newY = y - h/2;
-			if (newY < 0)
-				newY = 0;
-		}
-		if ( newY != absoluteYPosition ) {
-			absoluteYPosition = newY;
-			panned = true;
-		}
-		if (panned)
-		{
-			vncCanvas.scrollToAbsolute(absoluteXPosition, absoluteYPosition);
-		}
 	}
 	
 	/* (non-Javadoc)
@@ -518,12 +443,6 @@ public class VncCanvasActivity extends Activity {
 		return result;
 	}
 
-	/**
-	 * Position of the top left portion of the <i>visible</i> part of the screen, in
-	 * full-frame coordinates
-	 */
-	int absoluteXPosition = 0, absoluteYPosition = 0;
-
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		vncCanvas.afterMenu = true;
@@ -550,7 +469,7 @@ public class VncCanvasActivity extends Activity {
 			showPanningState();
 			return true;
 		case R.id.itemCenterMouse:
-			vncCanvas.warpMouse( absoluteXPosition + vncCanvas.getWidth()/2, absoluteYPosition + vncCanvas.getHeight()/2);
+			vncCanvas.warpMouse( vncCanvas.absoluteXPosition + vncCanvas.getVisibleWidth()/2, vncCanvas.absoluteYPosition + vncCanvas.getVisibleHeight()/2);
 			return true;
 		case R.id.itemDisconnect:
 			vncCanvas.closeConnection();
@@ -567,7 +486,7 @@ public class VncCanvasActivity extends Activity {
 			item.setChecked(newFollow);
 			connection.setFollowMouse(newFollow);
 			if (newFollow) {
-				panToMouse();
+				vncCanvas.panToMouse();
 			}
 			connection.save(database.getWritableDatabase());
 			return true;
@@ -743,44 +662,9 @@ public class VncCanvasActivity extends Activity {
 		int dX = (int) (panTouchX - curX);
 		int dY = (int) (panTouchY - curY);
 		
-		return pan(dX,dY);
+		return vncCanvas.pan(dX,dY);
 	}
 	
-	/**
-	 * Pan by a number of pixels (relative pan)
-	 * @param dX
-	 * @param dY
-	 * @return True if the pan changed the view (did not move view out of bounds); false otherwise
-	 */
-	boolean pan(int dX, int dY) {
-		
-		double scale = vncCanvas.getScale();
-		
-		double sX = (double)dX / scale;
-		double sY = (double)dY / scale;
-		
-		if (absoluteXPosition + sX < 0)
-			// dX = diff to 0
-			sX = -absoluteXPosition;
-		if (absoluteYPosition + sY < 0)
-			sY = -absoluteYPosition;
-
-		// Prevent panning right or below desktop image
-		if (absoluteXPosition + vncCanvas.getVisibleWidth() + sX > vncCanvas.getImageWidth())
-			sX = vncCanvas.getImageWidth() - vncCanvas.getVisibleWidth() - absoluteXPosition;
-		if (absoluteYPosition + vncCanvas.getVisibleHeight() + sY > vncCanvas.getImageHeight())
-			sY = vncCanvas.getImageHeight() - vncCanvas.getVisibleHeight() - absoluteYPosition;
-
-		absoluteXPosition += sX;
-		absoluteYPosition += sY;
-		if (sX != 0.0 || sY != 0.0)
-		{
-			vncCanvas.scrollToAbsolute(absoluteXPosition,absoluteYPosition);
-			return true;
-		}
-		return false;
-	}
-
 	boolean defaultKeyDownHandler( int keyCode, KeyEvent evt)
 	{
 		if ( vncCanvas.processLocalKeyEvent(keyCode, evt))
@@ -1013,6 +897,8 @@ public class VncCanvasActivity extends Activity {
 	}
 
 	static final String FIT_SCREEN_NAME = "FIT_SCREEN";
+	/** Internal name for default input mode with Zoom scaling */
+	static final String TOUCH_ZOOM_MODE = "TOUCH_ZOOM_MODE";
 	
 	/**
 	 * In fit-to-screen mode, no panning.  Trackball and touchscreen work as mouse.
@@ -1113,11 +999,7 @@ public class VncCanvasActivity extends Activity {
 			// Mouse Pointer Control Mode
 			// Pointer event is absolute coordinates.
 
-			// Adjust coordinates for Android notification bar.
-			event.offsetLocation(0, -1f * vncCanvas.getTop());
-
-			// Adjust coordinates for panning position.
-			event.offsetLocation(absoluteXPosition, absoluteYPosition);
+			vncCanvas.changeTouchCoordinatesToFullFrame(event);
 			if (vncCanvas.processPointerEvent(event,true))
 				return true;
 			return VncCanvasActivity.super.onTouchEvent(event);
@@ -1203,7 +1085,7 @@ public class VncCanvasActivity extends Activity {
 					}
 					
 				});
-				pan(x,y);
+				vncCanvas.pan(x,y);
 			}
 			return result;
 		}
@@ -1240,11 +1122,7 @@ public class VncCanvasActivity extends Activity {
 			// Mouse Pointer Control Mode
 			// Pointer event is absolute coordinates.
 
-			// Adjust coordinates for Android notification bar.
-			event.offsetLocation(0, -1f * vncCanvas.getTop());
-
-			// Adjust coordinates for panning position.
-			event.offsetLocation(absoluteXPosition, absoluteYPosition);
+			vncCanvas.changeTouchCoordinatesToFullFrame(event);
 			if (vncCanvas.processPointerEvent(event,true))
 				return true;
 			return VncCanvasActivity.super.onTouchEvent(event);
