@@ -48,8 +48,8 @@ class OneToOneScaling extends AbstractScaling {
 	@Override
 	void setScaleTypeForActivity(VncCanvasActivity activity) {
 		super.setScaleTypeForActivity(activity);
-		// Reset the pan position to (0,0)
-		activity.vncCanvas.scrollTo(-activity.vncCanvas.getCenteredXOffset(),-activity.vncCanvas.getCenteredYOffset());
+		activity.vncCanvas.scrollToAbsolute();
+		activity.vncCanvas.pan(0,0);
 	}
 
 }
