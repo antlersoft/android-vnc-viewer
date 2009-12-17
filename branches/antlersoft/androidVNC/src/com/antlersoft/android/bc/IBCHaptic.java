@@ -11,4 +11,10 @@ import android.view.View;
  */
 public interface IBCHaptic {
 	public boolean performLongPressHaptic(View v);
+	/**
+	 * Set whether haptic feedback is enabled on the view
+	 * @param enabled
+	 * @return Old value of setting
+	 */
+	//public boolean setIsHapticEnabled(View v, boolean enabled);
 }
