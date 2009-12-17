@@ -61,7 +61,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.zip.Inflater;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;

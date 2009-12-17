@@ -456,16 +456,12 @@ public class VncCanvasActivity extends Activity {
 		case R.id.itemColorMode:
 			selectColorModel();
 			return true;
+		// Following sets one of the scaling options
 		case R.id.itemZoomable:
-			AbstractScaling.getById(item.getItemId()).setScaleTypeForActivity(this);
-			showPanningState();
-			return true;
 		case R.id.itemOneToOne:
-			AbstractScaling.getById(item.getItemId()).setScaleTypeForActivity(this);
-			showPanningState();
-			return true;
 		case R.id.itemFitToScreen:
 			AbstractScaling.getById(item.getItemId()).setScaleTypeForActivity(this);
+			item.setChecked(true);
 			showPanningState();
 			return true;
 		case R.id.itemCenterMouse:

@@ -51,7 +51,7 @@ class ZoomScaling extends AbstractScaling {
 	 */
 	@Override
 	boolean isValidInputMode(int mode) {
-		return mode == R.id.itemInputTouchPanZoomMouse;
+		return mode != R.id.itemInputFitToScreen;
 	}
 	
 	/**
@@ -130,7 +130,7 @@ class ZoomScaling extends AbstractScaling {
 		resetMatrix();
 		activity.vncCanvas.setImageMatrix(matrix);
 		// Reset the pan position to (0,0)
-		activity.vncCanvas.scrollTo(canvasXOffset,canvasYOffset);
+		resolveZoom(activity);
 	}
 
 }
