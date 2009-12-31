@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="address_caption">Address</string>
     <string name="alt_check">Alt</string>
@@ -20,6 +20,8 @@
 <string name="delete_key">Delete Selected Key</string>
 <string name="delete_key_list">Delete Key List</string>
 <string name="disconnect">Disconnect</string>
+<string name="enter_text_title">Enter Text to Send</string>
+<string name="enter_text">Send text</string>
 <string name="fit_to_screen">Fit to Screen</string>
 <string name="force_full_check">Force full-screen bitmap</string>
 <string name="info">Info</string>
@@ -52,6 +54,4 @@
 <string name="send_key_again">Send Key Again</string>
 <string name="shift_check">Shift</string>
 <string name="special_keys">Send Keys</string>
-<string name="enter_text_title">Enter Text to Send</string>
-<string name="enter_text">Send text</string>
 </resources>

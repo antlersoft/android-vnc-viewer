@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="address_caption">Address</string>
+    <string name="alt_check">Alt</string>
+    <string name="app_name">androidVNC</string>
+    <string name="arrow_down">Freccia giù</string>
+    <string name="arrow_left">Freccia sinistra</string>
+    <string name="arrow_right">Freccia destra</string>
+    <string name="arrow_up">Freccia su</string>
+    <string name="button_send_text">Send Text</string>
+<string name="center_mouse">Mouse @</string>
+<string name="color_format_caption">Modalità Colore</string>
+<string name="color_mode">Modalità Colore</string>
+<string name="connect_button">Connettere</string>
+<string name="connection_caption">Connessione</string>
+<string name="control_check">Ctrl</string>
+<string name="copy_list_button">Copy List</string>
+<string name="ctrl_alt_del">Ctrl-Alt-Canc</string>
+<string name="delete_connection">Elimina connessione</string>
+<string name="delete_key">Elimina tasto selezionato</string>
+<string name="delete_key_list">Elimina elenco tasti</string>
+<string name="disconnect">Disconnetti</string>
+<string name="enter_text_title">Inserisci testo da inviare</string>
+<string name="enter_text">Invia testo</string>
+<string name="fit_to_screen">Adatta allo schermo</string>
+<string name="force_full_check">Force full-screen bitmap</string>
+<string name="info">Info</string>
+<string name="input_mode">Modalità inserimento</string>
+<string name="input_mode_fit_to_screen">Nessun cursore; Mouse Trackball</string>
+<string name="input_mode_mouse">Modalità controllo puntatore Mouse</string>
+<string name="input_mode_panning">Modalità panoramica Desktop</string>
+<string name="input_mode_touchpad_pan_trackball_mouse">Tocca cursore; Mouse Trackball</string>
+<string name="input_mode_dpad_pan_touchpad_mouse">Touch Mouse; D-Pad Pan</string>
+<string name="input_mode_touch_pan_zoom_mouse">Touch Mouse Pan and Zoom</string>
+<string name="keep_password_button">Keep</string>
+<string name="keys_caption">Keys</string>
+<string name="list_caption">List</string>
+<string name="list_name_caption">List Name</string>
+<string name="local_mouse_check">Local mouse pointer</string>
+<string name="meta_key_title">Invia tasti speciali</string>
+<string name="mouse_follow_pan">Mouse follow pan</string>
+<string name="new_list_button">New List</string>
+<string name="nickname_caption">Nickname</string>
+<string name="one_to_one">1:1</string>
+<string name="open_doc">Manuale/Wiki</string>
+<string name="pan_follow_mouse">Il cursore segue il Mouse</string>
+<string name="password_caption">Password</string>
+<string name="port_caption">Port</string>
+<string name="save_as_copy">Salva copia</string>
+<string name="scaling">Ridimesiona</string>
+<string name="scaling_zoomable">Zoomable</string>
+<!-- Send selected metakey -->
+<string name="send_button">Send</string>
+<string name="send_key_again">Ripeti invio tasto</string>
+<string name="shift_check">Shift</string>
+<string name="special_keys">Invia tasti</string>
+</resources>
