@@ -143,6 +143,7 @@ public class VncCanvas extends ImageView {
 	private byte[] zlibBuf;
 	private int zlibBufLen = 0;
 	private Inflater zlibInflater;
+	private MouseScrollRunnable scrollRunnable;
 	
 	/**
 	 * Position of the top left portion of the <i>visible</i> part of the screen, in
@@ -157,6 +158,7 @@ public class VncCanvas extends ImageView {
 	public VncCanvas(final Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
+		scrollRunnable = new MouseScrollRunnable();
 	}
 
 	/**
@@ -834,6 +836,36 @@ public class VncCanvas extends ImageView {
 		}
 		return false;
 	}
+	
+	/**
+	 * Moves the scroll while the volume key is held down
+	 * @author Michael A. MacDonald
+	 */
+	class MouseScrollRunnable implements Runnable
+	{
+		int delay = 100;
+		
+		int scrollButton = 0;
+		
+		/* (non-Javadoc)
+		 * @see java.lang.Runnable#run()
+		 */
+		@Override
+		public void run() {
+			try
+			{
+				Log.v(TAG,"Hold scrolling");
+				rfb.writePointerEvent(mouseX, mouseY, 0, scrollButton);
+				rfb.writePointerEvent(mouseX, mouseY, 0, 0);
+				
+				handler.postDelayed(this, delay);
+			}
+			catch (IOException ioe)
+			{
+				
+			}
+		}		
+	}
 
 	public boolean processLocalKeyEvent(int keyCode, KeyEvent evt) {
 		if (keyCode == KeyEvent.KEYCODE_MENU)
@@ -845,13 +877,18 @@ public class VncCanvas extends ImageView {
 		}
 		else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP)
 		{
+			handler.removeCallbacks(scrollRunnable);
 			int mouseChange = keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ? MOUSE_BUTTON_SCROLL_DOWN : MOUSE_BUTTON_SCROLL_UP;
 			if (evt.getAction() == KeyEvent.ACTION_DOWN)
 			{
 				pointerMask |= mouseChange;
+				scrollRunnable.scrollButton = mouseChange;
+				Log.v(TAG,"Start scrolling");
+				handler.postDelayed(scrollRunnable,200);
 			}
 			else
 			{
+				Log.v(TAG,"Stop scrolling");
 				pointerMask &= ~mouseChange;
 			}
 			try
