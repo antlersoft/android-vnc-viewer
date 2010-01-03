@@ -877,17 +877,22 @@ public class VncCanvas extends ImageView {
 		}
 		else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP)
 		{
-			handler.removeCallbacks(scrollRunnable);
 			int mouseChange = keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ? MOUSE_BUTTON_SCROLL_DOWN : MOUSE_BUTTON_SCROLL_UP;
 			if (evt.getAction() == KeyEvent.ACTION_DOWN)
 			{
-				pointerMask |= mouseChange;
-				scrollRunnable.scrollButton = mouseChange;
-				Log.v(TAG,"Start scrolling");
-				handler.postDelayed(scrollRunnable,200);
+				// If not auto-repeat
+				if (scrollRunnable.scrollButton != mouseChange)
+				{
+					pointerMask |= mouseChange;
+					scrollRunnable.scrollButton = mouseChange;
+					Log.v(TAG,"Start scrolling");
+					handler.postDelayed(scrollRunnable,200);
+				}
 			}
 			else
 			{
+				handler.removeCallbacks(scrollRunnable);
+				scrollRunnable.scrollButton = 0;
 				Log.v(TAG,"Stop scrolling");
 				pointerMask &= ~mouseChange;
 			}
