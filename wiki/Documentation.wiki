@@ -11,6 +11,8 @@ Next to the list is a _Connect_ button.  The _Connect_ button will start the VNC
 
 The bottom section of the page is where you enter your connection configurations.  There are more options that will fit on the page, so this section scrolls.
 
+[http://sites.google.com/site/androidvncviewer/home/config.png]
+
   _*Nickname*_ Each configuration you create can have a nickname which will make it easy to find in the list.  Enter that name here.
 
   _*Password*_ If your VNC server is configured to require a password, enter that password here.  Most configuration settings are stored in a simple database on your device.  The password will only be stored if you check _Keep_; otherwise, you will have to re-enter it when you recall a configuration.  Even if the password is not stored in the database, it will remain available on the page for as long as *android-vnc-viewer* runs on your device.
