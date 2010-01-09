@@ -19,6 +19,7 @@ The bottom section of the page is where you enter your connection configurations
 
   _*Address*_ This is where you enter the DNS name or IP address of the computer running the VNC server to which you want to connect.
 
+[http://sites.google.com/site/androidvncviewer/home/config2.png]
   _*Port*_ Here you should enter the port number of the VNC server.  This field will default to the first VNC port number, 5900.
 
   _*Color Format*_ The client supports a number of color formats, which are specified by number of colors/number of bits per pixel.  Formats with more bits per pixel provide greater fidelity to high color depth displays, but use more bandwidth (sometimes dramatically more because they don't compress as well) and more CPU on your Android device.  Not all VNC servers support all color depths; OS/X Remote Desktop for example requires 24-bit color.  If you are having trouble connecting, try another color depth.
@@ -30,6 +31,7 @@ The bottom section of the page is where you enter your connection configurations
 The menu on this page allows you to _Delete_ unneeded connection configurations;
 to _Save as Copy_ an existing connection to base a different configuration from it; or to open this _Manual/Wiki_.
 
+[http://sites.google.com/site/androidvncviewer/home/config%20menu.png]
 == VNC Client ==
 
 After you press the connect button, *android-vnc-viewer* will try to connect to the specified VNC server.  If it is able to handshake, authenticate and download the first frame, you will be able to see and control the served display.
@@ -38,6 +40,7 @@ In general, VNC servers expect clients with a full keyboard, a mouse and a
 generously-sized screen.  Because the Android device lacks these,
 *android-vnc-client* has some special adaptations to make it usable.
 
+[http://sites.google.com/site/androidvncviewer/home/connectmenu.png]
 === Scaling ===
 
 The served display can be shown on the Android device in three modes.  You
@@ -95,6 +98,7 @@ device (i.e., a G1) as a VNC controller.
 
   _Color Mode_ (Menu-C) Allows you to switch the [#Connection_Configuration Color Mode] of your connection.
 
+[http://sites.google.com/site/androidvncviewer/home/connectmenu2.png]
   _Pan Follows Mouse_ (Menu-F) The display will automatically pan to follow the mouse around the screen
   
   _Mouse follow pan_ If you pan the display so the mouse moves off the visible portion of the screen, the mouse will be warped to the middle of the screen.  You can use both follow modes together.
@@ -109,6 +113,7 @@ device (i.e., a G1) as a VNC controller.
 
 == Special Keys ==
 
+[http://sites.google.com/site/androidvncviewer/home/specialkeys.png]
 The _Send Keys_ (Menu-S) button opens the *Send Special Keys* dialog.  This allows you to access all the keys on a full-sized keyboard, or to send keys or any mouse button with any combination of the modifiers Shift, Alt and Ctrl.  (You might even use it as a touch-screen keyboard, but you would have to
 be incredibly patient.)
 
