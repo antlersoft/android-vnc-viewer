@@ -32,6 +32,7 @@
 <string name="input_mode_touchpad_pan_trackball_mouse">Tocca cursore; Mouse Trackball</string>
 <string name="input_mode_dpad_pan_touchpad_mouse">Tocca cursore; Panoramica D-Pad</string>
 <string name="input_mode_touch_pan_zoom_mouse">Panoramica tocca cursore ed Ingrandisci</string>
+<string name="input_mode_touch_pan_zoom_mouse_dpad">Panoramica tocca cursore ed Ingrandisci/DPad</string>
 <string name="keep_password_button">Mantieni</string>
 <string name="keys_caption">Tasti</string>
 <string name="list_caption">Elenco</string>
