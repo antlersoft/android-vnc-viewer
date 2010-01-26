@@ -854,7 +854,6 @@ public class VncCanvas extends ImageView {
 		public void run() {
 			try
 			{
-				Log.v(TAG,"Hold scrolling");
 				rfb.writePointerEvent(mouseX, mouseY, 0, scrollButton);
 				rfb.writePointerEvent(mouseX, mouseY, 0, 0);
 				
@@ -885,7 +884,6 @@ public class VncCanvas extends ImageView {
 				{
 					pointerMask |= mouseChange;
 					scrollRunnable.scrollButton = mouseChange;
-					Log.v(TAG,"Start scrolling");
 					handler.postDelayed(scrollRunnable,200);
 				}
 			}
@@ -893,7 +891,6 @@ public class VncCanvas extends ImageView {
 			{
 				handler.removeCallbacks(scrollRunnable);
 				scrollRunnable.scrollButton = 0;
-				Log.v(TAG,"Stop scrolling");
 				pointerMask &= ~mouseChange;
 			}
 			try
