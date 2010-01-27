@@ -36,7 +36,6 @@ import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,14 +53,48 @@ import android.widget.ZoomControls;
 public class VncCanvasActivity extends Activity {
 
 	/**
-	 * 
-	 * Like ZoomInputHndler, but uses DPad instead of trackball to control
-	 * mouse.
-	 * 
 	 * @author Michael A. MacDonald
 	 */
-	class DPadZoomInputHandler extends ZoomInputHandler {
-		boolean mousedown = false;
+	class ZoomInputHandler extends AbstractGestureInputHandler {
+
+		/**
+		 * In drag mode (entered with long press) you process mouse events
+		 * without sending them through the gesture detector
+		 */
+		private boolean dragMode;
+		
+		/**
+		 * Mouse is down during mouse move with d-pad
+		 */
+		private boolean mousedown;
+
+		/**
+		 * @param c
+		 */
+		ZoomInputHandler() {
+			super(VncCanvasActivity.this);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see android.androidVNC.AbstractInputHandler#getHandlerDescription()
+		 */
+		@Override
+		public CharSequence getHandlerDescription() {
+			return getResources().getString(
+					R.string.input_mode_touch_pan_zoom_mouse);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see android.androidVNC.AbstractInputHandler#getName()
+		 */
+		@Override
+		public String getName() {
+			return TOUCH_ZOOM_MODE;
+		}
 
 		/*
 		 * (non-Javadoc)
@@ -142,90 +175,6 @@ public class VncCanvasActivity extends Activity {
 				result = defaultKeyUpHandler(keyCode, evt);
 			}
 			return result;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see android.androidVNC.VncCanvasActivity.ZoomInputHandler#getHandlerDescription()
-		 */
-		@Override
-		public CharSequence getHandlerDescription() {
-			return getResources().getString(
-					R.string.input_mode_touch_pan_zoom_mouse_dpad);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see android.androidVNC.VncCanvasActivity.ZoomInputHandler#getName()
-		 */
-		@Override
-		public String getName() {
-			return "TOUCH_ZOOM_DPAD_MODE";
-		}
-
-	}
-
-	/**
-	 * @author Michael A. MacDonald
-	 */
-	class ZoomInputHandler extends AbstractGestureInputHandler {
-
-		/**
-		 * In drag mode (entered with long press) you process mouse events
-		 * without sending them through the gesture detector
-		 */
-		private boolean dragMode;
-
-		/**
-		 * @param c
-		 */
-		ZoomInputHandler() {
-			super(VncCanvasActivity.this);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see android.androidVNC.AbstractInputHandler#getHandlerDescription()
-		 */
-		@Override
-		public CharSequence getHandlerDescription() {
-			return getResources().getString(
-					R.string.input_mode_touch_pan_zoom_mouse);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see android.androidVNC.AbstractInputHandler#getName()
-		 */
-		@Override
-		public String getName() {
-			return TOUCH_ZOOM_MODE;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see android.androidVNC.AbstractInputHandler#onKeyDown(int,
-		 *      android.view.KeyEvent)
-		 */
-		@Override
-		public boolean onKeyDown(int keyCode, KeyEvent evt) {
-			return defaultKeyDownHandler(keyCode, evt);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see android.androidVNC.AbstractInputHandler#onKeyUp(int,
-		 *      android.view.KeyEvent)
-		 */
-		@Override
-		public boolean onKeyUp(int keyCode, KeyEvent evt) {
-			return defaultKeyUpHandler(keyCode, evt);
 		}
 
 		/*
@@ -373,8 +322,7 @@ public class VncCanvasActivity extends Activity {
 	private static final int inputModeIds[] = { R.id.itemInputFitToScreen,
 			R.id.itemInputMouse, R.id.itemInputPan,
 			R.id.itemInputTouchPanTrackballMouse,
-			R.id.itemInputDPadPanTouchMouse, R.id.itemInputTouchPanZoomMouse,
-			R.id.itemInputTouchPanZoomMouseDPad };
+			R.id.itemInputDPadPanTouchMouse, R.id.itemInputTouchPanZoomMouse };
 
 	ZoomControls zoomer;
 	Panner panner;
@@ -583,9 +531,6 @@ public class VncCanvasActivity extends Activity {
 					case R.id.itemInputTouchPanZoomMouse:
 						inputModeHandlers[i] = new ZoomInputHandler();
 						break;
-					case R.id.itemInputTouchPanZoomMouseDPad:
-						inputModeHandlers[i] = new DPadZoomInputHandler();
-						break;
 					}
 				}
 				return inputModeHandlers[i];
@@ -602,6 +547,9 @@ public class VncCanvasActivity extends Activity {
 				result = handler;
 				break;
 			}
+		}
+		if (result == null) {
+			result = getInputHandlerById(R.id.itemInputTouchPanZoomMouse);
 		}
 		return result;
 	}
