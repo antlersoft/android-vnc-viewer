@@ -165,5 +165,6 @@ class EnterTextDialog extends Dialog {
 	@Override
 	protected void onStart() {
 		super.onStart();
+		_textEnterText.requestFocus();
 	}
 }
