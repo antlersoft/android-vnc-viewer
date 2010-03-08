@@ -135,13 +135,11 @@ public class VncCanvas extends ImageView {
 
 	// ZRLE encoder's data.
 	private byte[] zrleBuf;
-	private int zrleBufLen = 0;
 	private int[] zrleTilePixels;
 	private ZlibInStream zrleInStream;
 
 	// Zlib encoder's data.
 	private byte[] zlibBuf;
-	private int zlibBufLen = 0;
 	private Inflater zlibInflater;
 	private MouseScrollRunnable scrollRunnable;
 	
@@ -653,34 +651,42 @@ public class VncCanvas extends ImageView {
 		handleRawRect(x, y, w, h, true);
 	}
 
+	byte[] handleRawRectBuffer = new byte[128];
 	void handleRawRect(int x, int y, int w, int h, boolean paint) throws IOException {
 		boolean valid=bitmapData.validDraw(x, y, w, h);
 		int[] pixels=bitmapData.bitmapPixels;
 		if (bytesPerPixel == 1) {
 			// 1 byte per pixel. Use palette lookup table.
-			byte[] buf = new byte[w];
+		  if (w > handleRawRectBuffer.length) {
+			  handleRawRectBuffer = new byte[w];
+		  }
 			int i, offset;
 			for (int dy = y; dy < y + h; dy++) {
-				rfb.readFully(buf);
+				rfb.readFully(handleRawRectBuffer, 0, w);
 				if ( ! valid)
 					continue;
 				offset = bitmapData.offset(x, dy);
 				for (i = 0; i < w; i++) {
-					pixels[offset + i] = colorPalette[0xFF & buf[i]];
+					pixels[offset + i] = colorPalette[0xFF & handleRawRectBuffer[i]];
 				}
 			}
 		} else {
 			// 4 bytes per pixel (argb) 24-bit color
-			byte[] buf = new byte[w * 4];
+		  
+			final int l = w * 4;
+			if (l>handleRawRectBuffer.length) {
+      handleRawRectBuffer = new byte[l];
+			}
 			int i, offset;
 			for (int dy = y; dy < y + h; dy++) {
-				rfb.readFully(buf);
+				rfb.readFully(handleRawRectBuffer, 0, l);
 				if ( ! valid)
 					continue;
 				offset = bitmapData.offset(x, dy);
 				for (i = 0; i < w; i++) {
+				  final int idx = i*4;
 					pixels[offset + i] = // 0xFF << 24 |
-					(buf[i * 4 + 2] & 0xff) << 16 | (buf[i * 4 + 1] & 0xff) << 8 | (buf[i * 4] & 0xff);
+					(handleRawRectBuffer[idx + 2] & 0xff) << 16 | (handleRawRectBuffer[idx + 1] & 0xff) << 8 | (handleRawRectBuffer[idx] & 0xff);
 				}
 			}
 		}
@@ -1080,6 +1086,7 @@ public class VncCanvas extends ImageView {
 	// Handle a CopyRect rectangle.
 	//
 
+  final Paint handleCopyRectPaint = new Paint();
 	private void handleCopyRect(int x, int y, int w, int h) throws IOException {
 
 		/**
@@ -1089,7 +1096,6 @@ public class VncCanvas extends ImageView {
 		rfb.readCopyRect();
 		if ( ! bitmapData.validDraw(x, y, w, h))
 			return;
-		Paint paint = new Paint();
 		// Source Coordinates
 		int leftSrc = rfb.copyRectSrcX;
 		int topSrc = rfb.copyRectSrcY;
@@ -1106,7 +1112,7 @@ public class VncCanvas extends ImageView {
 		int rightDest = rightSrc + dx;
 		int bottomDest = bottomSrc + dy;
 
-		bitmapData.copyRect(new Rect(leftSrc, topSrc, rightSrc, bottomSrc), new Rect(leftDest, topDest, rightDest, bottomDest), paint);
+		bitmapData.copyRect(new Rect(leftSrc, topSrc, rightSrc, bottomSrc), new Rect(leftDest, topDest, rightDest, bottomDest), handleCopyRectPaint);
 
 		reDraw();
 	}
@@ -1243,6 +1249,8 @@ public class VncCanvas extends ImageView {
 	// Handle one tile in the Hextile-encoded data.
 	//
 
+	Paint handleHextileSubrectPaint = new Paint();
+	byte[] backgroundColorBuffer = new byte[4];
 	private void handleHextileSubrect(int tx, int ty, int tw, int th) throws IOException {
 
 		int subencoding = rfb.is.readUnsignedByte();
@@ -1255,28 +1263,29 @@ public class VncCanvas extends ImageView {
 
 		boolean valid=bitmapData.validDraw(tx, ty, tw, th);
 		// Read and draw the background if specified.
-		byte[] cbuf = new byte[bytesPerPixel];
+		if (bytesPerPixel > backgroundColorBuffer.length) {
+		  throw new RuntimeException("impossible colordepth");
+		}
 		if ((subencoding & RfbProto.HextileBackgroundSpecified) != 0) {
-			rfb.readFully(cbuf);
+			rfb.readFully(backgroundColorBuffer, 0, bytesPerPixel);
 			if (bytesPerPixel == 1) {
-				hextile_bg = colorPalette[0xFF & cbuf[0]];
+				hextile_bg = colorPalette[0xFF & backgroundColorBuffer[0]];
 			} else {
-				hextile_bg = Color.rgb(cbuf[2] & 0xFF, cbuf[1] & 0xFF, cbuf[0] & 0xFF);
+				hextile_bg = Color.rgb(backgroundColorBuffer[2] & 0xFF, backgroundColorBuffer[1] & 0xFF, backgroundColorBuffer[0] & 0xFF);
 			}
 		}
-		Paint paint = new Paint();
-		paint.setColor(hextile_bg);
-		paint.setStyle(Paint.Style.FILL);
+		handleHextileSubrectPaint.setColor(hextile_bg);
+		handleHextileSubrectPaint.setStyle(Paint.Style.FILL);
 		if ( valid )
-			bitmapData.drawRect(tx, ty, tw, th, paint);
+			bitmapData.drawRect(tx, ty, tw, th, handleHextileSubrectPaint);
 
 		// Read the foreground color if specified.
 		if ((subencoding & RfbProto.HextileForegroundSpecified) != 0) {
-			rfb.readFully(cbuf);
+			rfb.readFully(backgroundColorBuffer, 0, bytesPerPixel);
 			if (bytesPerPixel == 1) {
-				hextile_fg = colorPalette[0xFF & cbuf[0]];
+				hextile_fg = colorPalette[0xFF & backgroundColorBuffer[0]];
 			} else {
-				hextile_fg = Color.rgb(cbuf[2] & 0xFF, cbuf[1] & 0xFF, cbuf[0] & 0xFF);
+				hextile_fg = Color.rgb(backgroundColorBuffer[2] & 0xFF, backgroundColorBuffer[1] & 0xFF, backgroundColorBuffer[0] & 0xFF);
 			}
 		}
 
@@ -1290,14 +1299,14 @@ public class VncCanvas extends ImageView {
 			bufsize += nSubrects * bytesPerPixel;
 		}
 		byte[] buf = new byte[bufsize];
-		rfb.readFully(buf);
+		rfb.readFully(buf, 0, bufsize);
 
 		int b1, b2, sx, sy, sw, sh;
 		int i = 0;
 		if ((subencoding & RfbProto.HextileSubrectsColoured) == 0) {
 
 			// Sub-rectangles are all of the same color.
-			paint.setColor(hextile_fg);
+			handleHextileSubrectPaint.setColor(hextile_fg);
 			for (int j = 0; j < nSubrects; j++) {
 				b1 = buf[i++] & 0xFF;
 				b2 = buf[i++] & 0xFF;
@@ -1306,7 +1315,7 @@ public class VncCanvas extends ImageView {
 				sw = (b2 >> 4) + 1;
 				sh = (b2 & 0xf) + 1;
 				if ( valid)
-					bitmapData.drawRect(sx, sy, sw, sh, paint);
+					bitmapData.drawRect(sx, sy, sw, sh, handleHextileSubrectPaint);
 			}
 		} else if (bytesPerPixel == 1) {
 
@@ -1319,9 +1328,9 @@ public class VncCanvas extends ImageView {
 				sy = ty + (b1 & 0xf);
 				sw = (b2 >> 4) + 1;
 				sh = (b2 & 0xf) + 1;
-				paint.setColor(hextile_fg);
+				handleHextileSubrectPaint.setColor(hextile_fg);
 				if ( valid)
-					bitmapData.drawRect(sx, sy, sw, sh, paint);
+					bitmapData.drawRect(sx, sy, sw, sh, handleHextileSubrectPaint);
 			}
 
 		} else {
@@ -1336,9 +1345,9 @@ public class VncCanvas extends ImageView {
 				sy = ty + (b1 & 0xf);
 				sw = (b2 >> 4) + 1;
 				sh = (b2 & 0xf) + 1;
-				paint.setColor(hextile_fg);
+				handleHextileSubrectPaint.setColor(hextile_fg);
 				if ( valid )
-					bitmapData.drawRect(sx, sy, sw, sh, paint);
+					bitmapData.drawRect(sx, sy, sw, sh, handleHextileSubrectPaint);
 			}
 
 		}
@@ -1348,6 +1357,8 @@ public class VncCanvas extends ImageView {
 	// Handle a ZRLE-encoded rectangle.
 	//
 
+  Paint handleZRLERectPaint = new Paint();
+  int[] handleZRLERectPalette = new int[128];
 	private void handleZRLERect(int x, int y, int w, int h) throws Exception {
 
 		if (zrleInStream == null)
@@ -1357,9 +1368,8 @@ public class VncCanvas extends ImageView {
 		if (nBytes > 64 * 1024 * 1024)
 			throw new Exception("ZRLE decoder: illegal compressed data size");
 
-		if (zrleBuf == null || zrleBufLen < nBytes) {
-			zrleBufLen = nBytes + 4096;
-			zrleBuf = new byte[zrleBufLen];
+		if (zrleBuf == null || zrleBuf.length < nBytes) {
+			zrleBuf = new byte[nBytes+4096];
 		}
 
 		rfb.readFully(zrleBuf, 0, nBytes);
@@ -1379,18 +1389,16 @@ public class VncCanvas extends ImageView {
 				int mode = zrleInStream.readU8();
 				boolean rle = (mode & 128) != 0;
 				int palSize = mode & 127;
-				int[] palette = new int[128];
 
-				readZrlePalette(palette, palSize);
+				readZrlePalette(handleZRLERectPalette, palSize);
 
 				if (palSize == 1) {
-					int pix = palette[0];
+					int pix = handleZRLERectPalette[0];
 					int c = (bytesPerPixel == 1) ? colorPalette[0xFF & pix] : (0xFF000000 | pix);
-					Paint paint = new Paint();
-					paint.setColor(c);
-					paint.setStyle(Paint.Style.FILL);
+					handleZRLERectPaint.setColor(c);
+					handleZRLERectPaint.setStyle(Paint.Style.FILL);
 					if ( valid)
-						bitmapData.drawRect(tx, ty, tw, th, paint);
+						bitmapData.drawRect(tx, ty, tw, th, handleZRLERectPaint);
 					continue;
 				}
 
@@ -1398,13 +1406,13 @@ public class VncCanvas extends ImageView {
 					if (palSize == 0) {
 						readZrleRawPixels(tw, th);
 					} else {
-						readZrlePackedPixels(tw, th, palette, palSize);
+						readZrlePackedPixels(tw, th, handleZRLERectPalette, palSize);
 					}
 				} else {
 					if (palSize == 0) {
 						readZrlePlainRLEPixels(tw, th);
 					} else {
-						readZrlePackedRLEPixels(tw, th, palette);
+						readZrlePackedRLEPixels(tw, th, handleZRLERectPalette);
 					}
 				}
 				if ( valid )
@@ -1421,13 +1429,13 @@ public class VncCanvas extends ImageView {
 	// Handle a Zlib-encoded rectangle.
 	//
 
+	byte[] handleZlibRectBuffer = new byte[128];
 	private void handleZlibRect(int x, int y, int w, int h) throws Exception {
 		boolean valid = bitmapData.validDraw(x, y, w, h);
 		int nBytes = rfb.is.readInt();
 
-		if (zlibBuf == null || zlibBufLen < nBytes) {
-			zlibBufLen = nBytes * 2;
-			zlibBuf = new byte[zlibBufLen];
+		if (zlibBuf == null || zlibBuf.length < nBytes) {
+			zlibBuf = new byte[nBytes*2];
 		}
 
 		rfb.readFully(zlibBuf, 0, nBytes);
@@ -1441,28 +1449,34 @@ public class VncCanvas extends ImageView {
 
 		if (bytesPerPixel == 1) {
 			// 1 byte per pixel. Use palette lookup table.
-			byte[] buf = new byte[w];
+		  if (w > handleZlibRectBuffer.length) {
+		    handleZlibRectBuffer = new byte[w];
+		  }
 			int i, offset;
 			for (int dy = y; dy < y + h; dy++) {
-				zlibInflater.inflate(buf);
+				zlibInflater.inflate(handleZlibRectBuffer,  0, w);
 				if ( ! valid)
 					continue;
 				offset = bitmapData.offset(x, dy);
 				for (i = 0; i < w; i++) {
-					pixels[offset + i] = colorPalette[0xFF & buf[i]];
+					pixels[offset + i] = colorPalette[0xFF & handleZlibRectBuffer[i]];
 				}
 			}
 		} else {
 			// 24-bit color (ARGB) 4 bytes per pixel.
-			byte[] buf = new byte[w * 4];
+		  final int l = w*4;
+		  if (l > handleZlibRectBuffer.length) {
+			  handleZlibRectBuffer = new byte[l];
+		  }
 			int i, offset;
 			for (int dy = y; dy < y + h; dy++) {
-				zlibInflater.inflate(buf);
+				zlibInflater.inflate(handleZlibRectBuffer, 0, l);
 				if ( ! valid)
 					continue;
 				offset = bitmapData.offset(x, dy);
 				for (i = 0; i < w; i++) {
-					pixels[offset + i] = (buf[i * 4 + 2] & 0xFF) << 16 | (buf[i * 4 + 1] & 0xFF) << 8 | (buf[i * 4] & 0xFF);
+				  final int idx = i*4;
+					pixels[offset + i] = (handleZlibRectBuffer[idx + 2] & 0xFF) << 16 | (handleZlibRectBuffer[idx + 1] & 0xFF) << 8 | (handleZlibRectBuffer[idx] & 0xFF);
 				}
 			}
 		}
@@ -1486,18 +1500,25 @@ public class VncCanvas extends ImageView {
 		return pix;
 	}
 
+	byte[] readPixelsBuffer = new byte[128];
 	private void readPixels(InStream is, int[] dst, int count) throws Exception {
 		if (bytesPerPixel == 1) {
-			byte[] buf = new byte[count];
-			is.readBytes(buf, 0, count);
+		  if (count > readPixelsBuffer.length) {
+		    readPixelsBuffer = new byte[count];
+		  }
+			is.readBytes(readPixelsBuffer, 0, count);
 			for (int i = 0; i < count; i++) {
-				dst[i] = (int) buf[i] & 0xFF;
+				dst[i] = (int) readPixelsBuffer[i] & 0xFF;
 			}
 		} else {
-			byte[] buf = new byte[count * 3];
-			is.readBytes(buf, 0, count * 3);
+		  final int l = count * 3;
+      if (l > readPixelsBuffer.length) {
+			readPixelsBuffer = new byte[l];
+      }
+			is.readBytes(readPixelsBuffer, 0, l);
 			for (int i = 0; i < count; i++) {
-				dst[i] = ((buf[i * 3 + 2] & 0xFF) << 16 | (buf[i * 3 + 1] & 0xFF) << 8 | (buf[i * 3] & 0xFF));
+			  final int idx = i*3;
+				dst[i] = ((readPixelsBuffer[idx + 2] & 0xFF) << 16 | (readPixelsBuffer[idx + 1] & 0xFF) << 8 | (readPixelsBuffer[idx] & 0xFF));
 			}
 		}
 	}
@@ -1508,7 +1529,7 @@ public class VncCanvas extends ImageView {
 
 	private void readZrleRawPixels(int tw, int th) throws Exception {
 		int len = tw * th;
-		if (zrleTilePixels == null || zrleTilePixels.length != len)
+		if (zrleTilePixels == null || len > zrleTilePixels.length)
 			zrleTilePixels = new int[len];
 		readPixels(zrleInStream, zrleTilePixels, tw * th); // /
 	}
@@ -1518,7 +1539,7 @@ public class VncCanvas extends ImageView {
 		int bppp = ((palSize > 16) ? 8 : ((palSize > 4) ? 4 : ((palSize > 2) ? 2 : 1)));
 		int ptr = 0;
 		int len = tw * th;
-		if (zrleTilePixels == null || zrleTilePixels.length != len)
+		if (zrleTilePixels == null || len > zrleTilePixels.length)
 			zrleTilePixels = new int[len];
 
 		for (int i = 0; i < th; i++) {
@@ -1547,7 +1568,7 @@ public class VncCanvas extends ImageView {
 	private void readZrlePlainRLEPixels(int tw, int th) throws Exception {
 		int ptr = 0;
 		int end = ptr + tw * th;
-		if (zrleTilePixels == null || zrleTilePixels.length != end)
+		if (zrleTilePixels == null || end > zrleTilePixels.length)
 			zrleTilePixels = new int[end];
 		while (ptr < end) {
 			int pix = readPixel(zrleInStream);
@@ -1575,7 +1596,7 @@ public class VncCanvas extends ImageView {
 
 		int ptr = 0;
 		int end = ptr + tw * th;
-		if (zrleTilePixels == null || zrleTilePixels.length != end)
+		if (zrleTilePixels == null || end > zrleTilePixels.length)
 			zrleTilePixels = new int[end];
 		while (ptr < end) {
 			int index = zrleInStream.readU8();

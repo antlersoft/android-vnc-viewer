@@ -22,6 +22,7 @@
 //
 package android.androidVNC;
 
+
 abstract public class InStream {
 
   // check() ensures there is buffer data for at least one item of size
@@ -73,30 +74,6 @@ abstract public class InStream {
   public final int readU32() throws Exception {
     return readS32() & 0xffffffff;
   }
-
-  // readString() reads a string - a U32 length followed by the data.
-
-  public final String readString() throws Exception {
-    int len = readU32();
-    if (len > maxStringLength)
-      throw new Exception("InStream max string length exceeded");
-
-    char[] str = new char[len];
-    int i = 0;
-    while (i < len) {
-      int j = i + check(1, len - i);
-      while (i < j) {
-	str[i++] = (char)b[ptr++];
-      }
-    }
-
-    return new String(str);
-  }
-
-  // maxStringLength protects against allocating a huge buffer.  Set it
-  // higher if you need longer strings.
-
-  public static int maxStringLength = 65535;
 
   public final void skip(int bytes) throws Exception {
     while (bytes > 0) {

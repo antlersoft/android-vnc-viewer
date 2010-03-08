@@ -574,13 +574,13 @@ class RfbProto {
   // Write a 32-bit integer into the output stream.
   //
 
+  byte[] writeIntBuffer = new byte[4];
   void writeInt(int value) throws IOException {
-    byte[] b = new byte[4];
-    b[0] = (byte) ((value >> 24) & 0xff);
-    b[1] = (byte) ((value >> 16) & 0xff);
-    b[2] = (byte) ((value >> 8) & 0xff);
-    b[3] = (byte) (value & 0xff);
-    os.write(b);
+    writeIntBuffer[0] = (byte) ((value >> 24) & 0xff);
+    writeIntBuffer[1] = (byte) ((value >> 16) & 0xff);
+    writeIntBuffer[2] = (byte) ((value >> 8) & 0xff);
+    writeIntBuffer[3] = (byte) (value & 0xff);
+    os.write(writeIntBuffer);
   }
 
   //
@@ -867,24 +867,23 @@ class RfbProto {
   // Write a FramebufferUpdateRequest message
   //
 
+  byte[] framebufferUpdateRequest = new byte[10];
   synchronized void writeFramebufferUpdateRequest(int x, int y, int w, int h,
 				     boolean incremental)
        throws IOException
   {
-    byte[] b = new byte[10];
+    framebufferUpdateRequest[0] = (byte) FramebufferUpdateRequest;
+    framebufferUpdateRequest[1] = (byte) (incremental ? 1 : 0);
+    framebufferUpdateRequest[2] = (byte) ((x >> 8) & 0xff);
+    framebufferUpdateRequest[3] = (byte) (x & 0xff);
+    framebufferUpdateRequest[4] = (byte) ((y >> 8) & 0xff);
+    framebufferUpdateRequest[5] = (byte) (y & 0xff);
+    framebufferUpdateRequest[6] = (byte) ((w >> 8) & 0xff);
+    framebufferUpdateRequest[7] = (byte) (w & 0xff);
+    framebufferUpdateRequest[8] = (byte) ((h >> 8) & 0xff);
+    framebufferUpdateRequest[9] = (byte) (h & 0xff);
 
-    b[0] = (byte) FramebufferUpdateRequest;
-    b[1] = (byte) (incremental ? 1 : 0);
-    b[2] = (byte) ((x >> 8) & 0xff);
-    b[3] = (byte) (x & 0xff);
-    b[4] = (byte) ((y >> 8) & 0xff);
-    b[5] = (byte) (y & 0xff);
-    b[6] = (byte) ((w >> 8) & 0xff);
-    b[7] = (byte) (w & 0xff);
-    b[8] = (byte) ((h >> 8) & 0xff);
-    b[9] = (byte) (h & 0xff);
-
-    os.write(b);
+    os.write(framebufferUpdateRequest);
   }
 
 
@@ -1120,43 +1119,6 @@ class RfbProto {
   // method assumes the recording is on (rec != null).
   //
 
-  /*-
-  void recordCompressedData(byte[] data, int off, int len) throws IOException {
-    Deflater deflater = new Deflater();
-    deflater.setInput(data, off, len);
-    int bufSize = len + len / 100 + 12;
-    byte[] buf = new byte[bufSize];
-    deflater.finish();
-    int compressedSize = deflater.deflate(buf);
-    recordCompactLen(compressedSize);
-    rec.write(buf, 0, compressedSize);
-  }
-
-  void recordCompressedData(byte[] data) throws IOException {
-    recordCompressedData(data, 0, data.length);
-  }
-
-  //
-  // Write an integer in compact representation (1..3 bytes) into the
-  // recorded session file. This method assumes the recording is on
-  // (rec != null).
-  //
-
-  void recordCompactLen(int len) throws IOException {
-    byte[] buf = new byte[3];
-    int bytes = 0;
-    buf[bytes++] = (byte)(len & 0x7F);
-    if (len > 0x7F) {
-      buf[bytes-1] |= 0x80;
-      buf[bytes++] = (byte)(len >> 7 & 0x7F);
-      if (len > 0x3FFF) {
-	buf[bytes-1] |= 0x80;
-	buf[bytes++] = (byte)(len >> 14 & 0xFF);
-      }
-    }
-    rec.write(buf, 0, bytes);
-  }
-	*/
 
   public void startTiming() {
     timing = true;

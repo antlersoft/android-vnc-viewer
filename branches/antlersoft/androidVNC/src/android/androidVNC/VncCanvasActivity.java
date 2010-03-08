@@ -22,6 +22,7 @@ package android.androidVNC;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.antlersoft.android.bc.BCFactory;
 
@@ -29,10 +30,12 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.PointF;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
@@ -337,25 +340,41 @@ public class VncCanvasActivity extends Activity {
 
 		database = new VncDatabase(this);
 
-		Bundle extras = getIntent().getExtras();
-
+		Intent i = getIntent();
 		connection = new ConnectionBean();
-		connection.Gen_populate((ContentValues) extras
-				.getParcelable(VncConstants.CONNECTION));
-		if (connection.getPort() == 0)
-			connection.setPort(5900);
+		Uri data = i.getData();
+		if ((data != null) && (data.getScheme().equals("vnc"))) {
+		    connection.setAddress(data.getHost());
+		    connection.setNickname(connection.getAddress());
+		    connection.setPort(data.getPort());
+		    List<String> path = data.getPathSegments();
+		    if (path.size() >= 1) {
+		        connection.setColorModel(path.get(0));
+		    }
+		    if (path.size() >= 2) {
+		        connection.setPassword(path.get(1));
+		    }
+		    connection.save(database.getWritableDatabase());
+		} else {
+		
+		    Bundle extras = getIntent().getExtras();
 
-		// Parse a HOST:PORT entry
-		String host = connection.getAddress();
-		if (host.indexOf(':') > -1) {
-			String p = host.substring(host.indexOf(':') + 1);
-			try {
-				connection.setPort(Integer.parseInt(p));
-			} catch (Exception e) {
-			}
-			connection.setAddress(host.substring(0, host.indexOf(':')));
+	  	    connection.Gen_populate((ContentValues) extras
+			  	.getParcelable(VncConstants.CONNECTION));
+		    if (connection.getPort() == 0)
+			    connection.setPort(5900);
+
+            // Parse a HOST:PORT entry
+		    String host = connection.getAddress();
+		    if (host.indexOf(':') > -1) {
+			    String p = host.substring(host.indexOf(':') + 1);
+			    try {
+				    connection.setPort(Integer.parseInt(p));
+			    } catch (Exception e) {
+			    }
+			    connection.setAddress(host.substring(0, host.indexOf(':')));
+	  	    }
 		}
-
 		setContentView(R.layout.canvas);
 
 		vncCanvas = (VncCanvas) findViewById(R.id.vnc_canvas);

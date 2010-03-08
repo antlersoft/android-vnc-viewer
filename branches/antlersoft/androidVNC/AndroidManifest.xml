@@ -12,9 +12,14 @@
 			<intent-filter>
 				<action android:name="android.intent.action.VIEW"></action>
 			</intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="vnc" />
+            </intent-filter>
 		</activity>
 	</application>
-<uses-permission android:name="android.permission.INTERNET"></uses-permission>
-<uses-sdk android:minSdkVersion="1" android:targetSdkVersion="4"></uses-sdk>
-<supports-screens android:anyDensity="true" />
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+    <uses-sdk android:minSdkVersion="1" android:targetSdkVersion="4"></uses-sdk>
+    <supports-screens android:anyDensity="true" />
 </manifest> 
