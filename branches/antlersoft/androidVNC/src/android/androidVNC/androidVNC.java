@@ -22,6 +22,7 @@
 package android.androidVNC;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ActivityManager.MemoryInfo;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -36,6 +37,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,6 +47,7 @@ public class androidVNC extends Activity {
 	private EditText portText;
 	private EditText passwordText;
 	private Button goButton;
+	private TextView repeaterText;
 	private Spinner colorSpinner;
 	private CheckBox checkboxForceFullScreen;
 	private Spinner spinnerConnection;
@@ -54,6 +57,7 @@ public class androidVNC extends Activity {
 	private EditText textNickname;
 	private CheckBox checkboxKeepPassword;
 	private CheckBox checkboxLocalCursor;
+	private boolean repeaterTextSet;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -66,6 +70,13 @@ public class androidVNC extends Activity {
 		passwordText = (EditText) findViewById(R.id.textPASSWORD);
 		textNickname = (EditText) findViewById(R.id.textNickname);
 		goButton = (Button) findViewById(R.id.buttonGO);
+		((Button) findViewById(R.id.buttonRepeater)).setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				showDialog(R.layout.repeater_dialog);
+			}
+		});
 		colorSpinner = (Spinner)findViewById(R.id.colorformat);
 		COLORMODEL[] models=COLORMODEL.values();
 		ArrayAdapter<COLORMODEL> colorSpinnerAdapter = new ArrayAdapter<COLORMODEL>(this, android.R.layout.simple_spinner_item, models);
@@ -101,7 +112,7 @@ public class androidVNC extends Activity {
 			}
 			
 		});
-
+		repeaterText = (TextView)findViewById(R.id.textRepeaterId);
 		goButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
@@ -117,6 +128,14 @@ public class androidVNC extends Activity {
 		super.onDestroy();
 	}
 	
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreateDialog(int)
+	 */
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		return new RepeaterDialog(this);
+	}
+
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
 	 */
@@ -190,6 +209,26 @@ public class androidVNC extends Activity {
 				break;
 			}
 		}
+		updateRepeaterInfo(selected.getRepeaterId());
+	}
+	
+	/**
+	 * Called when changing view to match selected connection or from
+	 * Repeater dialog to update the repeater information shown.
+	 * @param repeaterId If null or empty, show text for not using repeater
+	 */
+	void updateRepeaterInfo(String repeaterId)
+	{
+		if (repeaterId != null && repeaterId.length() > 0)
+		{
+			repeaterText.setText(repeaterId);
+			repeaterTextSet = true;
+		}
+		else
+		{
+			repeaterText.setText(getText(R.string.repeater_empty_text));
+			repeaterTextSet = false;
+		}
 	}
 	
 	private void updateSelectedFromView() {
@@ -211,6 +250,14 @@ public class androidVNC extends Activity {
 		selected.setKeepPassword(checkboxKeepPassword.isChecked());
 		selected.setUseLocalCursor(checkboxLocalCursor.isChecked());
 		selected.setColorModel(((COLORMODEL)colorSpinner.getSelectedItem()).nameString());
+		if (repeaterTextSet)
+		{
+			selected.setRepeaterId(repeaterText.getText().toString());
+		}
+		else
+		{
+			selected.setRepeaterId("");
+		}
 	}
 	
 	protected void onStart() {

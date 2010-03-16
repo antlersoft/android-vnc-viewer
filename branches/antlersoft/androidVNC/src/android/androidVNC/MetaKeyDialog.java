@@ -35,7 +35,7 @@ import android.widget.TextView;
  * @author Michael A. MacDonald
  *
  */
-class MetaKeyDialog extends Dialog {
+class MetaKeyDialog extends Dialog implements ConnectionSettable {
 
 	CheckBox _checkShift;
 	CheckBox _checkCtrl;
@@ -565,7 +565,7 @@ class MetaKeyDialog extends Dialog {
 		_textKeyDesc.setText(_currentKeyBean.getKeyDesc());
 	}
 	
-	void setConnection(ConnectionBean conn)
+	public void setConnection(ConnectionBean conn)
 	{
 		if ( _connection != conn) {
 			_connection = conn;
