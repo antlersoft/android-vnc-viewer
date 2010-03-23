@@ -361,7 +361,7 @@ class RfbProto {
   int selectSecurityType() throws Exception {
     int secType = SecTypeInvalid;
 
-    // Read the list of secutiry types.
+    // Read the list of security types.
     int nSecTypes = is.readUnsignedByte();
     if (nSecTypes == 0) {
       readConnFailedReason();
@@ -466,8 +466,9 @@ class RfbProto {
     int reasonLen = is.readInt();
     byte[] reason = new byte[reasonLen];
     readFully(reason);
-    Log.v(TAG, String.valueOf(reason));
-    throw new Exception(new String(reason));
+    String reasonString = new String(reason);
+    Log.v(TAG, reasonString);
+    throw new Exception(reasonString);
   }
 
   //

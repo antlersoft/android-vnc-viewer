@@ -67,6 +67,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Paint.Style;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -143,6 +144,8 @@ public class VncCanvas extends ImageView {
 	private Inflater zlibInflater;
 	private MouseScrollRunnable scrollRunnable;
 	
+	private Paint handleRREPaint;
+	
 	/**
 	 * Position of the top left portion of the <i>visible</i> part of the screen, in
 	 * full-frame coordinates
@@ -157,6 +160,8 @@ public class VncCanvas extends ImageView {
 	{
 		super(context, attrs);
 		scrollRunnable = new MouseScrollRunnable();
+		handleRREPaint = new Paint();
+		handleRREPaint.setStyle(Style.FILL);
 	}
 
 	/**
@@ -521,7 +526,7 @@ public class VncCanvas extends ImageView {
 		}
 	}
 
-	/**
+	/*
 	 * f(x,s) is a function that returns the coordinate in screen/scroll space corresponding
 	 * to the coordinate x in full-frame space with scaling s.
 	 * 
@@ -539,6 +544,10 @@ public class VncCanvas extends ImageView {
 	 * @param windowDim
 	 * @param offset
 	 * @return
+	 */
+	
+	/**
+	 * Change to Canvas's scroll position to match the absoluteXPosition
 	 */
 	void scrollToAbsolute()
 	{
@@ -1116,51 +1125,51 @@ public class VncCanvas extends ImageView {
 
 		reDraw();
 	}
-
+	byte[] bg_buf = new byte[4];
+	byte[] rre_buf = new byte[128];
 	//
 	// Handle an RRE-encoded rectangle.
 	//
-
 	private void handleRRERect(int x, int y, int w, int h) throws IOException {
 		boolean valid=bitmapData.validDraw(x, y, w, h);
 		int nSubrects = rfb.is.readInt();
 
-		byte[] bg_buf = new byte[bytesPerPixel];
-		rfb.readFully(bg_buf);
+		rfb.readFully(bg_buf, 0, bytesPerPixel);
 		int pixel;
 		if (bytesPerPixel == 1) {
 			pixel = colorPalette[0xFF & bg_buf[0]];
 		} else {
 			pixel = Color.rgb(bg_buf[2] & 0xFF, bg_buf[1] & 0xFF, bg_buf[0] & 0xFF);
 		}
-		Paint paint = new Paint();
-		paint.setColor(pixel);
-		paint.setStyle(Paint.Style.FILL);
+		handleRREPaint.setColor(pixel);
 		if ( valid)
-			bitmapData.drawRect(x, y, w, h, paint);
+			bitmapData.drawRect(x, y, w, h, handleRREPaint);
 
-		byte[] buf = new byte[nSubrects * (bytesPerPixel + 8)];
-		rfb.readFully(buf);
+		int len = nSubrects * (bytesPerPixel + 8);
+		if (len > rre_buf.length)
+			rre_buf = new byte[len];
+		
+		rfb.readFully(rre_buf, 0, len);
 		if ( ! valid)
 			return;
-		DataInputStream ds = new DataInputStream(new ByteArrayInputStream(buf));
 
 		int sx, sy, sw, sh;
 
+		int i = 0;
 		for (int j = 0; j < nSubrects; j++) {
 			if (bytesPerPixel == 1) {
-				pixel = colorPalette[0xFF & ds.readUnsignedByte()];
+				pixel = colorPalette[0xFF & rre_buf[i++]];
 			} else {
-				ds.skip(4);
-				pixel = Color.rgb(buf[j * 12 + 2] & 0xFF, buf[j * 12 + 1] & 0xFF, buf[j * 12] & 0xFF);
+				pixel = Color.rgb(rre_buf[i + 2] & 0xFF, rre_buf[i + 1] & 0xFF, rre_buf[i] & 0xFF);
+				i += 4;
 			}
-			sx = x + ds.readUnsignedShort();
-			sy = y + ds.readUnsignedShort();
-			sw = ds.readUnsignedShort();
-			sh = ds.readUnsignedShort();
+			sx = x + ((rre_buf[i] & 0xff) << 8) + (rre_buf[i+1] & 0xff); i+=2;
+			sy = y + ((rre_buf[i] & 0xff) << 8) + (rre_buf[i+1] & 0xff); i+=2;
+			sw = ((rre_buf[i] & 0xff) << 8) + (rre_buf[i+1] & 0xff); i+=2;
+			sh = ((rre_buf[i] & 0xff) << 8) + (rre_buf[i+1] & 0xff); i+=2;
 
-			paint.setColor(pixel);
-			bitmapData.drawRect(sx, sy, sw, sh, paint);
+			handleRREPaint.setColor(pixel);
+			bitmapData.drawRect(sx, sy, sw, sh, handleRREPaint);
 		}
 
 		reDraw();
@@ -1174,22 +1183,22 @@ public class VncCanvas extends ImageView {
 		boolean valid=bitmapData.validDraw(x, y, w, h);
 		int nSubrects = rfb.is.readInt();
 
-		byte[] bg_buf = new byte[bytesPerPixel];
-		rfb.readFully(bg_buf);
+		rfb.readFully(bg_buf, 0, bytesPerPixel);
 		int pixel;
 		if (bytesPerPixel == 1) {
 			pixel = colorPalette[0xFF & bg_buf[0]];
 		} else {
 			pixel = Color.rgb(bg_buf[2] & 0xFF, bg_buf[1] & 0xFF, bg_buf[0] & 0xFF);
 		}
-		Paint paint = new Paint();
-		paint.setColor(pixel);
-		paint.setStyle(Paint.Style.FILL);
+		handleRREPaint.setColor(pixel);
 		if ( valid)
-			bitmapData.drawRect(x, y, w, h, paint);
+			bitmapData.drawRect(x, y, w, h, handleRREPaint);
 
-		byte[] buf = new byte[nSubrects * (bytesPerPixel + 4)];
-		rfb.readFully(buf);
+		int len = nSubrects * (bytesPerPixel + 8);
+		if (len > rre_buf.length)
+			rre_buf = new byte[len];
+		
+		rfb.readFully(rre_buf, 0, len);
 		if ( ! valid)
 			return;
 
@@ -1198,18 +1207,18 @@ public class VncCanvas extends ImageView {
 
 		for (int j = 0; j < nSubrects; j++) {
 			if (bytesPerPixel == 1) {
-				pixel = colorPalette[0xFF & buf[i++]];
+				pixel = colorPalette[0xFF & rre_buf[i++]];
 			} else {
-				pixel = Color.rgb(buf[i + 2] & 0xFF, buf[i + 1] & 0xFF, buf[i] & 0xFF);
+				pixel = Color.rgb(rre_buf[i + 2] & 0xFF, rre_buf[i + 1] & 0xFF, rre_buf[i] & 0xFF);
 				i += 4;
 			}
-			sx = x + (buf[i++] & 0xFF);
-			sy = y + (buf[i++] & 0xFF);
-			sw = buf[i++] & 0xFF;
-			sh = buf[i++] & 0xFF;
+			sx = x + (rre_buf[i++] & 0xFF);
+			sy = y + (rre_buf[i++] & 0xFF);
+			sw = rre_buf[i++] & 0xFF;
+			sh = rre_buf[i++] & 0xFF;
 
-			paint.setColor(pixel);
-			bitmapData.drawRect(sx, sy, sw, sh, paint);
+			handleRREPaint.setColor(pixel);
+			bitmapData.drawRect(sx, sy, sw, sh, handleRREPaint);
 		}
 
 		reDraw();
@@ -1298,8 +1307,9 @@ public class VncCanvas extends ImageView {
 		if ((subencoding & RfbProto.HextileSubrectsColoured) != 0) {
 			bufsize += nSubrects * bytesPerPixel;
 		}
-		byte[] buf = new byte[bufsize];
-		rfb.readFully(buf, 0, bufsize);
+		if (rre_buf.length < bufsize)
+			rre_buf = new byte[bufsize];
+		rfb.readFully(rre_buf, 0, bufsize);
 
 		int b1, b2, sx, sy, sw, sh;
 		int i = 0;
@@ -1308,8 +1318,8 @@ public class VncCanvas extends ImageView {
 			// Sub-rectangles are all of the same color.
 			handleHextileSubrectPaint.setColor(hextile_fg);
 			for (int j = 0; j < nSubrects; j++) {
-				b1 = buf[i++] & 0xFF;
-				b2 = buf[i++] & 0xFF;
+				b1 = rre_buf[i++] & 0xFF;
+				b2 = rre_buf[i++] & 0xFF;
 				sx = tx + (b1 >> 4);
 				sy = ty + (b1 & 0xf);
 				sw = (b2 >> 4) + 1;
@@ -1321,9 +1331,9 @@ public class VncCanvas extends ImageView {
 
 			// BGR233 (8-bit color) version for colored sub-rectangles.
 			for (int j = 0; j < nSubrects; j++) {
-				hextile_fg = colorPalette[0xFF & buf[i++]];
-				b1 = buf[i++] & 0xFF;
-				b2 = buf[i++] & 0xFF;
+				hextile_fg = colorPalette[0xFF & rre_buf[i++]];
+				b1 = rre_buf[i++] & 0xFF;
+				b2 = rre_buf[i++] & 0xFF;
 				sx = tx + (b1 >> 4);
 				sy = ty + (b1 & 0xf);
 				sw = (b2 >> 4) + 1;
@@ -1337,10 +1347,10 @@ public class VncCanvas extends ImageView {
 
 			// Full-color (24-bit) version for colored sub-rectangles.
 			for (int j = 0; j < nSubrects; j++) {
-				hextile_fg = Color.rgb(buf[i + 2] & 0xFF, buf[i + 1] & 0xFF, buf[i] & 0xFF);
+				hextile_fg = Color.rgb(rre_buf[i + 2] & 0xFF, rre_buf[i + 1] & 0xFF, rre_buf[i] & 0xFF);
 				i += 4;
-				b1 = buf[i++] & 0xFF;
-				b2 = buf[i++] & 0xFF;
+				b1 = rre_buf[i++] & 0xFF;
+				b2 = rre_buf[i++] & 0xFF;
 				sx = tx + (b1 >> 4);
 				sy = ty + (b1 & 0xf);
 				sw = (b2 >> 4) + 1;
