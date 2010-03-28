@@ -59,5 +59,6 @@
 <string name="send_button">Send</string>
 <string name="send_key_again">Send Key Again</string>
 <string name="shift_check">Shift</string>
+<string name="shortcut_label">VNC Connection</string>
 <string name="special_keys">Send Keys</string>
 </resources>

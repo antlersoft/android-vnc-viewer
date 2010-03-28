@@ -18,9 +18,8 @@ import android.widget.TextView;
  *
  */
 class RepeaterDialog extends Dialog {
-	private ConnectionBean _connection;
 	private EditText _repeaterId;
-	private androidVNC _configurationDialog;
+	androidVNC _configurationDialog;
 
 	RepeaterDialog(androidVNC context) {
 		super(context);
@@ -28,11 +27,6 @@ class RepeaterDialog extends Dialog {
 		_configurationDialog = context;
 	}
 	
-	void saveRepeaterInfo(String info)
-	{
-		_configurationDialog.updateRepeaterInfo(info);
-	}
-
 	/* (non-Javadoc)
 	 * @see android.app.Dialog#onCreate(android.os.Bundle)
 	 */
@@ -48,7 +42,7 @@ class RepeaterDialog extends Dialog {
 			
 			@Override
 			public void onClick(View v) {
-				saveRepeaterInfo(_repeaterId.getText().toString());
+				_configurationDialog.updateRepeaterInfo(true, _repeaterId.getText().toString());
 				dismiss();
 			}
 		});
@@ -56,7 +50,7 @@ class RepeaterDialog extends Dialog {
 			
 			@Override
 			public void onClick(View v) {
-				saveRepeaterInfo("");
+				_configurationDialog.updateRepeaterInfo(false, "");
 				dismiss();
 			}
 		});
