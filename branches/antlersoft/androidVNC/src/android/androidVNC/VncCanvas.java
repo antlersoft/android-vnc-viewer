@@ -189,13 +189,7 @@ public class VncCanvas extends ImageView {
 		Thread t = new Thread() {
 			public void run() {
 				try {
-					if (connection.getRepeaterId() != null && connection.getRepeaterId().length()>0) {
-						// Connect to Repeater Session
-						// Passwords are irrelevant.
-						connectAndAuthenticate("");
-					} else {
-						connectAndAuthenticate(connection.getPassword());
-					}
+					connectAndAuthenticate(connection.getPassword());
 					doProtocolInitialisation();
 					handler.post(new Runnable() {
 						public void run() {
