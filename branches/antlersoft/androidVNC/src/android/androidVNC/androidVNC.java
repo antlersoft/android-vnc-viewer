@@ -209,7 +209,7 @@ public class androidVNC extends Activity {
 				break;
 			}
 		}
-		updateRepeaterInfo(selected.getRepeaterId());
+		updateRepeaterInfo(selected.getUseRepeater(), selected.getRepeaterId());
 	}
 	
 	/**
@@ -217,9 +217,9 @@ public class androidVNC extends Activity {
 	 * Repeater dialog to update the repeater information shown.
 	 * @param repeaterId If null or empty, show text for not using repeater
 	 */
-	void updateRepeaterInfo(String repeaterId)
+	void updateRepeaterInfo(boolean useRepeater, String repeaterId)
 	{
-		if (repeaterId != null && repeaterId.length() > 0)
+		if (useRepeater)
 		{
 			repeaterText.setText(repeaterId);
 			repeaterTextSet = true;
@@ -253,10 +253,11 @@ public class androidVNC extends Activity {
 		if (repeaterTextSet)
 		{
 			selected.setRepeaterId(repeaterText.getText().toString());
+			selected.setUseRepeater(true);
 		}
 		else
 		{
-			selected.setRepeaterId("");
+			selected.setUseRepeater(false);
 		}
 	}
 	

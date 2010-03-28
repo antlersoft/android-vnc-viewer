@@ -242,7 +242,7 @@ public class VncCanvas extends ImageView {
 		if (LOCAL_LOGV) Log.v(TAG, "Connected to server");
 
 		// <RepeaterMagic>
-		if (connection.getRepeaterId() != null && connection.getRepeaterId().length()>0) {
+		if (connection.getUseRepeater() && connection.getRepeaterId() != null && connection.getRepeaterId().length()>0) {
 			Log.i(TAG, "Negotiating repeater/proxy connection");
 			byte[] protocolMsg = new byte[12];
 			rfb.is.read(protocolMsg);
