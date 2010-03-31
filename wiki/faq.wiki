@@ -14,9 +14,9 @@
   * For PC's: [http://www.tightvnc.com/winst.html TightVNC setup]
   * For Mac's: [http://www.macminicolo.net/Mac_VNC_tutor.html Apple remote desktop sharing]
 
-== 1. I can run it fine over WiFi-- how do I get it to work over my carrier network?
+== 1. I can run it fine over WiFi-- how do I get it to work over my carrier network? ==
 
-  android-vnc-viewer works fine over 3g and Edge networks (Edge can be slow-- consider a smaller bit depth).  You need to set the Address field to the [i]public internet address[/i] of the PC you're trying to control.  If the PC you're connecting to accesses the internet through a router, this will be the WAN address assigned to the router by your ISP; you'll also need to forward the VNC port (5900) from the router to your PC (exactly how you do this depends on the details of your router, so I can't give more explicit instructions here).
+  android-vnc-viewer works fine over 3g and Edge networks (Edge can be slow-- consider a smaller bit depth).  You need to set the Address field to the _public internet address_ of the PC you're trying to control.  If the PC you're connecting to accesses the internet through a router, this will be the WAN address assigned to the router by your ISP; you'll also need to forward the VNC port (5900) from the router to your PC (exactly how you do this depends on the details of your router, so I can't give more explicit instructions here).
 
   If your PC is on a network separated from the public internet by systems you can't control (it's on a corporate network), you might not be able to use android-vnc-server to control it from your carrier network.  You might have to use one of the commercial Android products (like PhoneMyPC) that support connections over their own public servers.
 

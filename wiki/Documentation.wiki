@@ -30,7 +30,7 @@ The bottom section of the page is where you enter your connection configurations
 
   _*Use repeater*_ Press this button if you are using an UltraVNC repeater to
   connect to your VNC server.  In this case, you should have entered the
-  address and the port of the [i]repeater[/i] in those fields; in the repeater dialog you should enter the VNC server address from the repeater and the screen id or port number, separated by colons.
+  address and the port of the _repeater_ in those fields; in the repeater dialog you should enter the VNC server address from the repeater and the screen id or port number, separated by colons.
 
 The menu on this page allows you to _Delete_ unneeded connection configurations;
 to _Save as Copy_ an existing connection to base a different configuration from it; or to open this _Manual/Wiki_.
