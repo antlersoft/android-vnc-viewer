@@ -14,7 +14,7 @@
   * For PC's: [http://www.tightvnc.com/winst.html TightVNC setup]
   * For Mac's: [http://www.macminicolo.net/Mac_VNC_tutor.html Apple remote desktop sharing]
 
-== 1. I can run it fine over WiFi-- how do I get it to work over my carrier network? ==
+== 1. I can run it fine over wifi-- how do I get it to work over my carrier network? ==
 
   android-vnc-viewer works fine over 3g and Edge networks (Edge can be slow-- consider a smaller bit depth).  You need to set the Address field to the _public internet address_ of the PC you're trying to control.  If the PC you're connecting to accesses the internet through a router, this will be the WAN address assigned to the router by your ISP; you'll also need to forward the VNC port (5900) from the router to your PC (exactly how you do this depends on the details of your router, so I can't give more explicit instructions here).
 
@@ -88,7 +88,7 @@
 
 == 8. How do I get it to work with my repeater? ==
 
-  Put the address and port of the repeater server (repeater port is typically 5901) in the configuration.  Then put the behind-the-repeater host and port in the repeater info, which you access by pressing the "Use repeater" button
+  Put the address and port of the repeater server (repeater port is typically 5901) in the configuration.  Then put the behind-the-repeater host and port in the repeater info, which you access by pressing the _Repeater_ button
   on the configuration screen (scroll down to see it...)
 
 == 9. How do I connect to VNC from 3G without opening an insecure port to the internet? ==
