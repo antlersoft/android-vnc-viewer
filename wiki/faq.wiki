@@ -37,7 +37,10 @@
 
   Working with large PC screens can require more RAM than Android
   allows any one app to have.  To work around this, android-vnc-viewer breaks
-  large PC screens into smaller chunks that will fit into its memory.  This
+  large PC screens into smaller chunks that will fit into its memory.
+  In normal operation you will see a patch of green that indicates
+  that an update from the server has overlapped a tile and needs
+  to be retransmitted.  This
   works very well with some VNC servers and less well with others; in
   particular the built-in VNCs for OS/X and Ubuntu won't always retransmit
   sections of the screen on request, leaving you with a green screen (or
