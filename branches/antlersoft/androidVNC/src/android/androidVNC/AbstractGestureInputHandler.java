@@ -10,6 +10,8 @@ import android.view.MotionEvent;
 import com.antlersoft.android.bc.BCFactory;
 
 /**
+ * An AbstractInputHandler that uses GestureDetector to detect standard gestures in touch events
+ * 
  * @author Michael A. MacDonald
  */
 abstract class AbstractGestureInputHandler extends GestureDetector.SimpleOnGestureListener implements AbstractInputHandler {

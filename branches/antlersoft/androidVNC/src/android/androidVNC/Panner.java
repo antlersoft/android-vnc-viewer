@@ -14,11 +14,11 @@ import android.util.Log;
  */
 class Panner implements Runnable {
 	
-	private VncCanvasActivity activity;
-	private Handler handler;
-	private PointF velocity;
-	private long lastSent;
-	private VelocityUpdater updater;
+	VncCanvasActivity activity;
+	Handler handler;
+	PointF velocity;
+	long lastSent;
+	VelocityUpdater updater;
 	
 	private static final String TAG = "PANNER";
 	

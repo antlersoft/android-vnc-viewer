@@ -99,7 +99,7 @@ public class VncCanvas extends ImageView {
 	/**
 	 * Use camera button as meta key for right mouse button
 	 */
-	private boolean cameraButtonDown = false;
+	boolean cameraButtonDown = false;
 	
 	// Keep track when a seeming key press was the result of a menu shortcut
 	int lastKeyDown;
@@ -812,24 +812,23 @@ public class VncCanvas extends ImageView {
 	 * @return true if event was actually sent
 	 */
 	public boolean processPointerEvent(MotionEvent evt,boolean downEvent,boolean useRightButton) {
+		return processPointerEvent((int)evt.getX(),(int)evt.getY(), evt.getAction(), evt.getMetaState(), downEvent, useRightButton);
+	}
+	
+	boolean processPointerEvent(int x, int y, int action, int modifiers, boolean mouseIsDown, boolean useRightButton) {
 		if (rfb != null && rfb.inNormalProtocol) {
-		    int modifiers = evt.getMetaState();
-
-		    if (evt.getAction() == MotionEvent.ACTION_DOWN || (downEvent && evt.getAction() == MotionEvent.ACTION_MOVE)) {
+		    if (action == MotionEvent.ACTION_DOWN || (mouseIsDown && action == MotionEvent.ACTION_MOVE)) {
 		      if (useRightButton) {
 		        pointerMask = MOUSE_BUTTON_RIGHT;
-//		      } else if ((modifiers & KeyEvent.META_SYM_ON) != 0) {
-//		        pointerMask = mask3;
-//		        modifiers &= ~META_MASK;
 		      } else {
 		        pointerMask = MOUSE_BUTTON_LEFT;
 		      }
-		    } else if (evt.getAction() == MotionEvent.ACTION_UP) {
+		    } else if (action == MotionEvent.ACTION_UP) {
 		      pointerMask = 0;
 		    }
 		    bitmapData.invalidateMousePosition();
-		    mouseX=(int)evt.getX();
-		    mouseY=(int)evt.getY();
+		    mouseX= x;
+		    mouseY= y;
 		    if ( mouseX<0) mouseX=0;
 		    else if ( mouseX>=rfb.framebufferWidth) mouseX=rfb.framebufferWidth-1;
 		    if ( mouseY<0) mouseY=0;
@@ -843,7 +842,7 @@ public class VncCanvas extends ImageView {
 		    panToMouse();
 			return true;
 		}
-		return false;
+		return false;		
 	}
 	
 	/**
