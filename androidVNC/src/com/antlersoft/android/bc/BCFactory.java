@@ -16,6 +16,7 @@ public class BCFactory {
 	private IBCActivityManager bcActivityManager;
 	private IBCGestureDetector bcGestureDetector;
 	private IBCHaptic bcHaptic;
+	private IBCMotionEvent bcMotionEvent;
 	
 	/**
 	 * This is here so checking the static doesn't get optimized away;
@@ -146,6 +147,46 @@ public class BCFactory {
 			}
 		}
 		return bcHaptic;
+	}
+	
+	/**
+	 * Return the implementation of IBCMotionEvent appropriate for this SDK level
+	 * @return
+	 */
+	public IBCMotionEvent getBCMotionEvent()
+	{
+		if (bcMotionEvent == null)
+		{
+			synchronized (this)
+			{
+				if (bcMotionEvent == null)
+				{
+					if (getSdkVersion() >= 5)
+					{
+						try
+						{
+							bcMotionEvent = (IBCMotionEvent)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCMotionEvent5").newInstance();
+						}
+						catch (Exception ie)
+						{
+							throw new RuntimeException("Error instantiating", ie);
+						}
+					}
+					else
+					{
+						try
+						{
+							bcMotionEvent = (IBCMotionEvent)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCMotionEvent4").newInstance();
+						}
+						catch (Exception ie)
+						{
+							throw new RuntimeException("Error instantiating", ie);
+						}
+					}
+				}
+			}
+		}
+		return bcMotionEvent;
 	}
 	
 	/**

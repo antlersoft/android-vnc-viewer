@@ -67,15 +67,16 @@ public class VncCanvasActivity extends Activity {
 		private boolean dragMode;
 		
 		/**
-		 * Mouse is down during mouse move with d-pad
+		 * Key handler delegate that handles DPad-based mouse motion
 		 */
-		private boolean mousedown;
+		private DPadMouseKeyHandler keyHandler;
 
 		/**
 		 * @param c
 		 */
 		ZoomInputHandler() {
 			super(VncCanvasActivity.this);
+			keyHandler = new DPadMouseKeyHandler(VncCanvasActivity.this,vncCanvas.handler);
 		}
 
 		/*
@@ -107,43 +108,7 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public boolean onKeyDown(int keyCode, KeyEvent evt) {
-			int xv = 0;
-			int yv = 0;
-			boolean result = true;
-			int action = MotionEvent.ACTION_MOVE;
-			switch (keyCode) {
-			case KeyEvent.KEYCODE_DPAD_LEFT:
-				xv = -1;
-				break;
-			case KeyEvent.KEYCODE_DPAD_RIGHT:
-				xv = 1;
-				break;
-			case KeyEvent.KEYCODE_DPAD_UP:
-				yv = -1;
-				break;
-			case KeyEvent.KEYCODE_DPAD_DOWN:
-				yv = 1;
-				break;
-			case KeyEvent.KEYCODE_DPAD_CENTER:
-				if (!mousedown) {
-					mousedown = true;
-					action = MotionEvent.ACTION_DOWN;
-				}
-				break;
-			default:
-				return defaultKeyDownHandler(keyCode, evt);
-			}
-			long tm = SystemClock.uptimeMillis();
-			vncCanvas.mouseX += xv;
-			vncCanvas.mouseY += yv;
-			MotionEvent me = MotionEvent.obtain(tm, tm, action,
-					vncCanvas.mouseX, vncCanvas.mouseY, evt.getMetaState());
-			try {
-				result = vncCanvas.processPointerEvent(me, mousedown);
-			} finally {
-				me.recycle();
-			}
-			return result;
+			return keyHandler.onKeyDown(keyCode, evt);
 		}
 
 		/*
@@ -154,30 +119,7 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public boolean onKeyUp(int keyCode, KeyEvent evt) {
-			boolean result = true;
-			switch (keyCode) {
-			case KeyEvent.KEYCODE_DPAD_LEFT:
-			case KeyEvent.KEYCODE_DPAD_RIGHT:
-			case KeyEvent.KEYCODE_DPAD_UP:
-			case KeyEvent.KEYCODE_DPAD_DOWN:
-				break;
-			case KeyEvent.KEYCODE_DPAD_CENTER:
-				if (mousedown) {
-					mousedown = false;
-					long tm = SystemClock.uptimeMillis();
-					MotionEvent me = MotionEvent.obtain(tm, tm, MotionEvent.ACTION_UP,
-							vncCanvas.mouseX, vncCanvas.mouseY, evt.getMetaState());
-					try {
-						result = vncCanvas.processPointerEvent(me, mousedown);
-					} finally {
-						me.recycle();
-					}
-				}
-				break;
-			default:
-				result = defaultKeyUpHandler(keyCode, evt);
-			}
-			return result;
+			return keyHandler.onKeyUp(keyCode, evt);
 		}
 
 		/*
@@ -1320,7 +1262,7 @@ public class VncCanvasActivity extends Activity {
 				result = true;
 				break;
 			default:
-				result = defaultKeyDownHandler(keyCode, evt);
+				result = defaultKeyUpHandler(keyCode, evt);
 				break;
 			}
 			return result;
