@@ -3,7 +3,6 @@
  */
 package android.androidVNC;
 
-import android.view.MotionEvent;
 import android.widget.ImageView;
 
 /**
