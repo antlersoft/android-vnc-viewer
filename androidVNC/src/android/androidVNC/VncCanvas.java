@@ -582,6 +582,7 @@ public class VncCanvas extends ImageView {
 		}
 		if ( newX != absoluteXPosition ) {
 			absoluteXPosition = newX;
+			panned = true;
 		}
 		if (y - newY >= (9 * h) / 10)
 		{
