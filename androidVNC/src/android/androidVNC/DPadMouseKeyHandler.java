@@ -72,7 +72,7 @@ class DPadMouseKeyHandler {
 				 */
 				@Override
 				public boolean updateVelocity(PointF p, long interval) {
-					double scale = (2.0 * (double) interval / 50.0);
+					double scale = (1.2 * (double) interval / 50.0);
 					if (Math.abs(p.x) < 500)
 						p.x += (int) (scale * x);
 					if (Math.abs(p.y) < 500)
