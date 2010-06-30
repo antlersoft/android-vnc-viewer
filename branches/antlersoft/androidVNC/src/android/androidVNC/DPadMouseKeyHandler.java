@@ -5,7 +5,6 @@ package android.androidVNC;
 
 import android.graphics.PointF;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
