@@ -54,4 +54,5 @@
 <string name="send_key_again">Ripeti invio tasto</string>
 <string name="shift_check">Shift</string>
 <string name="special_keys">Invia tasti</string>
+<string name="input_mode_touchpad">Touchpad</string>
 </resources>

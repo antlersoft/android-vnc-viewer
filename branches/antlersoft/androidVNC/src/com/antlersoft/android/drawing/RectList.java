@@ -8,7 +8,6 @@ import android.graphics.Rect;
 import java.util.ArrayList;
 
 import com.antlersoft.util.ObjectPool;
-import com.antlersoft.util.ObjectPool.Entry;
 
 /**
  * A list of rectangular regions that together represent an area of interest.  Provides
