@@ -498,17 +498,6 @@ public class VncCanvasActivity extends Activity {
 			return true;
 		}
 
-		/**
-		 * initialX and initialY keeps track of the (x, y) coordinates of the first
-		 * touch, down event. It is used later to determine whether a long press
-		 * is truely a long press. In this input mode, touch down event has to be
-		 * stable to qualify as a long press event.
-		 * By the way, long press event is interpreted as the start of dragging event in this
-		 * input mode (touchpad).
-		 */
-		private int initialX = -1;
-		private int initialY = -1;
-		
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -516,19 +505,6 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public boolean onTouchEvent(MotionEvent e) {
-			// set and reset the initialX, initialY variables;
-			if (initialX < 0) {
-				if (e.getAction()==MotionEvent.ACTION_DOWN) {
-					initialX = (int)e.getX();
-					initialY = (int)e.getY();
-				}
-			} else {
-				if (e.getAction()==MotionEvent.ACTION_UP) {
-					initialX = -1;
-					initialY = -1;
-				}
-			}
-			
 			// remember the new position.
 			float newX = e.getX();
 			float newY = e.getY();
@@ -958,20 +934,6 @@ public class VncCanvasActivity extends Activity {
 			result = getInputHandlerById(R.id.itemInputTouchPanZoomMouse);
 		}
 		return result;
-	}
-
-	
-	@Override
-	public void onBackPressed() {
-		if (TOUCHPAD_MODE.equals(vncCanvas.connection.getInputMode())) {
-			// in touch pad mode, back button will do a right mouse click.
-			MotionEvent e = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, vncCanvas.mouseX, vncCanvas.mouseY, 0);
-			vncCanvas.processPointerEvent(e, true, true);
-			e.setAction(MotionEvent.ACTION_UP);
-		    vncCanvas.processPointerEvent(e, false, true);
-		    return;
-		}
-		super.onBackPressed();
 	}
 
 	@Override
