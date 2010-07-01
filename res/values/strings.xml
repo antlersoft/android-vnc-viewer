@@ -32,7 +32,7 @@
 <string name="input_mode_touchpad_pan_trackball_mouse">Touch Pan; Trackball Mouse</string>
 <string name="input_mode_dpad_pan_touchpad_mouse">Touch Mouse; D-Pad Pan</string>
 <string name="input_mode_touch_pan_zoom_mouse">Touch Mouse Pan and Zoom</string>
-<string name="keep_password_button">Keep</string>
+<string name="input_mode_touchpad">Touchpad</string><string name="keep_password_button">Keep</string>
 <string name="keys_caption">Keys</string>
 <string name="list_caption">List</string>
 <string name="list_name_caption">List Name</string>
@@ -61,4 +61,5 @@
 <string name="shift_check">Shift</string>
 <string name="shortcut_label">VNC Connection</string>
 <string name="special_keys">Send Keys</string>
+
 </resources>

@@ -555,8 +555,17 @@ public class VncCanvas extends ImageView {
 	 */
 	void panToMouse()
 	{
-		if (! connection.getFollowMouse() || (scaling != null && ! scaling.isAbleToPan()))
+		if (VncCanvasActivity.TOUCHPAD_MODE.equals(connection.getInputMode())) {
+			panToMouseTouchPad();
 			return;
+		}
+
+		if (! connection.getFollowMouse())
+			return;
+		
+		if (scaling != null && ! scaling.isAbleToPan())
+			return;
+			
 		int x = mouseX;
 		int y = mouseY;
 		boolean panned = false;
@@ -582,6 +591,7 @@ public class VncCanvas extends ImageView {
 		}
 		if ( newX != absoluteXPosition ) {
 			absoluteXPosition = newX;
+			panned = true;
 		}
 		if (y - newY >= (9 * h) / 10)
 		{
@@ -605,6 +615,66 @@ public class VncCanvas extends ImageView {
 		}
 	}
 	
+	/**
+	 * A pan method designed for touchpad mode. This one allows fine pan when the mouse
+	 * is pushing the edge of the touch screen.
+	 */
+	private void panToMouseTouchPad() {
+		if (scaling != null && ! scaling.isAbleToPan())
+			return;
+			
+
+		int x = mouseX;
+		int y = mouseY;
+		boolean panned = false;
+		int w = getVisibleWidth();
+		int h = getVisibleHeight();
+		int iw = getImageWidth();
+		int ih = getImageHeight();
+		
+		int newX = absoluteXPosition;
+		int newY = absoluteYPosition;
+		
+		if (x - newX >= w - 5)
+		{
+			newX = x - w + 5;
+			if (newX + w > iw)
+				newX = iw - w;
+		}
+		else if (x < newX + 5)
+		{
+			newX = x - 5;
+			if (newX < 0)
+				newX = 0;
+		}
+		if ( newX != absoluteXPosition ) {
+			absoluteXPosition = newX;
+			panned = true;
+		}
+		if (y - newY >= h - 5)
+		{
+			newY = y - h + 5;
+			if (newY + h > ih)
+				newY = ih - h;
+		}
+		else if (y < newY + 5)
+		{
+			newY = y - 5;
+			if (newY < 0)
+				newY = 0;
+		}
+		if ( newY != absoluteYPosition ) {
+			absoluteYPosition = newY;
+			panned = true;
+		}
+		if (panned)
+		{
+			scrollToAbsolute();
+		}
+
+		
+	}
+
 	/**
 	 * Pan by a number of pixels (relative pan)
 	 * @param dX
