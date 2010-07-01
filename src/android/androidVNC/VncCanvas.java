@@ -56,8 +56,6 @@
 
 package android.androidVNC;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.zip.Inflater;
 
