@@ -54,4 +54,5 @@
 <string name="send_key_again">キーを繰り返す</string>
 <string name="shift_check">Shift</string>
 <string name="special_keys">特殊キー</string>
+<string name="input_mode_touchpad">Touchpad</string>
 </resources>
