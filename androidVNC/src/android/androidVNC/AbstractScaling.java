@@ -90,7 +90,7 @@ abstract class AbstractScaling {
 		activity.vncCanvas.scaling = this;
 		activity.vncCanvas.setScaleType(scaleType);
 		activity.getConnection().setScaleMode(scaleType);
-		if (activity.inputHandler == null) {
+		if (activity.inputHandler == null || ! isValidInputMode(activity.getModeIdFromHandler(activity.inputHandler))) {
 			activity.inputHandler=activity.getInputHandlerById(getDefaultHandlerId());
 			activity.getConnection().setInputMode(activity.inputHandler.getName());
 		}

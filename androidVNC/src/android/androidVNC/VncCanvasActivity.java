@@ -817,6 +817,14 @@ public class VncCanvasActivity extends Activity {
 		}
 		return result;
 	}
+	
+	int getModeIdFromHandler(AbstractInputHandler handler) {
+		for (int id : inputModeIds) {
+			if (handler == getInputHandlerById(id))
+				return id;
+		}
+		return R.id.itemInputTouchPanZoomMouse;
+	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
