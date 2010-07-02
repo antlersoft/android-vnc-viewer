@@ -1,32 +1,5 @@
 //
-//  Copyright (C) 2004 Horizon Wimba.  All Rights Reserved.
-//  Copyright (C) 2001-2003 HorizonLive.com, Inc.  All Rights Reserved.
-//  Copyright (C) 2001,2002 Constantin Kaplinsky.  All Rights Reserved.
-//  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
-//  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
-//
-//  This is free software; you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation; either version 2 of the License, or
-//  (at your option) any later version.
-//
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
-//  USA.
-//
-
-//
-// VncCanvas is a subclass of android.view.ImageView which draws a VNC
-// desktop on it.
-//
-
-//
+//  Copyright (C) 2010 Michael A. MacDonald
 //  Copyright (C) 2004 Horizon Wimba.  All Rights Reserved.
 //  Copyright (C) 2001-2003 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 2001,2002 Constantin Kaplinsky.  All Rights Reserved.
