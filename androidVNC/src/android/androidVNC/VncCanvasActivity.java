@@ -586,20 +586,31 @@ public class VncCanvasActivity extends Activity {
 		connection = new ConnectionBean();
 		Uri data = i.getData();
 		if ((data != null) && (data.getScheme().equals("vnc"))) {
-		    connection.setAddress(data.getHost());
-		    connection.setNickname(connection.getAddress());
-		    connection.setPort(data.getPort());
-		    List<String> path = data.getPathSegments();
-		    if (path.size() >= 1) {
-		        connection.setColorModel(path.get(0));
-		    }
-		    if (path.size() >= 2) {
-		        connection.setPassword(path.get(1));
-		    }
-		    connection.save(database.getWritableDatabase());
+			if (data.getHost().equals(VncConstants.CONNECTION))
+			{
+				connection.Gen_read(database.getReadableDatabase(), data.getPort());
+			}
+			else
+			{
+			    connection.setAddress(data.getHost());
+			    connection.setNickname(connection.getAddress());
+			    connection.setPort(data.getPort());
+			    List<String> path = data.getPathSegments();
+			    if (path.size() >= 1) {
+			        connection.setColorModel(path.get(0));
+			    }
+			    if (path.size() >= 2) {
+			        connection.setPassword(path.get(1));
+			    }
+			    connection.save(database.getWritableDatabase());
+			}
 		} else {
 		
-		    Bundle extras = getIntent().getExtras();
+		    Bundle extras = i.getExtras();
+		    
+		    Log.i(TAG,extras == null ? "extras is null" : extras.toString());
+		    Log.i(TAG,icicle == null ? "icicle is null" : "icicle not null " + icicle.toString());
+		    Log.i(TAG,data == null ? "data is null" : data.toString());
 
 	  	    connection.Gen_populate((ContentValues) extras
 			  	.getParcelable(VncConstants.CONNECTION));
@@ -946,11 +957,6 @@ public class VncCanvasActivity extends Activity {
 	public boolean onKeyDown(int keyCode, KeyEvent evt) {
 		if (keyCode == KeyEvent.KEYCODE_MENU)
 			return super.onKeyDown(keyCode, evt);
-
-		if (keyCode == KeyEvent.KEYCODE_BACK && evt.getRepeatCount() == 0) {
-			onBackPressed();
-			return true;
-	    }
 
 		return inputHandler.onKeyDown(keyCode, evt);
 	}

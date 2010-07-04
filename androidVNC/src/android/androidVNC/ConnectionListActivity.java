@@ -22,6 +22,7 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.content.Intent.ShortcutIconResource;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
@@ -97,7 +98,10 @@ public class ConnectionListActivity extends ListActivity {
             Intent intent = new Intent();
             
             Intent launchIntent = new Intent(this,VncCanvasActivity.class);
-            launchIntent.putExtra(VncConstants.CONNECTION,connection.Gen_getValues());
+            Uri.Builder builder = new Uri.Builder();
+            builder.authority(VncConstants.CONNECTION + ":" + connection.get_Id());
+            builder.scheme("vnc");
+            launchIntent.setData(builder.build());
             
             intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, launchIntent);
             intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, connection.getNickname());
