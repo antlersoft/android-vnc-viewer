@@ -63,7 +63,9 @@ to the VNC display, to enable a style of interaction most convenient for the app
 you are using.
 You can switch between these modes with the _Input Mode_ (Menu-P) menu item.
 
-  _Touch Mouse Pan and Zoom_ This is the default input mode and is designed to work like the Android browser.  You can both pan the display and control the mouse using the touchscreen and gestures. You pan by dragging or flicking on the touchscreen; you click the mouse by tapping on it. You right-click by double-tapping (or by holding down the camera button while tapping). You drag the mouse by doing a long press on the display, and then dragging.  In this mode the trackball (if your phone has one) can also be used to control the mouse; this may give you finer control.
+  _Touch Mouse Pan and Zoom_ This is the default input mode and is designed to work like the Android browser.  You can both pan the display and control the mouse using the touchscreen and gestures. You pan by dragging or flicking on the touchscreen; you click the mouse by tapping on it. You right-click by double-tapping (or by holding down the camera button while tapping). You drag the mouse by doing a long press on the display, and then dragging.  In this mode the trackball or DPad (if your phone has one) can also be used to control the mouse; this may give you finer control.
+
+  _Touchpad Mode_ This is the alternate gesture-based interface.  In this mode, touching the screen moves the mouse cursor like a mouse touchpad.  The screen will pan to follow the mouse (unless you turn it off).  Tapping the screen clicks the mouse, where it is rather than where you tap.  For multi-touch capable devices, drag two fingers to pan the screen independent of the mouse position.  Otherwise, it works like Touch Mouse Pan and Zoom.
 
   _No Pan; Trackball Mouse_ This mode is only available in [#Scaling Fit to Screen] scaling and is the only input mode available then.  In this mode the touchscreen is not used.  Keyboard events are sent to the server and the trackball (if your device, like the G1, has a trackball) controls the VNC mouse.
 
