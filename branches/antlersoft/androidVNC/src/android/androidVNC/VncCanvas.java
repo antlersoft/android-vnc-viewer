@@ -686,7 +686,8 @@ public class VncCanvas extends ImageView {
 				showDesktopInfo = false;
 				showConnectionInfo();
 			}
-			bitmapData.updateView(VncCanvas.this);
+			if (bitmapData != null)
+				bitmapData.updateView(VncCanvas.this);
 		}
 	};
 	
