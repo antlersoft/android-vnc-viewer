@@ -548,13 +548,11 @@ public class VncCanvasActivity extends Activity {
 		} else {
 		
 		    Bundle extras = i.getExtras();
-		    
-		    Log.i(TAG,extras == null ? "extras is null" : extras.toString());
-		    Log.i(TAG,icicle == null ? "icicle is null" : "icicle not null " + icicle.toString());
-		    Log.i(TAG,data == null ? "data is null" : data.toString());
 
-	  	    connection.Gen_populate((ContentValues) extras
-			  	.getParcelable(VncConstants.CONNECTION));
+		    if (extras != null) {
+		  	    connection.Gen_populate((ContentValues) extras
+				  	.getParcelable(VncConstants.CONNECTION));
+		    }
 		    if (connection.getPort() == 0)
 			    connection.setPort(5900);
 
@@ -682,7 +680,8 @@ public class VncCanvasActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.vnccanvasactivitymenu, menu);
 
-		menu.findItem(vncCanvas.scaling.getId()).setChecked(true);
+		if (vncCanvas.scaling != null)
+			menu.findItem(vncCanvas.scaling.getId()).setChecked(true);
 
 		Menu inputMenu = menu.findItem(R.id.itemInputMode).getSubMenu();
 
