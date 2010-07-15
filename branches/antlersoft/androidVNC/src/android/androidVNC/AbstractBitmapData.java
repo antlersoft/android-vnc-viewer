@@ -35,6 +35,8 @@ abstract class AbstractBitmapData {
 	{
 		rfb=p;
 		vncCanvas = c;
+		framebufferwidth=rfb.framebufferWidth;
+		framebufferheight=rfb.framebufferHeight;
 	}
 	
 	synchronized void doneWaiting()
