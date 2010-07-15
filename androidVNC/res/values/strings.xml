@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">androidVNC</string>
+<string name="input_mode_panning">Desktop Panning Mode</string>
+<string name="input_mode_mouse">Mouse Pointer Control Mode</string>
+<string name="input_mode_fit_to_screen">No Pan; Trackball Mouse</string>
+<string name="input_mode_touchpad_pan_trackball_mouse">Touch Pan; Trackball Mouse</string>
+<string name="info">Info</string>
+<string name="color_mode">Color Mode</string>
+<string name="scaling">Scaling</string>
+<string name="disconnect">Disconnect</string>
+<string name="input_mode">Input Mode</string>
+<string name="one_to_one">1:1</string>
+<string name="center_mouse">Mouse @</string>
+<string name="fit_to_screen">Fit to Screen</string>
+<string name="ctrl_alt_del">Ctrl-Alt-Del</string>
+    <string name="menu_new">new</string>
+    <string name="menu_edit">edit</string>
+    <string name="menu_delete">delete</string>
+</resources>
