@@ -27,7 +27,7 @@ public class BCFactory {
 	{
 		try
 		{
-		 return Integer.parseInt(android.os.Build.VERSION.SDK);
+			return Integer.parseInt(android.os.Build.VERSION.SDK);
 		}
 		catch (NumberFormatException nfe)
 		{
@@ -71,6 +71,8 @@ public class BCFactory {
 	
 	/**
 	 * Return the implementation of IBCGestureDetector appropriate for this SDK level
+	 * 
+	 * Since we dropped support of SDK levels < 3, there is only one version at the moment.
 	 * @return
 	 */
 	public IBCGestureDetector getBCGestureDetector()
@@ -81,27 +83,13 @@ public class BCFactory {
 			{
 				if (bcGestureDetector == null)
 				{
-					if (getSdkVersion() >= 3)
+					try
 					{
-						try
-						{
-							bcGestureDetector = (IBCGestureDetector)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCGestureDetectorDefault").newInstance();
-						}
-						catch (Exception ie)
-						{
-							throw new RuntimeException("Error instantiating", ie);
-						}
+						bcGestureDetector = (IBCGestureDetector)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCGestureDetectorDefault").newInstance();
 					}
-					else
+					catch (Exception ie)
 					{
-						try
-						{
-							bcGestureDetector = (IBCGestureDetector)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCGestureDetectorOld").newInstance();
-						}
-						catch (Exception ie)
-						{
-							throw new RuntimeException("Error instantiating", ie);
-						}
+						throw new RuntimeException("Error instantiating", ie);
 					}
 				}
 			}
@@ -111,6 +99,8 @@ public class BCFactory {
 	
 	/**
 	 * Return the implementation of IBCHaptic appropriate for this SDK level
+	 * 
+	 * Since we dropped support of SDK levels prior to 3, there is only one version at the moment.
 	 * @return
 	 */
 	public IBCHaptic getBCHaptic()
@@ -121,27 +111,13 @@ public class BCFactory {
 			{
 				if (bcHaptic == null)
 				{
-					if (getSdkVersion() >= 3)
+					try
 					{
-						try
-						{
-							bcHaptic = (IBCHaptic)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCHapticDefault").newInstance();
-						}
-						catch (Exception ie)
-						{
-							throw new RuntimeException("Error instantiating", ie);
-						}
+						bcHaptic = (IBCHaptic)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCHapticDefault").newInstance();
 					}
-					else
+					catch (Exception ie)
 					{
-						try
-						{
-							bcHaptic = (IBCHaptic)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCHapticOld").newInstance();
-						}
-						catch (Exception ie)
-						{
 							throw new RuntimeException("Error instantiating", ie);
-						}
 					}
 				}
 			}
