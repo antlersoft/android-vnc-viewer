@@ -4,10 +4,8 @@
 package android.androidVNC;
 
 import java.io.IOException;
+import java.util.Arrays;
 
-import com.antlersoft.android.drawing.RectList;
-
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -33,6 +31,14 @@ class FullBufferBitmapData extends AbstractBitmapData {
 			// TODO Auto-generated constructor stub
 		}
 
+		/* (non-Javadoc)
+		 * @see android.graphics.drawable.DrawableContainer#draw(android.graphics.Canvas)
+		 */
+		@Override
+		public void draw(Canvas canvas) {
+			canvas.drawBitmap(data.bitmapPixels, 0, data.framebufferwidth, 0, 0, data.framebufferwidth, data.framebufferheight, false, null);
+		}
+
 	}
 
 	/**
@@ -41,12 +47,6 @@ class FullBufferBitmapData extends AbstractBitmapData {
 	 */
 	static final int CAPACITY_MULTIPLIER = 17;
 	
-	int xoffset;
-	int yoffset;
-	int scrolledToX;
-	int scrolledToY;
-	private Rect bitmapRect;
-	private Paint defaultPaint;
 	/**
 	 * @param p
 	 * @param c
@@ -55,12 +55,10 @@ class FullBufferBitmapData extends AbstractBitmapData {
 		super(p, c);
 		framebufferwidth=rfb.framebufferWidth;
 		framebufferheight=rfb.framebufferHeight;
-		bitmapwidth=displayWidth;
-		bitmapheight=displayHeight;
+		bitmapwidth=framebufferwidth;
+		bitmapheight=framebufferheight;
 		android.util.Log.i("FBBM", "bitmapsize = ("+bitmapwidth+","+bitmapheight+")");
-		bitmapPixels = new int[bitmapwidth * bitmapheight];
-		bitmapRect=new Rect(0,0,bitmapwidth,bitmapheight);
-		defaultPaint = new Paint();
+		bitmapPixels = new int[framebufferwidth * framebufferheight];
 	}
 
 	/* (non-Javadoc)
@@ -77,8 +75,7 @@ class FullBufferBitmapData extends AbstractBitmapData {
 	 */
 	@Override
 	AbstractBitmapDrawable createDrawable() {
-		// TODO Auto-generated method stub
-		return null;
+		return new Drawable(this);
 	}
 
 	/* (non-Javadoc)
@@ -86,8 +83,25 @@ class FullBufferBitmapData extends AbstractBitmapData {
 	 */
 	@Override
 	void drawRect(int x, int y, int w, int h, Paint paint) {
-		// TODO Auto-generated method stub
-
+		int color = paint.getColor();
+		int offset = offset(x,y);
+		if (w > 10)
+		{
+			for (int j = 0; j < h; j++, offset += framebufferwidth)
+			{
+				Arrays.fill(bitmapPixels, offset, offset + w, color);
+			}
+		}
+		else
+		{
+			for (int j = 0; j < h; j++, offset += framebufferwidth - w)
+			{
+				for (int k = 0; k < w; k++, offset++)
+				{
+					bitmapPixels[offset] = color;
+				}
+			}
+		}
 	}
 
 	/* (non-Javadoc)
@@ -95,8 +109,7 @@ class FullBufferBitmapData extends AbstractBitmapData {
 	 */
 	@Override
 	int offset(int x, int y) {
-		// TODO Auto-generated method stub
-		return 0;
+		return x + y * framebufferwidth;
 	}
 
 	/* (non-Javadoc)
@@ -104,7 +117,7 @@ class FullBufferBitmapData extends AbstractBitmapData {
 	 */
 	@Override
 	void scrollChanged(int newx, int newy) {
-		// TODO Auto-generated method stub
+		// Don't need to do anything here either
 
 	}
 
@@ -113,7 +126,7 @@ class FullBufferBitmapData extends AbstractBitmapData {
 	 */
 	@Override
 	void syncScroll() {
-		// TODO Auto-generated method stub
+		// Don't need to do anything here
 
 	}
 
@@ -122,7 +135,7 @@ class FullBufferBitmapData extends AbstractBitmapData {
 	 */
 	@Override
 	void updateBitmap(int x, int y, int w, int h) {
-		// TODO Auto-generated method stub
+		// Don't need to do anything here
 
 	}
 
@@ -131,8 +144,7 @@ class FullBufferBitmapData extends AbstractBitmapData {
 	 */
 	@Override
 	boolean validDraw(int x, int y, int w, int h) {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	/* (non-Javadoc)
@@ -140,8 +152,7 @@ class FullBufferBitmapData extends AbstractBitmapData {
 	 */
 	@Override
 	void writeFullUpdateRequest(boolean incremental) throws IOException {
-		// TODO Auto-generated method stub
-
+		rfb.writeFramebufferUpdateRequest(0, 0, framebufferwidth, framebufferheight, incremental);
 	}
 
 }
