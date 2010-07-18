@@ -42,6 +42,7 @@ import android.graphics.Paint.Style;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.widget.ImageView;
@@ -157,11 +158,12 @@ public class VncCanvas extends ImageView {
 				});
 			}
 		});
+		final Display display = pd.getWindow().getWindowManager().getDefaultDisplay();
 		Thread t = new Thread() {
 			public void run() {
 				try {
 					connectAndAuthenticate(connection.getPassword());
-					doProtocolInitialisation();
+					doProtocolInitialisation(display.getWidth(), display.getHeight());
 					handler.post(new Runnable() {
 						public void run() {
 							pd.setMessage("Downloading first frame.\nPlease wait...");
@@ -247,15 +249,13 @@ public class VncCanvas extends ImageView {
 		}
 	}
 
-	void doProtocolInitialisation() throws IOException {
+	void doProtocolInitialisation(int dx, int dy) throws IOException {
 		rfb.writeClientInit();
 		rfb.readServerInit();
 
 		Log.i(TAG, "Desktop name is " + rfb.desktopName);
 		Log.i(TAG, "Desktop size is " + rfb.framebufferWidth + " x " + rfb.framebufferHeight);
 
-		int dx=getWidth();
-		int dy=getHeight();
 		boolean useCompact = connection.getForceFull();
 		int capacity = 0;
 		if (! useCompact)

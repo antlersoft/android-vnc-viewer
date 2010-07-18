@@ -9,6 +9,7 @@ import java.util.Arrays;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.util.Log;
 
 /**
  * @author Michael A. MacDonald
@@ -16,6 +17,10 @@ import android.graphics.Rect;
  */
 class FullBufferBitmapData extends AbstractBitmapData {
 
+	int xoffset;
+	int yoffset;
+	int displaywidth;
+	int displayheight;
 	
 	/**
 	 * @author Michael A. MacDonald
@@ -36,7 +41,8 @@ class FullBufferBitmapData extends AbstractBitmapData {
 		 */
 		@Override
 		public void draw(Canvas canvas) {
-			canvas.drawBitmap(data.bitmapPixels, 0, data.framebufferwidth, 0, 0, data.framebufferwidth, data.framebufferheight, false, null);
+			Log.i("FBBM", "xoffset "+xoffset+" yoffset "+ yoffset);
+			canvas.drawBitmap(data.bitmapPixels, offset(xoffset, yoffset), data.framebufferwidth, xoffset, yoffset, displaywidth, displayheight, false, null);
 		}
 
 	}
@@ -57,7 +63,9 @@ class FullBufferBitmapData extends AbstractBitmapData {
 		framebufferheight=rfb.framebufferHeight;
 		bitmapwidth=framebufferwidth;
 		bitmapheight=framebufferheight;
-		android.util.Log.i("FBBM", "bitmapsize = ("+bitmapwidth+","+bitmapheight+")");
+		displaywidth = displayWidth;
+		displayheight = displayHeight;
+		android.util.Log.i("FBBM", "bitmapsize = ("+bitmapwidth+","+bitmapheight+") display = ( "+displaywidth+ "," + displayheight+ ")");
 		bitmapPixels = new int[framebufferwidth * framebufferheight];
 	}
 
@@ -117,8 +125,8 @@ class FullBufferBitmapData extends AbstractBitmapData {
 	 */
 	@Override
 	void scrollChanged(int newx, int newy) {
-		// Don't need to do anything here either
-
+		xoffset = newx;
+		yoffset = newy;
 	}
 
 	/* (non-Javadoc)
