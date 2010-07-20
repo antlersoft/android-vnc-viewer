@@ -9,6 +9,7 @@
     <string name="arrow_up">Up Arrow</string>
     <string name="button_send_text">Send Text</string>
 <string name="center_mouse">Mouse @</string>
+<string name="close">Close</string>
 <string name="color_format_caption">Color Format</string>
 <string name="color_mode">Color Mode</string>
 <string name="connect_button">Connect</string>
@@ -25,6 +26,9 @@
 <string name="fit_to_screen">Fit to Screen</string>
 <string name="force_full_check">Force full-screen bitmap</string>
 <string name="info">Info</string>
+<string name="intro_text">If you need help, please check the &lt;a href="http://code.google.com/p/android-vnc-viewer/wiki/Documentation"&gt;manual&lt;/a&gt; (press Menu button on config page), or the &lt;a href="http://code.google.com/p/android-vnc-viewer/wiki/faq"&gt;FAQ&lt;/a&gt;.&lt;br&gt;</string>
+<string name="intro_title">Welcome</string>
+<string name="intro_version_text">&lt;br&gt;--Intro dialog; French translation (except for this page); Bug fixes, including green screen fix</string>
 <string name="input_mode">Input Mode</string>
 <string name="input_mode_fit_to_screen">No Pan; Trackball Mouse</string>
 <string name="input_mode_mouse">Mouse Pointer Control Mode</string>
@@ -33,6 +37,7 @@
 <string name="input_mode_dpad_pan_touchpad_mouse">Touch Mouse; D-Pad Pan</string>
 <string name="input_mode_touch_pan_zoom_mouse">Touch Mouse Pan and Zoom</string>
 <string name="input_mode_touchpad">Touchpad</string><string name="keep_password_button">Keep</string>
+<string name="intro_dont_show">Don\'t show again</string>
 <string name="keys_caption">Keys</string>
 <string name="list_caption">List</string>
 <string name="list_name_caption">List Name</string>

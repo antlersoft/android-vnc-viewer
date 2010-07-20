@@ -457,11 +457,12 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent e) {
+			boolean multiTouch = (BCFactory.getInstance().getBCMotionEvent().getPointerCount(e) > 1);
 			remoteMouseStayPut(e);
             
-			vncCanvas.processPointerEvent(e, true);
+			vncCanvas.processPointerEvent(e, true, multiTouch||vncCanvas.cameraButtonDown);
 			e.setAction(MotionEvent.ACTION_UP);
-			return vncCanvas.processPointerEvent(e, false);
+			return vncCanvas.processPointerEvent(e, false, multiTouch||vncCanvas.cameraButtonDown);
 		}
 
 		/*

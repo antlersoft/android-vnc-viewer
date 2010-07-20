@@ -15,4 +15,8 @@ public interface IMostRecentBean {
 	long get_Id();
 	@FieldAccessor(Name="CONNECTION_ID")
 	long getConnectionId();
+	@FieldAccessor(Name="SHOW_SPLASH_VERSION")
+	long getShowSplashVersion();
+	@FieldAccessor(Name="TEXT_INDEX")
+	long getTextIndex();
 }
