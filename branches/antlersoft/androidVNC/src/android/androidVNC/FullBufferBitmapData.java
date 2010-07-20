@@ -10,6 +10,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
+import android.widget.ImageView;
 
 /**
  * @author Michael A. MacDonald
@@ -41,23 +42,29 @@ class FullBufferBitmapData extends AbstractBitmapData {
 		 */
 		@Override
 		public void draw(Canvas canvas) {
-			float scale = vncCanvas.getScale();
-			if (scale == 1 || scale <= 0)
+			if (vncCanvas.getScaleType() == ImageView.ScaleType.FIT_CENTER)
 			{
-				canvas.drawBitmap(data.bitmapPixels, offset(xoffset, yoffset), data.framebufferwidth, xoffset, yoffset, displaywidth, displayheight, false, null);
+				canvas.drawBitmap(data.bitmapPixels, 0, data.framebufferwidth, xoffset, yoffset, framebufferwidth, framebufferheight, false, null);				
 			}
 			else
 			{
-				int scalewidth = (int)(displaywidth / scale + 1);
-				if (scalewidth + xoffset > data.framebufferwidth)
-					scalewidth = data.framebufferwidth - xoffset;
-				int scaleheight = (int)(displayheight / scale + 1);
-				if (scaleheight + yoffset > data.framebufferheight)
-					scaleheight = data.framebufferheight - yoffset;
-				canvas.drawBitmap(data.bitmapPixels, offset(xoffset, yoffset), data.framebufferwidth, xoffset, yoffset, scalewidth, scaleheight, false, null);				
+				float scale = vncCanvas.getScale();
+				if (scale == 1 || scale <= 0)
+				{
+					canvas.drawBitmap(data.bitmapPixels, offset(xoffset, yoffset), data.framebufferwidth, xoffset, yoffset, displaywidth, displayheight, false, null);
+				}
+				else
+				{
+					int scalewidth = (int)(displaywidth / scale + 1);
+					if (scalewidth + xoffset > data.framebufferwidth)
+						scalewidth = data.framebufferwidth - xoffset;
+					int scaleheight = (int)(displayheight / scale + 1);
+					if (scaleheight + yoffset > data.framebufferheight)
+						scaleheight = data.framebufferheight - yoffset;
+					canvas.drawBitmap(data.bitmapPixels, offset(xoffset, yoffset), data.framebufferwidth, xoffset, yoffset, scalewidth, scaleheight, false, null);				
+				}
 			}
 		}
-
 	}
 
 	/**
