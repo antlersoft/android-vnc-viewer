@@ -45,4 +45,8 @@ interface IConnectionBean {
 	long getLastMetaKeyId();
 	@FieldAccessor(DefaultValue="0")
 	boolean getFollowPan();
+	@FieldAccessor
+	String getUserName();
+	@FieldAccessor
+	String getSecureConnectionType();
 }
