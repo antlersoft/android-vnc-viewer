@@ -41,8 +41,21 @@ class FullBufferBitmapData extends AbstractBitmapData {
 		 */
 		@Override
 		public void draw(Canvas canvas) {
-			Log.i("FBBM", "xoffset "+xoffset+" yoffset "+ yoffset);
-			canvas.drawBitmap(data.bitmapPixels, offset(xoffset, yoffset), data.framebufferwidth, xoffset, yoffset, displaywidth, displayheight, false, null);
+			float scale = vncCanvas.getScale();
+			if (scale == 1 || scale <= 0)
+			{
+				canvas.drawBitmap(data.bitmapPixels, offset(xoffset, yoffset), data.framebufferwidth, xoffset, yoffset, displaywidth, displayheight, false, null);
+			}
+			else
+			{
+				int scalewidth = (int)(displaywidth / scale + 1);
+				if (scalewidth + xoffset > data.framebufferwidth)
+					scalewidth = data.framebufferwidth - xoffset;
+				int scaleheight = (int)(displayheight / scale + 1);
+				if (scaleheight + yoffset > data.framebufferheight)
+					scaleheight = data.framebufferheight - yoffset;
+				canvas.drawBitmap(data.bitmapPixels, offset(xoffset, yoffset), data.framebufferwidth, xoffset, yoffset, scalewidth, scaleheight, false, null);				
+			}
 		}
 
 	}
@@ -51,7 +64,7 @@ class FullBufferBitmapData extends AbstractBitmapData {
 	 * Multiply this times total number of pixels to get estimate of process size with all buffers plus
 	 * safety factor
 	 */
-	static final int CAPACITY_MULTIPLIER = 17;
+	static final int CAPACITY_MULTIPLIER = 8;
 	
 	/**
 	 * @param p

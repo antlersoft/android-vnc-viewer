@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -86,6 +87,25 @@ class IntroTextDialog extends Dialog {
 			}
 			
 		});
+		((Button)findViewById(R.id.buttonCloseIntroDontShow)).setOnClickListener(new View.OnClickListener() {
+
+			/* (non-Javadoc)
+			 * @see android.view.View.OnClickListener#onClick(android.view.View)
+			 */
+			@Override
+			public void onClick(View v) {
+				SQLiteDatabase db = database.getWritableDatabase();
+				MostRecentBean mostRecent = androidVNC.getMostRecent(db);
+				if (mostRecent != null)
+				{
+					mostRecent.setShowSplashVersion(packageInfo.versionCode);
+					mostRecent.Gen_update(db);
+				}
+				dismiss();
+			}
+			
+		});
+
 	}
 
 }

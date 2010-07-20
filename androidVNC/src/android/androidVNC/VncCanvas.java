@@ -261,7 +261,7 @@ public class VncCanvas extends ImageView {
 		if (! useCompact)
 		{
 			capacity = BCFactory.getInstance().getBCActivityManager().getMemoryClass(Utils.getActivityManager(getContext()));
-			if (rfb.framebufferWidth * rfb.framebufferHeight * 8 <= capacity * 1024 * 1024)
+			if (rfb.framebufferWidth * rfb.framebufferHeight * FullBufferBitmapData.CAPACITY_MULTIPLIER <= capacity * 1024 * 1024)
 				useCompact = true;
 		}
 		if (! useCompact)
