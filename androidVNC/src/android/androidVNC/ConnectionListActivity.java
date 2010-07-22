@@ -83,15 +83,9 @@ public class ConnectionListActivity extends ListActivity {
 	 */
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		ArrayList<ConnectionBean> list = new ArrayList<ConnectionBean>();
-		ConnectionBean.Gen_populateFromCursor(
-				database.getReadableDatabase().rawQuery(
-						"select * from " + ConnectionBean.GEN_TABLE_NAME +
-						" where " + ConnectionBean.GEN_FIELD__ID +
-						" = " + id, null), list, ConnectionBean.newInstance);
-		if (list.size() > 0)
+		ConnectionBean connection = new ConnectionBean();
+		if (connection.Gen_read(database.getReadableDatabase(), id))
 		{
-			ConnectionBean connection = list.get(0);
             // create shortcut if requested
             ShortcutIconResource icon = Intent.ShortcutIconResource.fromContext(this, R.drawable.icon);
 
