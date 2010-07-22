@@ -11,6 +11,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -94,18 +96,52 @@ class IntroTextDialog extends Dialog {
 			 */
 			@Override
 			public void onClick(View v) {
-				SQLiteDatabase db = database.getWritableDatabase();
-				MostRecentBean mostRecent = androidVNC.getMostRecent(db);
-				if (mostRecent != null)
-				{
-					mostRecent.setShowSplashVersion(packageInfo.versionCode);
-					mostRecent.Gen_update(db);
-				}
-				dismiss();
+				dontShowAgain();
 			}
 			
 		});
 
 	}
 
+	/* (non-Javadoc)
+	 * @see android.app.Dialog#onCreateOptionsMenu(android.view.Menu)
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getOwnerActivity().getMenuInflater().inflate(R.menu.intro_dialog_menu,menu);
+		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see android.app.Dialog#onOptionsItemSelected(android.view.MenuItem)
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId())
+		{
+		case R.id.itemOpenDoc :
+			Utils.showDocumentation(getOwnerActivity());
+			dismiss();
+			break;
+		case R.id.itemDontShowAgain :
+			dontShowAgain();
+			break;
+		case R.id.itemClose :
+			dismiss();
+			break;
+		}
+		return true;
+	}
+
+	private void dontShowAgain()
+	{
+		SQLiteDatabase db = database.getWritableDatabase();
+		MostRecentBean mostRecent = androidVNC.getMostRecent(db);
+		if (mostRecent != null)
+		{
+			mostRecent.setShowSplashVersion(packageInfo.versionCode);
+			mostRecent.Gen_update(db);
+		}
+		dismiss();
+	}
 }

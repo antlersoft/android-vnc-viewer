@@ -26,9 +26,9 @@
 <string name="fit_to_screen">Fit to Screen</string>
 <string name="force_full_check">Force full-screen bitmap</string>
 <string name="info">Info</string>
-<string name="intro_text">If you need help, please check the &lt;a href="http://code.google.com/p/android-vnc-viewer/wiki/Documentation"&gt;manual&lt;/a&gt; (press Menu button on config page), or the &lt;a href="http://code.google.com/p/android-vnc-viewer/wiki/faq"&gt;FAQ&lt;/a&gt;.&lt;br&gt;</string>
+<string name="intro_text">If you need help, please check the &lt;a href="http://code.google.com/p/android-vnc-viewer/wiki/Documentation"&gt;manual&lt;/a&gt; (press phone\'s Menu button to access manual and other menu items), or the &lt;a href="http://code.google.com/p/android-vnc-viewer/wiki/faq"&gt;FAQ&lt;/a&gt;.&lt;br&gt;</string>
 <string name="intro_title">Welcome</string>
-<string name="intro_version_text">&lt;br&gt;--Intro dialog; French translation (except for this page); Bug fixes, including green screen fix</string>
+<string name="intro_version_text">&lt;br&gt;--Intro dialog;&lt;br&gt;--French translation (except for this page);&lt;br&gt;--Bug fixes, including green screen fix</string>
 <string name="input_mode">Input Mode</string>
 <string name="input_mode_fit_to_screen">No Pan; Trackball Mouse</string>
 <string name="input_mode_mouse">Mouse Pointer Control Mode</string>
