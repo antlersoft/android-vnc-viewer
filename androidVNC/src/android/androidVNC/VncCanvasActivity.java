@@ -528,15 +528,44 @@ public class VncCanvasActivity extends Activity {
 		connection = new ConnectionBean();
 		Uri data = i.getData();
 		if ((data != null) && (data.getScheme().equals("vnc"))) {
-			if (data.getHost().equals(VncConstants.CONNECTION))
+			String host = data.getHost();
+			// This should not happen according to Uri contract, but bug introduced in Froyo (2.2)
+			// has made this parsing of host necessary
+			int index = host.indexOf(':');
+			int port;
+			if (index != -1)
 			{
-				connection.Gen_read(database.getReadableDatabase(), data.getPort());
+				try
+				{
+					port = Integer.parseInt(host.substring(index + 1));
+				}
+				catch (NumberFormatException nfe)
+				{
+					port = 0;
+				}
+				host = host.substring(0,index);
 			}
 			else
 			{
-			    connection.setAddress(data.getHost());
+				port = data.getPort();
+			}
+			if (host.equals(VncConstants.CONNECTION))
+			{
+				if (connection.Gen_read(database.getReadableDatabase(), port))
+				{
+					MostRecentBean bean = androidVNC.getMostRecent(database.getReadableDatabase());
+					if (bean != null)
+					{
+						bean.setConnectionId(connection.get_Id());
+						bean.Gen_update(database.getWritableDatabase());
+					}
+				}
+			}
+			else
+			{
+			    connection.setAddress(host);
 			    connection.setNickname(connection.getAddress());
-			    connection.setPort(data.getPort());
+			    connection.setPort(port);
 			    List<String> path = data.getPathSegments();
 			    if (path.size() >= 1) {
 			        connection.setColorModel(path.get(0));
