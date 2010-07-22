@@ -64,6 +64,15 @@ class FullBufferBitmapData extends AbstractBitmapData {
 					canvas.drawBitmap(data.bitmapPixels, offset(xoffset, yoffset), data.framebufferwidth, xoffset, yoffset, scalewidth, scaleheight, false, null);				
 				}
 			}
+			if(data.vncCanvas.connection.getUseLocalCursor())
+			{
+				setCursorRect(data.vncCanvas.mouseX, data.vncCanvas.mouseY);
+				clipRect.set(cursorRect);
+				if (canvas.clipRect(cursorRect))
+				{
+					drawCursor(canvas);
+				}
+			}
 		}
 	}
 
