@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010 The Android Open Source Project
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,13 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * MODIFIED FOR ANTLERSOFT
+ * 
+ * Changes for antlersoft/ vnc viewer for android
+ * 
+ * Copyright (C) 2010 Michael A. MacDonald
+ *
  */
 
-package android.view;
+package com.antlersoft.android.bc;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
 import android.util.FloatMath;
+import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 
 /**
  * Detects transformation gestures involving more than one pointer ("multitouch")
@@ -253,8 +262,8 @@ public class ScaleGestureDetector {
             case MotionEvent.ACTION_POINTER_UP:
                 if (mSloppyGesture) {
                     // Set focus point to the remaining finger
-                    int id = (((action & MotionEvent.ACTION_POINTER_INDEX_MASK)
-                            >> MotionEvent.ACTION_POINTER_INDEX_SHIFT) == 0) ? 1 : 0;
+                    int id = (((action & MotionEvent.ACTION_POINTER_ID_MASK)
+                            >> MotionEvent.ACTION_POINTER_ID_SHIFT) == 0) ? 1 : 0;
                     mFocusX = event.getX(id);
                     mFocusY = event.getY(id);
                 }
@@ -268,8 +277,8 @@ public class ScaleGestureDetector {
                     setContext(event);
 
                     // Set focus point to the remaining finger
-                    int id = (((action & MotionEvent.ACTION_POINTER_INDEX_MASK)
-                            >> MotionEvent.ACTION_POINTER_INDEX_SHIFT) == 0) ? 1 : 0;
+                    int id = (((action & MotionEvent.ACTION_POINTER_ID_MASK)
+                            >> MotionEvent.ACTION_POINTER_ID_SHIFT) == 0) ? 1 : 0;
                     mFocusX = event.getX(id);
                     mFocusY = event.getY(id);
 
