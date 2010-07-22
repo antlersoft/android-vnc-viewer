@@ -14,6 +14,7 @@ import android.text.method.LinkMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -108,28 +109,33 @@ class IntroTextDialog extends Dialog {
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
 		getOwnerActivity().getMenuInflater().inflate(R.menu.intro_dialog_menu,menu);
-		return true;
-	}
+		menu.findItem(R.id.itemOpenDoc).setOnMenuItemClickListener(new OnMenuItemClickListener() {
 
-	/* (non-Javadoc)
-	 * @see android.app.Dialog#onOptionsItemSelected(android.view.MenuItem)
-	 */
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId())
-		{
-		case R.id.itemOpenDoc :
-			Utils.showDocumentation(getOwnerActivity());
-			dismiss();
-			break;
-		case R.id.itemDontShowAgain :
-			dontShowAgain();
-			break;
-		case R.id.itemClose :
-			dismiss();
-			break;
-		}
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				Utils.showDocumentation(getOwnerActivity());
+				dismiss();
+				return true;
+			}
+		});
+		menu.findItem(R.id.itemClose).setOnMenuItemClickListener(new OnMenuItemClickListener() {
+
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				dismiss();
+				return true;
+			}
+		});
+		menu.findItem(R.id.itemDontShowAgain).setOnMenuItemClickListener(new OnMenuItemClickListener() {
+
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				dontShowAgain();
+				return true;
+			}
+		});
 		return true;
 	}
 

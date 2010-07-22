@@ -71,7 +71,7 @@ class FullBufferBitmapData extends AbstractBitmapData {
 	 * Multiply this times total number of pixels to get estimate of process size with all buffers plus
 	 * safety factor
 	 */
-	static final int CAPACITY_MULTIPLIER = 8;
+	static final int CAPACITY_MULTIPLIER = 7;
 	
 	/**
 	 * @param p
