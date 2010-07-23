@@ -902,10 +902,11 @@ public class VncCanvas extends ImageView {
 		      case KeyEvent.KEYCODE_DEL: 		  key = 0xff08; break;
 		      case KeyEvent.KEYCODE_ENTER:        key = 0xff0d; break;
 		      case KeyEvent.KEYCODE_DPAD_CENTER:  key = 0xff0d; break;
-		      default: 							  key = evt.getUnicodeChar(); break;
+		      default: 							  
+		    	  key = evt.getUnicodeChar();
+		    	  metaState = 0;
+		    	  break;
 		    }
-		    if (key!=0)
-		    	metaState = metaState & ~ALT_MASK;
 	    	try {
 	    		if (afterMenu)
 	    		{
@@ -915,6 +916,7 @@ public class VncCanvas extends ImageView {
 	    		}
 	    		if (down)
 	    			lastKeyDown = key;
+	    		Log.i(TAG,"key = " + key + " metastate = " + metaState + " keycode = " + keyCode);
 	    		rfb.writeKeyEvent(key, metaState, down);
 			} catch (Exception e) {
 				e.printStackTrace();
