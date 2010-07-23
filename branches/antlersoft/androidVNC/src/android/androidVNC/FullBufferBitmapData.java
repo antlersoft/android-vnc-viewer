@@ -49,14 +49,14 @@ class FullBufferBitmapData extends AbstractBitmapData {
 			else
 			{
 				float scale = vncCanvas.getScale();
+				int xo = xoffset < 0 ? 0 : xoffset;
+				int yo = yoffset < 0 ? 0 : yoffset;
 				if (scale == 1 || scale <= 0)
 				{
-					canvas.drawBitmap(data.bitmapPixels, offset(xoffset, yoffset), data.framebufferwidth, xoffset, yoffset, displaywidth, displayheight, false, null);
+					canvas.drawBitmap(data.bitmapPixels, offset(xo, yo), data.framebufferwidth, xo, yo, displaywidth, displayheight, false, null);
 				}
 				else
 				{
-					int xo = xoffset < 0 ? 0 : xoffset;
-					int yo = yoffset < 0 ? 0 : yoffset;
 					int scalewidth = (int)(displaywidth / scale + 1);
 					if (scalewidth + xo > data.framebufferwidth)
 						scalewidth = data.framebufferwidth - xo;
@@ -95,7 +95,11 @@ class FullBufferBitmapData extends AbstractBitmapData {
 		bitmapwidth=framebufferwidth;
 		bitmapheight=framebufferheight;
 		displaywidth = displayWidth;
+		if (displaywidth > framebufferwidth)
+			displaywidth = framebufferwidth;
 		displayheight = displayHeight;
+		if (displayheight > framebufferheight)
+			displayheight = framebufferheight;
 		android.util.Log.i("FBBM", "bitmapsize = ("+bitmapwidth+","+bitmapheight+") display = ( "+displaywidth+ "," + displayheight+ ")");
 		bitmapPixels = new int[framebufferwidth * framebufferheight];
 	}
