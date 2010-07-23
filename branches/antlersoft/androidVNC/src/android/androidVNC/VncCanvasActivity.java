@@ -730,7 +730,7 @@ public class VncCanvasActivity extends Activity {
 	 * Change the input mode sub-menu to reflect change in scaling
 	 */
 	void updateInputMenu() {
-		if (inputModeMenuItems == null) {
+		if (inputModeMenuItems == null || vncCanvas.scaling == null) {
 			return;
 		}
 		for (MenuItem item : inputModeMenuItems) {
