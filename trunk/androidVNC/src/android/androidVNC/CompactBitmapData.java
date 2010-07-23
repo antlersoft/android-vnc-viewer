@@ -34,8 +34,8 @@ class CompactBitmapData extends AbstractBitmapData {
 	CompactBitmapData(RfbProto rfb, VncCanvas c)
 	{
 		super(rfb,c);
-		bitmapwidth=framebufferwidth=rfb.framebufferWidth;
-		bitmapheight=framebufferheight=rfb.framebufferHeight;
+		bitmapwidth=framebufferwidth;
+		bitmapheight=framebufferheight;
 		mbitmap = Bitmap.createBitmap(rfb.framebufferWidth, rfb.framebufferHeight, Bitmap.Config.RGB_565);
 		memGraphics = new Canvas(mbitmap);
 		bitmapPixels = new int[rfb.framebufferWidth * rfb.framebufferHeight];

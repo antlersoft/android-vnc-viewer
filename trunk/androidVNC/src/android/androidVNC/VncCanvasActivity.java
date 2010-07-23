@@ -457,11 +457,12 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent e) {
+			boolean multiTouch = (BCFactory.getInstance().getBCMotionEvent().getPointerCount(e) > 1);
 			remoteMouseStayPut(e);
             
-			vncCanvas.processPointerEvent(e, true);
+			vncCanvas.processPointerEvent(e, true, multiTouch||vncCanvas.cameraButtonDown);
 			e.setAction(MotionEvent.ACTION_UP);
-			return vncCanvas.processPointerEvent(e, false);
+			return vncCanvas.processPointerEvent(e, false, multiTouch||vncCanvas.cameraButtonDown);
 		}
 
 		/*
@@ -527,15 +528,44 @@ public class VncCanvasActivity extends Activity {
 		connection = new ConnectionBean();
 		Uri data = i.getData();
 		if ((data != null) && (data.getScheme().equals("vnc"))) {
-			if (data.getHost().equals(VncConstants.CONNECTION))
+			String host = data.getHost();
+			// This should not happen according to Uri contract, but bug introduced in Froyo (2.2)
+			// has made this parsing of host necessary
+			int index = host.indexOf(':');
+			int port;
+			if (index != -1)
 			{
-				connection.Gen_read(database.getReadableDatabase(), data.getPort());
+				try
+				{
+					port = Integer.parseInt(host.substring(index + 1));
+				}
+				catch (NumberFormatException nfe)
+				{
+					port = 0;
+				}
+				host = host.substring(0,index);
 			}
 			else
 			{
-			    connection.setAddress(data.getHost());
+				port = data.getPort();
+			}
+			if (host.equals(VncConstants.CONNECTION))
+			{
+				if (connection.Gen_read(database.getReadableDatabase(), port))
+				{
+					MostRecentBean bean = androidVNC.getMostRecent(database.getReadableDatabase());
+					if (bean != null)
+					{
+						bean.setConnectionId(connection.get_Id());
+						bean.Gen_update(database.getWritableDatabase());
+					}
+				}
+			}
+			else
+			{
+			    connection.setAddress(host);
 			    connection.setNickname(connection.getAddress());
-			    connection.setPort(data.getPort());
+			    connection.setPort(port);
 			    List<String> path = data.getPathSegments();
 			    if (path.size() >= 1) {
 			        connection.setColorModel(path.get(0));
@@ -548,13 +578,11 @@ public class VncCanvasActivity extends Activity {
 		} else {
 		
 		    Bundle extras = i.getExtras();
-		    
-		    Log.i(TAG,extras == null ? "extras is null" : extras.toString());
-		    Log.i(TAG,icicle == null ? "icicle is null" : "icicle not null " + icicle.toString());
-		    Log.i(TAG,data == null ? "data is null" : data.toString());
 
-	  	    connection.Gen_populate((ContentValues) extras
-			  	.getParcelable(VncConstants.CONNECTION));
+		    if (extras != null) {
+		  	    connection.Gen_populate((ContentValues) extras
+				  	.getParcelable(VncConstants.CONNECTION));
+		    }
 		    if (connection.getPort() == 0)
 			    connection.setPort(5900);
 
@@ -682,7 +710,8 @@ public class VncCanvasActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.vnccanvasactivitymenu, menu);
 
-		menu.findItem(vncCanvas.scaling.getId()).setChecked(true);
+		if (vncCanvas.scaling != null)
+			menu.findItem(vncCanvas.scaling.getId()).setChecked(true);
 
 		Menu inputMenu = menu.findItem(R.id.itemInputMode).getSubMenu();
 
@@ -845,6 +874,9 @@ public class VncCanvasActivity extends Activity {
 			return true;
 		case R.id.itemSendKeyAgain:
 			sendSpecialKeyAgain();
+			return true;
+		case R.id.itemOpenDoc:
+			Utils.showDocumentation(this);
 			return true;
 		default:
 			AbstractInputHandler input = getInputHandlerById(item.getItemId());

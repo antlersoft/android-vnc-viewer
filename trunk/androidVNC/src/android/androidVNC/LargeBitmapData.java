@@ -84,8 +84,6 @@ class LargeBitmapData extends AbstractBitmapData {
 	LargeBitmapData(RfbProto p, VncCanvas c, int displayWidth, int displayHeight, int capacity)
 	{
 		super(p,c);
-		framebufferwidth=rfb.framebufferWidth;
-		framebufferheight=rfb.framebufferHeight;
 		double scaleMultiplier = Math.sqrt((double)(capacity * 1024 * 1024) / (double)(CAPACITY_MULTIPLIER * framebufferwidth * framebufferheight));
 		if (scaleMultiplier > 1)
 			scaleMultiplier = 1;

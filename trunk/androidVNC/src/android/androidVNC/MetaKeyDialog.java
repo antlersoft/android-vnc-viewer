@@ -151,7 +151,7 @@ class MetaKeyDialog extends Dialog implements ConnectionSettable {
 												_connection.save(db);
 											}
 											int newPos = _spinnerKeysInList.getSelectedItemPosition();
-											if (newPos != Spinner.INVALID_POSITION)
+											if (newPos != Spinner.INVALID_POSITION && newPos < _keysInList.size())
 											{
 												_currentKeyBean = new MetaKeyBean(_keysInList.get(newPos));
 												updateDialogForCurrentKey();
