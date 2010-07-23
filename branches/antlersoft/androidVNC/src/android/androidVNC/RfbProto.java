@@ -1065,8 +1065,10 @@ class RfbProto {
   //
   synchronized void writeKeyEvent(int keySym, int metaState, boolean down) throws IOException {
     eventBufLen = 0;
-    writeModifierKeyEvents(metaState);
-    writeKeyEvent(keySym, down);
+    if (down)
+    	writeModifierKeyEvents(metaState);
+    if (keySym != 0)
+    	writeKeyEvent(keySym, down);
 
     // Always release all modifiers after an "up" event
     if (!down)
