@@ -51,7 +51,6 @@ public class androidVNC extends Activity {
 	private Spinner colorSpinner;
 	private CheckBox checkboxForceFullScreen;
 	private Spinner spinnerConnection;
-	private MostRecentBean mostRecent;
 	private VncDatabase database;
 	private ConnectionBean selected;
 	private EditText textNickname;
@@ -266,6 +265,22 @@ public class androidVNC extends Activity {
 		arriveOnPage();
 	}
 	
+	/**
+	 * Return the object representing the app global state in the database, or null
+	 * if the object hasn't been set up yet
+	 * @param db App's database -- only needs to be readable
+	 * @return Object representing the single persistent instance of MostRecentBean, which
+	 * is the app's global state
+	 */
+	static MostRecentBean getMostRecent(SQLiteDatabase db)
+	{
+		ArrayList<MostRecentBean> recents = new ArrayList<MostRecentBean>(1);
+		MostRecentBean.getAll(db, MostRecentBean.GEN_TABLE_NAME, recents, MostRecentBean.GEN_NEW);
+		if (recents.size() == 0)
+			return null;
+		return recents.get(0);
+	}
+	
 	private void arriveOnPage() {
 		ArrayList<ConnectionBean> connections=new ArrayList<ConnectionBean>();
 		ConnectionBean.getAll(database.getReadableDatabase(), ConnectionBean.GEN_TABLE_NAME, connections, ConnectionBean.newInstance);
@@ -274,11 +289,9 @@ public class androidVNC extends Activity {
 		int connectionIndex=0;
 		if ( connections.size()>1)
 		{
-			ArrayList<MostRecentBean> recents=new ArrayList<MostRecentBean>(1);
-			MostRecentBean.getAll(database.getReadableDatabase(),MostRecentBean.GEN_TABLE_NAME,recents,MostRecentBean.GEN_NEW);
-			if (recents.size()>0)
+			MostRecentBean mostRecent = getMostRecent(database.getReadableDatabase());
+			if (mostRecent != null)
 			{
-				mostRecent=recents.get(0);
 				for ( int i=1; i<connections.size(); ++i)
 				{
 					if (connections.get(i).get_Id() == mostRecent.getConnectionId())
@@ -294,6 +307,7 @@ public class androidVNC extends Activity {
 		spinnerConnection.setSelection(connectionIndex,false);
 		selected=connections.get(connectionIndex);
 		updateViewFromSelected();
+		IntroTextDialog.showIntroTextIfNecessary(this, database);
 	}
 	
 	protected void onStop() {
@@ -327,10 +341,18 @@ public class androidVNC extends Activity {
 		try
 		{
 			selected.save(db);
-			mostRecent = new MostRecentBean();
-			mostRecent.setConnectionId(selected.get_Id());
-			db.execSQL("DELETE FROM "+MostRecentBean.GEN_TABLE_NAME);
-			mostRecent.Gen_insert(db);
+			MostRecentBean mostRecent = getMostRecent(db);
+			if (mostRecent == null)
+			{
+				mostRecent = new MostRecentBean();
+				mostRecent.setConnectionId(selected.get_Id());
+				mostRecent.Gen_insert(db);
+			}
+			else
+			{
+				mostRecent.setConnectionId(selected.get_Id());
+				mostRecent.Gen_update(db);
+			}
 			db.setTransactionSuccessful();
 		}
 		finally

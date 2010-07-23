@@ -42,6 +42,7 @@ import android.graphics.Paint.Style;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.widget.ImageView;
@@ -157,11 +158,12 @@ public class VncCanvas extends ImageView {
 				});
 			}
 		});
+		final Display display = pd.getWindow().getWindowManager().getDefaultDisplay();
 		Thread t = new Thread() {
 			public void run() {
 				try {
 					connectAndAuthenticate(connection.getPassword());
-					doProtocolInitialisation();
+					doProtocolInitialisation(display.getWidth(), display.getHeight());
 					handler.post(new Runnable() {
 						public void run() {
 							pd.setMessage("Downloading first frame.\nPlease wait...");
@@ -247,27 +249,25 @@ public class VncCanvas extends ImageView {
 		}
 	}
 
-	void doProtocolInitialisation() throws IOException {
+	void doProtocolInitialisation(int dx, int dy) throws IOException {
 		rfb.writeClientInit();
 		rfb.readServerInit();
 
 		Log.i(TAG, "Desktop name is " + rfb.desktopName);
 		Log.i(TAG, "Desktop size is " + rfb.framebufferWidth + " x " + rfb.framebufferHeight);
 
-		int dx=getWidth();
-		int dy=getHeight();
 		boolean useCompact = connection.getForceFull();
 		int capacity = 0;
 		if (! useCompact)
 		{
 			capacity = BCFactory.getInstance().getBCActivityManager().getMemoryClass(Utils.getActivityManager(getContext()));
-			if (rfb.framebufferWidth * rfb.framebufferHeight * LargeBitmapData.CAPACITY_MULTIPLIER <= capacity * 1024 * 1024)
+			if (rfb.framebufferWidth * rfb.framebufferHeight * FullBufferBitmapData.CAPACITY_MULTIPLIER <= capacity * 1024 * 1024)
 				useCompact = true;
 		}
 		if (! useCompact)
 			bitmapData=new LargeBitmapData(rfb,this,dx,dy,capacity);
 		else
-			bitmapData=new CompactBitmapData(rfb,this);
+			bitmapData=new FullBufferBitmapData(rfb,this, dx, dy, capacity);
 		mouseX=rfb.framebufferWidth/2;
 		mouseY=rfb.framebufferHeight/2;
 
@@ -686,7 +686,8 @@ public class VncCanvas extends ImageView {
 				showDesktopInfo = false;
 				showConnectionInfo();
 			}
-			bitmapData.updateView(VncCanvas.this);
+			if (bitmapData != null)
+				bitmapData.updateView(VncCanvas.this);
 		}
 	};
 	
@@ -1610,12 +1611,10 @@ public class VncCanvas extends ImageView {
 
 	private void handleUpdatedZrleTile(int x, int y, int w, int h) {
 		int offsetSrc = 0;
-		int offsetDst = bitmapData.offset(x, y);
 		int[] destPixels=bitmapData.bitmapPixels;
 		for (int j = 0; j < h; j++) {
-			System.arraycopy(zrleTilePixels, offsetSrc, destPixels, offsetDst, w);
+			System.arraycopy(zrleTilePixels, offsetSrc, destPixels, bitmapData.offset(x, y + j), w);
 			offsetSrc += w;
-			offsetDst += bitmapData.bitmapwidth;
 		}
 
 		bitmapData.updateBitmap(x, y, w, h);
