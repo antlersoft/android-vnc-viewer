@@ -58,89 +58,7 @@ import android.view.ViewConfiguration;
  *          callback will be executed when the events occur.
  * </ul>
  */
-public class ScaleGestureDetector {
-    /**
-     * The listener for receiving notifications when gestures occur.
-     * If you want to listen for all the different gestures then implement
-     * this interface. If you only want to listen for a subset it might
-     * be easier to extend {@link SimpleOnScaleGestureListener}.
-     * 
-     * An application will receive events in the following order:
-     * <ul>
-     *  <li>One {@link OnScaleGestureListener#onScaleBegin(ScaleGestureDetector)}
-     *  <li>Zero or more {@link OnScaleGestureListener#onScale(ScaleGestureDetector)}
-     *  <li>One {@link OnScaleGestureListener#onScaleEnd(ScaleGestureDetector)}
-     * </ul>
-     */
-    public interface OnScaleGestureListener {
-        /**
-         * Responds to scaling events for a gesture in progress.
-         * Reported by pointer motion.
-         * 
-         * @param detector The detector reporting the event - use this to
-         *          retrieve extended info about event state.
-         * @return Whether or not the detector should consider this event
-         *          as handled. If an event was not handled, the detector
-         *          will continue to accumulate movement until an event is
-         *          handled. This can be useful if an application, for example,
-         *          only wants to update scaling factors if the change is
-         *          greater than 0.01.
-         */
-        public boolean onScale(ScaleGestureDetector detector);
-
-        /**
-         * Responds to the beginning of a scaling gesture. Reported by
-         * new pointers going down.
-         * 
-         * @param detector The detector reporting the event - use this to
-         *          retrieve extended info about event state.
-         * @return Whether or not the detector should continue recognizing
-         *          this gesture. For example, if a gesture is beginning
-         *          with a focal point outside of a region where it makes
-         *          sense, onScaleBegin() may return false to ignore the
-         *          rest of the gesture.
-         */
-        public boolean onScaleBegin(ScaleGestureDetector detector);
-
-        /**
-         * Responds to the end of a scale gesture. Reported by existing
-         * pointers going up.
-         * 
-         * Once a scale has ended, {@link ScaleGestureDetector#getFocusX()}
-         * and {@link ScaleGestureDetector#getFocusY()} will return the location
-         * of the pointer remaining on the screen.
-         * 
-         * @param detector The detector reporting the event - use this to
-         *          retrieve extended info about event state.
-         */
-        public void onScaleEnd(ScaleGestureDetector detector);
-    }
-    
-    /**
-     * A convenience class to extend when you only want to listen for a subset
-     * of scaling-related events. This implements all methods in
-     * {@link OnScaleGestureListener} but does nothing.
-     * {@link OnScaleGestureListener#onScale(ScaleGestureDetector)} returns
-     * {@code false} so that a subclass can retrieve the accumulated scale
-     * factor in an overridden onScaleEnd.
-     * {@link OnScaleGestureListener#onScaleBegin(ScaleGestureDetector)} returns
-     * {@code true}. 
-     */
-    public static class SimpleOnScaleGestureListener implements OnScaleGestureListener {
-
-        public boolean onScale(ScaleGestureDetector detector) {
-            return false;
-        }
-
-        public boolean onScaleBegin(ScaleGestureDetector detector) {
-            return true;
-        }
-
-        public void onScaleEnd(ScaleGestureDetector detector) {
-            // Intentionally empty
-        }
-    }
-
+public class ScaleGestureDetector implements IBCScaleGestureDetector {
     /**
      * This value is the threshold ratio between our previous combined pressure
      * and the current combined pressure. We will only fire an onScale event if
@@ -184,6 +102,9 @@ public class ScaleGestureDetector {
         mEdgeSlop = config.getScaledEdgeSlop();
     }
 
+    /* (non-Javadoc)
+	 * @see com.antlersoft.android.bc.IBCScaleGestureDetector#onTouchEvent(android.view.MotionEvent)
+	 */
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getAction();
         boolean handled = true;
@@ -397,50 +318,30 @@ public class ScaleGestureDetector {
         mGestureInProgress = false;
     }
 
-    /**
-     * Returns {@code true} if a two-finger scale gesture is in progress.
-     * @return {@code true} if a scale gesture is in progress, {@code false} otherwise.
-     */
+    /* (non-Javadoc)
+	 * @see com.antlersoft.android.bc.IBCScaleGestureDetector#isInProgress()
+	 */
     public boolean isInProgress() {
         return mGestureInProgress;
     }
 
-    /**
-     * Get the X coordinate of the current gesture's focal point.
-     * If a gesture is in progress, the focal point is directly between
-     * the two pointers forming the gesture.
-     * If a gesture is ending, the focal point is the location of the
-     * remaining pointer on the screen.
-     * If {@link #isInProgress()} would return false, the result of this
-     * function is undefined.
-     * 
-     * @return X coordinate of the focal point in pixels.
-     */
+    /* (non-Javadoc)
+	 * @see com.antlersoft.android.bc.IBCScaleGestureDetector#getFocusX()
+	 */
     public float getFocusX() {
         return mFocusX;
     }
 
-    /**
-     * Get the Y coordinate of the current gesture's focal point.
-     * If a gesture is in progress, the focal point is directly between
-     * the two pointers forming the gesture.
-     * If a gesture is ending, the focal point is the location of the
-     * remaining pointer on the screen.
-     * If {@link #isInProgress()} would return false, the result of this
-     * function is undefined.
-     * 
-     * @return Y coordinate of the focal point in pixels.
-     */
+    /* (non-Javadoc)
+	 * @see com.antlersoft.android.bc.IBCScaleGestureDetector#getFocusY()
+	 */
     public float getFocusY() {
         return mFocusY;
     }
 
-    /**
-     * Return the current distance between the two pointers forming the
-     * gesture in progress.
-     * 
-     * @return Distance between pointers in pixels.
-     */
+    /* (non-Javadoc)
+	 * @see com.antlersoft.android.bc.IBCScaleGestureDetector#getCurrentSpan()
+	 */
     public float getCurrentSpan() {
         if (mCurrLen == -1) {
             final float cvx = mCurrFingerDiffX;
@@ -450,12 +351,9 @@ public class ScaleGestureDetector {
         return mCurrLen;
     }
 
-    /**
-     * Return the previous distance between the two pointers forming the
-     * gesture in progress.
-     * 
-     * @return Previous distance between pointers in pixels.
-     */
+    /* (non-Javadoc)
+	 * @see com.antlersoft.android.bc.IBCScaleGestureDetector#getPreviousSpan()
+	 */
     public float getPreviousSpan() {
         if (mPrevLen == -1) {
             final float pvx = mPrevFingerDiffX;
@@ -465,13 +363,9 @@ public class ScaleGestureDetector {
         return mPrevLen;
     }
 
-    /**
-     * Return the scaling factor from the previous scale event to the current
-     * event. This value is defined as
-     * ({@link #getCurrentSpan()} / {@link #getPreviousSpan()}).
-     * 
-     * @return The current scaling factor.
-     */
+    /* (non-Javadoc)
+	 * @see com.antlersoft.android.bc.IBCScaleGestureDetector#getScaleFactor()
+	 */
     public float getScaleFactor() {
         if (mScaleFactor == -1) {
             mScaleFactor = getCurrentSpan() / getPreviousSpan();
@@ -479,21 +373,16 @@ public class ScaleGestureDetector {
         return mScaleFactor;
     }
     
-    /**
-     * Return the time difference in milliseconds between the previous
-     * accepted scaling event and the current scaling event.
-     * 
-     * @return Time difference since the last scaling event in milliseconds.
-     */
+    /* (non-Javadoc)
+	 * @see com.antlersoft.android.bc.IBCScaleGestureDetector#getTimeDelta()
+	 */
     public long getTimeDelta() {
         return mTimeDelta;
     }
     
-    /**
-     * Return the event time of the current event being processed.
-     * 
-     * @return Current event time in milliseconds.
-     */
+    /* (non-Javadoc)
+	 * @see com.antlersoft.android.bc.IBCScaleGestureDetector#getEventTime()
+	 */
     public long getEventTime() {
         return mCurrEvent.getEventTime();
     }
