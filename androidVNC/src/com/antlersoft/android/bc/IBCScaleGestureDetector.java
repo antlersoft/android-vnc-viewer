@@ -37,6 +37,15 @@ package com.antlersoft.android.bc;
 
 import android.view.MotionEvent;
 
+/**
+ * Backwards-compatibility interface to the android.view.ScaleGestureDetector introduced in Android SDK 8.
+ * 
+ * This will be a working implementation of devices with SDK >= 5 (since I backported ScaleGestureDetector
+ * to 5) and a dummy implementation for older devices.
+ * 
+ * @author Michael A. MacDonald
+ *
+ */
 public interface IBCScaleGestureDetector {
 
 	public abstract boolean onTouchEvent(MotionEvent event);

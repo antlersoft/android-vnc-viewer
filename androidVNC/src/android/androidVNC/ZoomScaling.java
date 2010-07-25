@@ -70,6 +70,7 @@ class ZoomScaling extends AbstractScaling {
 	@Override
 	void zoomIn(VncCanvasActivity activity) {
 		resetMatrix();
+		standardizeScaling();
 		scaling += 0.25;
 		if (scaling > 4.0)
 		{
@@ -97,10 +98,11 @@ class ZoomScaling extends AbstractScaling {
 	@Override
 	void zoomOut(VncCanvasActivity activity) {
 		resetMatrix();
+		standardizeScaling();
 		scaling -= 0.25;
 		if (scaling < minimumScale)
 		{
-			scaling = (float)minimumScale;
+			scaling = minimumScale;
 			activity.zoomer.setIsZoomOutEnabled(false);
 		}
 		activity.zoomer.setIsZoomInEnabled(true);
@@ -111,10 +113,58 @@ class ZoomScaling extends AbstractScaling {
 		resolveZoom(activity);
 	}
 
+	/* (non-Javadoc)
+	 * @see android.androidVNC.AbstractScaling#adjust(android.androidVNC.VncCanvasActivity, float, float, float)
+	 */
+	@Override
+	void adjust(VncCanvasActivity activity, float scaleFactor, float fx,
+			float fy) {
+		float newScale = scaleFactor * scaling;
+		if (scaleFactor < 1)
+		{
+			if (newScale < minimumScale)
+			{
+				newScale = minimumScale;
+				activity.zoomer.setIsZoomOutEnabled(false);
+			}
+			activity.zoomer.setIsZoomInEnabled(true);
+		}
+		else
+		{
+			if (newScale > 4)
+			{
+				newScale = 4;
+				activity.zoomer.setIsZoomInEnabled(false);
+			}
+			activity.zoomer.setIsZoomOutEnabled(true);
+		}
+		// ax is the absolute x of the focus
+		int xPan = activity.vncCanvas.absoluteXPosition;
+		float ax = (fx / scaling) + xPan;
+		float newXPan = (scaling * xPan - scaling * ax + newScale * ax)/newScale;
+		int yPan = activity.vncCanvas.absoluteYPosition;
+		float ay = (fy / scaling) + yPan;
+		float newYPan = (scaling * yPan - scaling * ay + newScale * ay)/newScale;
+		resetMatrix();
+		scaling = newScale;
+		matrix.postScale(scaling, scaling);
+		activity.vncCanvas.setImageMatrix(matrix);
+		resolveZoom(activity);
+		activity.vncCanvas.pan((int)(newXPan - xPan), (int)(newYPan - yPan));
+	}
+
 	private void resetMatrix()
 	{
 		matrix.reset();
 		matrix.preTranslate(canvasXOffset, canvasYOffset);
+	}
+	
+	/**
+	 *  Set scaling to one of the clicks on the zoom scale
+	 */
+	private void standardizeScaling()
+	{
+		scaling = ((float)((int)(scaling * 4))) / 4;
 	}
 
 	/* (non-Javadoc)

@@ -58,7 +58,7 @@ import android.view.ViewConfiguration;
  *          callback will be executed when the events occur.
  * </ul>
  */
-public class ScaleGestureDetector implements IBCScaleGestureDetector {
+class ScaleGestureDetector implements IBCScaleGestureDetector {
     /**
      * This value is the threshold ratio between our previous combined pressure
      * and the current combined pressure. We will only fire an onScale event if

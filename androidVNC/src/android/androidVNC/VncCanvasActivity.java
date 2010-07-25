@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.antlersoft.android.bc.BCFactory;
+import com.antlersoft.android.bc.IBCScaleGestureDetector;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -220,6 +221,8 @@ public class VncCanvasActivity extends Activity {
 		@Override
 		public boolean onScroll(MotionEvent e1, MotionEvent e2,
 				float distanceX, float distanceY) {
+			if (inScaling)
+				return false;
 			showZoomer(false);
 			return vncCanvas.pan((int) distanceX, (int) distanceY);
 		}
@@ -381,6 +384,8 @@ public class VncCanvasActivity extends Activity {
 			
 			if (BCFactory.getInstance().getBCMotionEvent().getPointerCount(e2) > 1)
 			{
+				if (inScaling)
+					return false;
 				showZoomer(false);
 				return vncCanvas.pan((int) distanceX, (int) distanceY);			
 			}
@@ -489,8 +494,6 @@ public class VncCanvasActivity extends Activity {
 			panner.stop();
 			return true;
 		}
-
-		
 	}
 	
 	private final static String TAG = "VncCanvasActivity";
