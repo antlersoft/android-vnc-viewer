@@ -916,7 +916,7 @@ public class VncCanvas extends ImageView {
 	    		}
 	    		if (down)
 	    			lastKeyDown = key;
-	    		Log.i(TAG,"key = " + key + " metastate = " + metaState + " keycode = " + keyCode);
+	    		//Log.i(TAG,"key = " + key + " metastate = " + metaState + " keycode = " + keyCode);
 	    		rfb.writeKeyEvent(key, metaState, down);
 			} catch (Exception e) {
 				e.printStackTrace();
