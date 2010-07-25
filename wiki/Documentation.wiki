@@ -63,7 +63,7 @@ to the VNC display, to enable a style of interaction most convenient for the app
 you are using.
 You can switch between these modes with the _Input Mode_ (Menu-P) menu item.
 
-  _Touch Mouse Pan and Zoom_ This is the default input mode and is designed to work like the Android browser.  You can both pan the display and control the mouse using the touchscreen and gestures. You pan by dragging or flicking on the touchscreen; you click the mouse by tapping on it. You right-click by double-tapping (or by holding down the camera button while tapping). You drag the mouse by doing a long press on the display, and then dragging.  In this mode the trackball or DPad (if your phone has one) can also be used to control the mouse; this may give you finer control.
+  _Touch Mouse Pan and Zoom_ This is the default input mode and is designed to work like the Android browser.  You can both pan the display and control the mouse using the touchscreen and gestures. You pan by dragging or flicking on the touchscreen; you click the mouse by tapping on it. You right-click by double-tapping (or by holding down the camera button while tapping). You drag the mouse by doing a long press on the display, and then dragging.  In this mode the trackball or DPad (if your phone has one) can also be used to control the mouse; this may give you finer control.  You can zoom the screen size with the +/- buttons, or, if your device supports multi-touch and has Android 2.0+, you can pinch to zoom out and spread to zoom in.
 
   _Touchpad Mode_ This is the alternate gesture-based interface.  In this mode, touching the screen moves the mouse cursor like a mouse touchpad.  The screen will pan to follow the mouse (unless you turn it off).  Tapping the screen clicks the mouse, where it is rather than where you tap.  For multi-touch capable devices, drag two fingers to pan the screen independent of the mouse position.  Otherwise, it works like Touch Mouse Pan and Zoom.
 
@@ -93,6 +93,8 @@ device (i.e., a G1) as a VNC controller.
   * The volume control buttons simulate turning the mouse scroll wheel up or down.  (Holding them down doesn't work, to scroll further click repeatedly).
   
   * To send control keys, function keys and other special keys and combinations see [#Special_Keys Special Keys].
+
+  * To send (or resend) a whole block of text, use the Send Text menu option.
 
 === Other Menu Items ===
 
@@ -143,3 +145,14 @@ those modifiers.  Press the Search button to toggle the
 Ctrl modifier.  When you type a regular key on the keyboard,
 that key plus the selected modifiers will be sent
 immediately to the server.
+
+== Devices without Keyboards ==
+
+android-vnc-viewer can work effectively on devices without physical keyboards.  Use the Send Keys menu option to send keystrokes that are commands in themselves (i.e. Alt-Tab).  When you need to enter a block of text, use the Enter Text command, type the text with the Android keyboard, and press send.  You can edit the text before it is sent to make sure it is correct, and
+the Enter Text command will remember the texts you've sent in that session, so you can send them again quickly (convenient for passwords you have to enter many times).
+
+== Shortcuts ==
+
+android-vnc-viewer lets you create home screen shortcuts for quick access to
+your favorite connections.  Long click on the home screen, select Shortcuts in the menu, then scroll down to VNC Connection.  You'll get a page that lists
+your configured connections.  Select one and it will be added to the home screen as a short cut.  Selecting a short cut starts that connection immediately.
