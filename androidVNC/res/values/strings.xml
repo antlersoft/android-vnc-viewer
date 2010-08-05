@@ -28,7 +28,7 @@
 <string name="info">Info</string>
 <string name="intro_text">If you need help, please check the &lt;a href="http://code.google.com/p/android-vnc-viewer/wiki/Documentation"&gt;manual&lt;/a&gt; (press phone\'s Menu button to access manual and other menu items), or the &lt;a href="http://code.google.com/p/android-vnc-viewer/wiki/faq"&gt;FAQ&lt;/a&gt;.&lt;br&gt;</string>
 <string name="intro_title">Welcome</string>
-<string name="intro_version_text">&lt;br&gt;--Fix missing local cursor&lt;br&gt;0.4.5 --Intro dialog;&lt;br&gt;--French translation (except for this page);&lt;br&gt;--Bug fixes, including green screen fix</string>
+<string name="intro_version_text">&lt;br&gt;--Pinch zoom for 2.0+ phones in gesture modes&lt;br&gt;--Fix sending uppercase from physical keyboard&lt;br&gt;--Crash bug fixes</string>
 <string name="input_mode">Input Mode</string>
 <string name="input_mode_fit_to_screen">No Pan; Trackball Mouse</string>
 <string name="input_mode_mouse">Mouse Pointer Control Mode</string>
