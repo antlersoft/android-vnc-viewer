@@ -32,6 +32,7 @@ import java.io.*;
 import java.net.Socket;
 //- import java.util.zip.*;
 import android.util.Log;
+import android.androidVNC.DH;
 
 /**
  * Access the RFB protocol through a socket.
@@ -60,7 +61,8 @@ class RfbProto {
     SecTypeInvalid = 0,
     SecTypeNone    = 1,
     SecTypeVncAuth = 2,
-    SecTypeTight   = 16;
+    SecTypeTight   = 16,
+    SecTypeUltra34 = 0xfffffffa;
 
   // Supported tunneling types
   final static int
@@ -72,7 +74,8 @@ class RfbProto {
   final static int
     AuthNone      = 1,
     AuthVNC       = 2,
-    AuthUnixLogin = 129;
+    AuthUnixLogin = 129,
+    AuthUltra	  = 17;
   final static String
     SigAuthNone      = "NOAUTH__",
     SigAuthVNC       = "VNCAUTH_",
@@ -168,6 +171,10 @@ class RfbProto {
   Socket sock;
   DataInputStream is;
   OutputStream os;
+  
+  DH dh;
+  long dh_resp;
+  
   //- SessionRecorder rec;
   boolean inNormalProtocol = false;
   //- VncViewer viewer;
@@ -330,16 +337,16 @@ class RfbProto {
   // Negotiate the authentication scheme.
   //
 
-  int negotiateSecurity() throws Exception {
+  int negotiateSecurity(int bitPref) throws Exception {
     return (clientMinor >= 7) ?
-      selectSecurityType() : readSecurityType();
+      selectSecurityType(bitPref) : readSecurityType(bitPref);
   }
 
   //
   // Read security type from the server (protocol version 3.3).
   //
 
-  int readSecurityType() throws Exception {
+  int readSecurityType(int bitPref) throws Exception {
     int secType = is.readInt();
 
     switch (secType) {
@@ -349,6 +356,10 @@ class RfbProto {
     case SecTypeNone:
     case SecTypeVncAuth:
       return secType;
+    case SecTypeUltra34:
+      if((bitPref & 1) == 1)
+    	return secType;
+      throw new Exception("Username required.");
     default:
       throw new Exception("Unknown security type from RFB server: " + secType);
     }
@@ -358,7 +369,7 @@ class RfbProto {
   // Select security type from the server's list (protocol versions 3.7/3.8).
   //
 
-  int selectSecurityType() throws Exception {
+  int selectSecurityType(int bitPref) throws Exception {
     int secType = SecTypeInvalid;
 
     // Read the list of security types.
@@ -471,6 +482,52 @@ class RfbProto {
     throw new Exception(reasonString);
   }
 
+  void prepareDH() throws Exception
+  {
+	long gen = is.readLong();
+	long mod = is.readLong();
+	dh_resp = is.readLong();
+	
+	dh = new DH(gen,mod);
+	long pub = dh.createInterKey();
+	
+	os.write(DH.longToBytes(pub));
+  }
+  
+  void authenticateDH(String us,String pw) throws Exception
+  {
+	long key = dh.createEncryptionKey(dh_resp);
+	
+	DesCipher des = new DesCipher(DH.longToBytes(key));
+	
+	byte user[] = new byte[256];
+	byte passwd[] = new byte[64];
+	int i;
+	System.arraycopy(us.getBytes(),0,user,0,us.length());
+	if(us.length() < 256)
+	{
+	  for(i=us.length(); i<256; i++)
+	  {
+		user[i]=0;
+	  }
+	}
+	System.arraycopy(pw.getBytes(),0,passwd,0,pw.length());
+	if(pw.length() < 64)
+	{
+	  for(i=pw.length(); i<64; i++)
+	  {
+		passwd[i]=0;
+	  }
+	}
+	
+	des.encryptText(user,user,DH.longToBytes(key));
+	des.encryptText(passwd,passwd,DH.longToBytes(key));
+	
+	os.write(user);
+	os.write(passwd);
+	
+	readSecurityResult("VNC authentication");
+  }
   //
   // Initialize capability lists (TightVNC protocol extensions).
   //

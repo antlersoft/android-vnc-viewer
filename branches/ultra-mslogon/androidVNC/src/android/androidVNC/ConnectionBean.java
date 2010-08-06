@@ -26,6 +26,7 @@ class ConnectionBean extends AbstractConnectionBean implements Comparable<Connec
 		setPassword("");
 		setKeepPassword(true);
 		setNickname("");
+		setUserName("");
 		setPort(5900);
 		setColorModel(COLORMODEL.C64.nameString());
 		setScaleMode(ScaleType.MATRIX);

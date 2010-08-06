@@ -46,6 +46,7 @@
 <string name="mouse_follow_pan">Mouse follow pan</string>
 <string name="new_list_button">New List</string>
 <string name="nickname_caption">Nickname</string>
+<string name="username_caption">Username</string>
 <string name="one_to_one">1:1</string>
 <string name="open_doc">Manual/Wiki</string>
 <string name="pan_follow_mouse">Pan Follows Mouse</string>
@@ -66,5 +67,5 @@
 <string name="shift_check">Shift</string>
 <string name="shortcut_label">VNC Connection</string>
 <string name="special_keys">Send Keys</string>
-
+<string name="showkbd_label">Keyboard</string>
 </resources>
