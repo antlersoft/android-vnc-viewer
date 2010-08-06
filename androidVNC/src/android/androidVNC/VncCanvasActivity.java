@@ -53,6 +53,9 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ZoomControls;
+import android.widget.Button;
+import android.view.inputmethod.InputMethodManager;
+import android.content.Context;
 
 public class VncCanvasActivity extends Activity {
 
@@ -516,6 +519,7 @@ public class VncCanvasActivity extends Activity {
 
 	ZoomControls zoomer;
 	Panner panner;
+	Button btnshowkbd;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -604,6 +608,7 @@ public class VncCanvasActivity extends Activity {
 
 		vncCanvas = (VncCanvas) findViewById(R.id.vnc_canvas);
 		zoomer = (ZoomControls) findViewById(R.id.zoomer);
+		btnshowkbd = (Button) findViewById(R.id.showkbd);
 
 		vncCanvas.initializeVncCanvas(connection, new Runnable() {
 			public void run() {
@@ -638,6 +643,21 @@ public class VncCanvasActivity extends Activity {
 				showZoomer(true);
 				vncCanvas.scaling.zoomOut(VncCanvasActivity.this);
 
+			}
+
+		});
+		btnshowkbd.setVisibility(View.INVISIBLE);
+		btnshowkbd.setOnClickListener(new View.OnClickListener() {
+
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see android.view.View.OnClickListener#onClick(android.view.View)
+			 */
+			@Override
+			public void onClick(View v) {
+              InputMethodManager inputMgr = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+              inputMgr.toggleSoftInput(0, 0);
 			}
 
 		});
@@ -1092,6 +1112,7 @@ public class VncCanvasActivity extends Activity {
 	private void showZoomer(boolean force) {
 		if (force || zoomer.getVisibility() != View.VISIBLE) {
 			zoomer.show();
+			btnshowkbd.setVisibility(View.VISIBLE);
 			hideZoomAfterMs = SystemClock.uptimeMillis() + ZOOM_HIDE_DELAY_MS;
 			vncCanvas.handler
 					.postAtTime(hideZoomInstance, hideZoomAfterMs + 10);
@@ -1101,6 +1122,7 @@ public class VncCanvasActivity extends Activity {
 	private class HideZoomRunnable implements Runnable {
 		public void run() {
 			if (SystemClock.uptimeMillis() >= hideZoomAfterMs) {
+				btnshowkbd.setVisibility(View.INVISIBLE);
 				zoomer.hide();
 			}
 		}
