@@ -50,6 +50,7 @@ public class ConnectionListActivity extends ListActivity {
         Cursor mCursor = database.getReadableDatabase().query(ConnectionBean.GEN_TABLE_NAME, new String[] {		
         		ConnectionBean.GEN_FIELD__ID,
         		ConnectionBean.GEN_FIELD_NICKNAME,
+        		ConnectionBean.GEN_FIELD_USERNAME,
         		ConnectionBean.GEN_FIELD_ADDRESS,
         		ConnectionBean.GEN_FIELD_PORT,
         		ConnectionBean.GEN_FIELD_REPEATERID },

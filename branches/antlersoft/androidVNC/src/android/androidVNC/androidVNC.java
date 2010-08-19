@@ -54,6 +54,7 @@ public class androidVNC extends Activity {
 	private VncDatabase database;
 	private ConnectionBean selected;
 	private EditText textNickname;
+	private EditText textUsername;
 	private CheckBox checkboxKeepPassword;
 	private CheckBox checkboxLocalCursor;
 	private boolean repeaterTextSet;
@@ -68,6 +69,7 @@ public class androidVNC extends Activity {
 		portText = (EditText) findViewById(R.id.textPORT);
 		passwordText = (EditText) findViewById(R.id.textPASSWORD);
 		textNickname = (EditText) findViewById(R.id.textNickname);
+		textUsername = (EditText) findViewById(R.id.textUsername);
 		goButton = (Button) findViewById(R.id.buttonGO);
 		((Button) findViewById(R.id.buttonRepeater)).setOnClickListener(new View.OnClickListener() {
 			
@@ -199,6 +201,7 @@ public class androidVNC extends Activity {
 		checkboxKeepPassword.setChecked(selected.getKeepPassword());
 		checkboxLocalCursor.setChecked(selected.getUseLocalCursor());
 		textNickname.setText(selected.getNickname());
+		textUsername.setText(selected.getUserName());
 		COLORMODEL cm = COLORMODEL.valueOf(selected.getColorModel());
 		COLORMODEL[] colors=COLORMODEL.values();
 		for (int i=0; i<colors.length; ++i)
@@ -244,6 +247,7 @@ public class androidVNC extends Activity {
 			
 		}
 		selected.setNickname(textNickname.getText().toString());
+		selected.setUserName(textUsername.getText().toString());
 		selected.setForceFull(checkboxForceFullScreen.isChecked());
 		selected.setPassword(passwordText.getText().toString());
 		selected.setKeepPassword(checkboxKeepPassword.isChecked());
