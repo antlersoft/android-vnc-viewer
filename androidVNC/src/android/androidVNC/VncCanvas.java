@@ -162,7 +162,7 @@ public class VncCanvas extends ImageView {
 		Thread t = new Thread() {
 			public void run() {
 				try {
-					connectAndAuthenticate(connection.getPassword());
+					connectAndAuthenticate(connection.getUserName(),connection.getPassword());
 					doProtocolInitialisation(display.getWidth(), display.getHeight());
 					handler.post(new Runnable() {
 						public void run() {
@@ -202,7 +202,7 @@ public class VncCanvas extends ImageView {
 		t.start();
 	}
 
-	void connectAndAuthenticate(String pw) throws Exception {
+	void connectAndAuthenticate(String us,String pw) throws Exception {
 		Log.i(TAG, "Connecting to " + connection.getAddress() + ", port " + connection.getPort() + "...");
 
 		rfb = new RfbProto(connection.getAddress(), connection.getPort());
@@ -225,12 +225,19 @@ public class VncCanvas extends ImageView {
 		rfb.writeVersionMsg();
 		Log.i(TAG, "Using RFB protocol version " + rfb.clientMajor + "." + rfb.clientMinor);
 
-		int secType = rfb.negotiateSecurity();
+		int bitPref=0;
+		Log.d("debug","bitPref="+bitPref);
+		if(connection.getUserName().length()>0)
+		  bitPref|=1;
+		int secType = rfb.negotiateSecurity(bitPref);
 		int authType;
 		if (secType == RfbProto.SecTypeTight) {
 			rfb.initCapabilities();
 			rfb.setupTunneling();
 			authType = rfb.negotiateAuthenticationTight();
+		} else if (secType == RfbProto.SecTypeUltra34) {
+			rfb.prepareDH();
+			authType = RfbProto.AuthUltra;
 		} else {
 			authType = secType;
 		}
@@ -243,6 +250,9 @@ public class VncCanvas extends ImageView {
 		case RfbProto.AuthVNC:
 			Log.i(TAG, "VNC authentication needed");
 			rfb.authenticateVNC(pw);
+			break;
+		case RfbProto.AuthUltra:
+			rfb.authenticateDH(us,pw);
 			break;
 		default:
 			throw new Exception("Unknown authentication scheme " + authType);

@@ -65,6 +65,8 @@
 <string name="send_key_again">Send Key Again</string>
 <string name="shift_check">Shift</string>
 <string name="shortcut_label">VNC Connection</string>
+<string name="showkbd_label">Keyboard</string>
 <string name="special_keys">Send Keys</string>
-
+<string name="username_caption">Username</string>
+<string name="username_hint">For Windows Authentication</string>
 </resources>
