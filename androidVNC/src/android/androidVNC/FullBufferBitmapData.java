@@ -20,8 +20,6 @@ class FullBufferBitmapData extends AbstractBitmapData {
 
 	int xoffset;
 	int yoffset;
-	int displaywidth;
-	int displayheight;
 	
 	/**
 	 * @author Michael A. MacDonald
@@ -51,20 +49,30 @@ class FullBufferBitmapData extends AbstractBitmapData {
 				float scale = vncCanvas.getScale();
 				int xo = xoffset < 0 ? 0 : xoffset;
 				int yo = yoffset < 0 ? 0 : yoffset;
+				/*
 				if (scale == 1 || scale <= 0)
 				{
-					canvas.drawBitmap(data.bitmapPixels, offset(xo, yo), data.framebufferwidth, xo, yo, displaywidth, displayheight, false, null);
+				*/
+					int drawWidth = vncCanvas.getVisibleWidth();
+					if (drawWidth + xo > data.framebufferwidth)
+						drawWidth = data.framebufferwidth - xo;
+					int drawHeight = vncCanvas.getVisibleHeight();
+					if (drawHeight + yo > data.framebufferheight)
+						drawHeight = data.framebufferheight - yo;
+					canvas.drawBitmap(data.bitmapPixels, offset(xo, yo), data.framebufferwidth, xo, yo, drawWidth, drawHeight, false, null);
+				/*
 				}
 				else
 				{
-					int scalewidth = (int)(displaywidth / scale + 1);
+					int scalewidth = (int)(vncCanvas.getVisibleWidth() / scale + 1);
 					if (scalewidth + xo > data.framebufferwidth)
 						scalewidth = data.framebufferwidth - xo;
-					int scaleheight = (int)(displayheight / scale + 1);
+					int scaleheight = (int)(vncCanvas.getVisibleHeight() / scale + 1);
 					if (scaleheight + yo > data.framebufferheight)
 						scaleheight = data.framebufferheight - yo;
 					canvas.drawBitmap(data.bitmapPixels, offset(xo, yo), data.framebufferwidth, xo, yo, scalewidth, scaleheight, false, null);				
 				}
+				*/
 			}
 			if(data.vncCanvas.connection.getUseLocalCursor())
 			{
@@ -88,19 +96,13 @@ class FullBufferBitmapData extends AbstractBitmapData {
 	 * @param p
 	 * @param c
 	 */
-	public FullBufferBitmapData(RfbProto p, VncCanvas c, int displayWidth, int displayHeight, int capacity) {
+	public FullBufferBitmapData(RfbProto p, VncCanvas c, int capacity) {
 		super(p, c);
 		framebufferwidth=rfb.framebufferWidth;
 		framebufferheight=rfb.framebufferHeight;
 		bitmapwidth=framebufferwidth;
 		bitmapheight=framebufferheight;
-		displaywidth = displayWidth;
-		if (displaywidth > framebufferwidth)
-			displaywidth = framebufferwidth;
-		displayheight = displayHeight;
-		if (displayheight > framebufferheight)
-			displayheight = framebufferheight;
-		android.util.Log.i("FBBM", "bitmapsize = ("+bitmapwidth+","+bitmapheight+") display = ( "+displaywidth+ "," + displayheight+ ")");
+		android.util.Log.i("FBBM", "bitmapsize = ("+bitmapwidth+","+bitmapheight+")");
 		bitmapPixels = new int[framebufferwidth * framebufferheight];
 	}
 

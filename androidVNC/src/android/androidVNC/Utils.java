@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.net.Uri;
+import android.text.Html;
 
 public class Utils {
 
@@ -65,7 +66,7 @@ public class Utils {
 	public static void showMessage(Context _context, String title, String message, int icon, DialogInterface.OnClickListener ackHandler) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(_context);
 		builder.setTitle(title);
-		builder.setMessage(message);
+		builder.setMessage(Html.fromHtml(message));
 		builder.setCancelable(false);
 		builder.setPositiveButton("Acknowledged", ackHandler);
 		builder.setIcon(icon);

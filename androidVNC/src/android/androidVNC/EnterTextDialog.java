@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -22,12 +24,14 @@ import android.widget.ImageButton;
  *
  */
 class EnterTextDialog extends Dialog {
+	static final int NUMBER_SENT_SAVED = 100;
+	static final int DELETED_ID = -10;
 	
 	private VncCanvasActivity _canvasActivity;
 	
 	private EditText _textEnterText;
 	
-	private ArrayList<String> _history;
+	private ArrayList<SentTextBean> _history;
 	
 	private int _historyIndex;
 	
@@ -38,8 +42,7 @@ class EnterTextDialog extends Dialog {
 		super(context);
 		setOwnerActivity((Activity)context);
 		_canvasActivity = (VncCanvasActivity)context;
-		_history = new ArrayList<String>();
-		_historyIndex = 0;
+		_history = new ArrayList<SentTextBean>();
 	}
 	
 	private String saveText(boolean wasSent)
@@ -48,11 +51,52 @@ class EnterTextDialog extends Dialog {
 		if (cs.length()==0)
 			return "";
 		String s = cs.toString();
-		if (wasSent || _historyIndex>=_history.size() || ! s.equals(_history.get(_historyIndex)))
+		if (wasSent || _historyIndex>=_history.size() || ! s.equals(_history.get(_historyIndex).getSentText()))
 		{
-			_history.add(s);
+			SentTextBean added = new SentTextBean();
+			added.setSentText(s);
+			SQLiteDatabase db = _canvasActivity.database.getWritableDatabase();
+			added.Gen_insert(db);
+			_history.add(added);
+			for (int i = 0; i < _historyIndex - NUMBER_SENT_SAVED; i++)
+			{
+				SentTextBean deleteCandidate = _history.get(i);
+				if (deleteCandidate.get_Id() != DELETED_ID)
+				{
+					deleteCandidate.Gen_delete(db);
+					deleteCandidate.set_Id(DELETED_ID);
+				}
+			}
 		}
 		return s;
+	}
+	
+	private void sendText(String s)
+	{
+		RfbProto rfb = _canvasActivity.vncCanvas.rfb;
+		int l = s.length();
+		for (int i = 0; i<l; i++)
+		{
+			char c = s.charAt(i);
+			int meta = 0;
+			int keysym = c;
+			if (Character.isISOControl(c))
+			{
+				if (c=='\n')
+					keysym = MetaKeyBean.keysByKeyCode.get(KeyEvent.KEYCODE_ENTER).keySym;
+				else
+					continue;
+			}
+			try
+			{
+				rfb.writeKeyEvent(keysym, meta, true);
+				rfb.writeKeyEvent(keysym, meta, false);
+			}
+			catch (IOException ioe)
+			{
+				// TODO: log this
+			}
+		}		
 	}
 
 	/* (non-Javadoc)
@@ -81,7 +125,7 @@ class EnterTextDialog extends Dialog {
 						_historyIndex++;
 					if (_historyIndex < _history.size())
 					{
-					    _textEnterText.setText(_history.get(_historyIndex));
+					    _textEnterText.setText(_history.get(_historyIndex).getSentText());
 					}
 					else
 					{
@@ -104,7 +148,7 @@ class EnterTextDialog extends Dialog {
 				{
 					saveText(false);
 					_historyIndex--;
-				    _textEnterText.setText(_history.get(_historyIndex));
+				    _textEnterText.setText(_history.get(_historyIndex).getSentText());
 				}
 				updateButtons();
 			}
@@ -117,31 +161,8 @@ class EnterTextDialog extends Dialog {
 			 */
 			@Override
 			public void onClick(View v) {
-				RfbProto rfb = _canvasActivity.vncCanvas.rfb;
 				String s = saveText(true);
-				int l = s.length();
-				for (int i = 0; i<l; i++)
-				{
-					char c = s.charAt(i);
-					int meta = 0;
-					int keysym = c;
-					if (Character.isISOControl(c))
-					{
-						if (c=='\n')
-							keysym = MetaKeyBean.keysByKeyCode.get(KeyEvent.KEYCODE_ENTER).keySym;
-						else
-							continue;
-					}
-					try
-					{
-						rfb.writeKeyEvent(keysym, meta, true);
-						rfb.writeKeyEvent(keysym, meta, false);
-					}
-					catch (IOException ioe)
-					{
-						// TODO: log this
-					}
-				}
+				sendText(s);
 				_textEnterText.setText("");
 				_historyIndex = _history.size();
 				updateButtons();
@@ -149,6 +170,60 @@ class EnterTextDialog extends Dialog {
 			}
 			
 		});
+		
+		((Button)findViewById(R.id.buttonSendWithoutSaving)).setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				String s = _textEnterText.getText().toString();
+				sendText(s);
+				_textEnterText.setText("");
+				_historyIndex = _history.size();
+				updateButtons();
+				dismiss();
+			}
+		});
+		
+		((ImageButton)findViewById(R.id.buttonTextDelete)).setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (_historyIndex < _history.size())
+				{
+					String s = _textEnterText.getText().toString();
+					SentTextBean bean = _history.get(_historyIndex);
+					if (s.equals(bean.getSentText()))
+					{
+						
+						bean.Gen_delete(_canvasActivity.database.getWritableDatabase());
+						_history.remove(_historyIndex);
+						if (_historyIndex > 0)
+						{
+							_historyIndex = _historyIndex - 1;
+						}
+					}
+				}
+				String s = "";
+				if (_historyIndex < _history.size())
+				{
+					s = _history.get(_historyIndex).getSentText();
+				}
+				_textEnterText.setText(s);
+				updateButtons();
+			}
+			
+		});
+		Cursor readInOrder = _canvasActivity.database.getReadableDatabase().rawQuery(
+				 "select * from " + SentTextBean.GEN_TABLE_NAME + " ORDER BY _id", null);
+		try
+		{
+			SentTextBean.Gen_populateFromCursor(readInOrder, _history, SentTextBean.GEN_NEW);
+		}
+		finally
+		{
+			readInOrder.close();
+		}
+		_historyIndex = _history.size();
 		
 		updateButtons();
 	}

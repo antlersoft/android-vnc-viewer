@@ -105,24 +105,49 @@
 			    android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
 			/>
-			<LinearLayout android:orientation="horizontal" 
+			<CheckBox
+				android:id="@+id/checkboxUseLocalCursor"
+			    android:text="@string/local_mouse_check"
+			    android:layout_width="wrap_content"
+			    android:gravity="left|center_vertical"
+			    android:layout_height="wrap_content"
+			/>
+			<LinearLayout
+				android:orientation="horizontal"
+				android:padding="10dp"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
 				>
-				<CheckBox
-					android:id="@+id/checkboxUseLocalCursor"
-				    android:text="@string/local_mouse_check"
-				    android:layout_width="wrap_content"
-				    android:gravity="left|center_vertical"
-				    android:layout_height="wrap_content"
-				/>
-				<CheckBox
-					android:id="@+id/checkboxForceFullScreen"
-				    android:text="@string/force_full_check"
-				    android:layout_width="wrap_content"
-				    android:gravity="right|center_vertical"
-				    android:layout_height="wrap_content"
-				/>
+				<TextView
+					android:text="@string/force_full_check"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					/> 
+				<RadioGroup
+					android:id="@+id/groupForceFullScreen"
+					android:orientation="horizontal"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					>
+					<RadioButton
+						android:id="@+id/radioForceFullScreenAuto"
+					    android:text="@string/auto"
+					    android:layout_width="wrap_content"
+					    android:layout_height="wrap_content"
+					/>
+					<RadioButton
+						android:id="@+id/radioForceFullScreenOn"
+					    android:text="@string/on"
+					    android:layout_width="wrap_content"
+					    android:layout_height="wrap_content"
+					/>
+					<RadioButton
+						android:id="@+id/radioForceFullScreenOff"
+					    android:text="@string/off"
+					    android:layout_width="wrap_content"
+					    android:layout_height="wrap_content"
+					/>
+				</RadioGroup>
 			</LinearLayout>
 			<LinearLayout android:orientation="horizontal"
 				android:layout_width="fill_parent"
