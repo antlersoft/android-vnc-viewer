@@ -36,6 +36,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -48,8 +49,8 @@ public class androidVNC extends Activity {
 	private EditText passwordText;
 	private Button goButton;
 	private TextView repeaterText;
+	private RadioGroup groupForceFullScreen;
 	private Spinner colorSpinner;
-	private CheckBox checkboxForceFullScreen;
 	private Spinner spinnerConnection;
 	private VncDatabase database;
 	private ConnectionBean selected;
@@ -81,7 +82,7 @@ public class androidVNC extends Activity {
 		colorSpinner = (Spinner)findViewById(R.id.colorformat);
 		COLORMODEL[] models=COLORMODEL.values();
 		ArrayAdapter<COLORMODEL> colorSpinnerAdapter = new ArrayAdapter<COLORMODEL>(this, android.R.layout.simple_spinner_item, models);
-		checkboxForceFullScreen = (CheckBox)findViewById(R.id.checkboxForceFullScreen);
+		groupForceFullScreen = (RadioGroup)findViewById(R.id.groupForceFullScreen);
 		checkboxKeepPassword = (CheckBox)findViewById(R.id.checkboxKeepPassword);
 		checkboxLocalCursor = (CheckBox)findViewById(R.id.checkboxUseLocalCursor);
 		colorSpinner.setAdapter(colorSpinnerAdapter);
@@ -197,7 +198,7 @@ public class androidVNC extends Activity {
 		if (selected.getKeepPassword() || selected.getPassword().length()>0) {
 			passwordText.setText(selected.getPassword());
 		}
-		checkboxForceFullScreen.setChecked(selected.getForceFull());
+		groupForceFullScreen.check(selected.getForceFull()==BitmapImplHint.AUTO ? R.id.radioForceFullScreenAuto : (selected.getForceFull() == BitmapImplHint.FULL ? R.id.radioForceFullScreenOn : R.id.radioForceFullScreenOff));
 		checkboxKeepPassword.setChecked(selected.getKeepPassword());
 		checkboxLocalCursor.setChecked(selected.getUseLocalCursor());
 		textNickname.setText(selected.getNickname());
@@ -248,7 +249,7 @@ public class androidVNC extends Activity {
 		}
 		selected.setNickname(textNickname.getText().toString());
 		selected.setUserName(textUsername.getText().toString());
-		selected.setForceFull(checkboxForceFullScreen.isChecked());
+		selected.setForceFull(groupForceFullScreen.getCheckedRadioButtonId()==R.id.radioForceFullScreenAuto ? BitmapImplHint.AUTO : (groupForceFullScreen.getCheckedRadioButtonId()==R.id.radioForceFullScreenOn ? BitmapImplHint.FULL : BitmapImplHint.TILE));
 		selected.setPassword(passwordText.getText().toString());
 		selected.setKeepPassword(checkboxKeepPassword.isChecked());
 		selected.setUseLocalCursor(checkboxLocalCursor.isChecked());

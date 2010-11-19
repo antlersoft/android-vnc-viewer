@@ -7,7 +7,9 @@
     <string name="arrow_left">Left Arrow</string>
     <string name="arrow_right">Right Arrow</string>
     <string name="arrow_up">Up Arrow</string>
+    <string name="auto">Auto</string>
     <string name="button_send_text">Send Text</string>
+    <string name="button_send_without_saving">Send Text/Don\'t Save It</string>
 <string name="center_mouse">Mouse @</string>
 <string name="close">Close</string>
 <string name="color_format_caption">Color Format</string>
@@ -46,6 +48,8 @@
 <string name="mouse_follow_pan">Mouse follow pan</string>
 <string name="new_list_button">New List</string>
 <string name="nickname_caption">Nickname</string>
+<string name="off">Off</string>
+<string name="on">On</string>
 <string name="one_to_one">1:1</string>
 <string name="open_doc">Manual/Wiki</string>
 <string name="pan_follow_mouse">Pan Follows Mouse</string>

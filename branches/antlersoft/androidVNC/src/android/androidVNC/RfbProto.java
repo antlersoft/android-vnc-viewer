@@ -300,6 +300,7 @@ class RfbProto {
 	|| (b[8] < '0') || (b[8] > '9') || (b[9] < '0') || (b[9] > '9')
 	|| (b[10] < '0') || (b[10] > '9') || (b[11] != '\n'))
     {
+      Log.i(TAG,new String(b));
       throw new Exception("Host " + host + " port " + port +
 			  " is not an RFB server");
     }
