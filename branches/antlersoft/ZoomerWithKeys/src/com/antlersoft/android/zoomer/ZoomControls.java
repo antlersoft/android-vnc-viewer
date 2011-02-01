@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package android.widget;
+package com.antlersoft.android.zoomer;
 
-import android.annotation.Widget;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
-
-import com.android.internal.R;
-
+import android.widget.LinearLayout;
 
 /**
  * The {@code ZoomControls} class displays a simple set of controls used for zooming and
  * provides callbacks to register for events. */
-@Widget
 public class ZoomControls extends LinearLayout {
 
     private final ZoomButton mZoomIn;
