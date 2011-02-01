@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.widget;
+package com.antlersoft.android.zoomer;
 
 import android.content.Context;
 import android.os.Handler;
@@ -23,14 +23,15 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
+import android.widget.ImageButton;
 
 public class ZoomButton extends ImageButton implements OnLongClickListener {
 
     private final Handler mHandler;
     private final Runnable mRunnable = new Runnable() {
         public void run() {
-            if ((mOnClickListener != null) && mIsInLongpress && isEnabled()) {
-                mOnClickListener.onClick(ZoomButton.this);
+            if (mIsInLongpress && isEnabled()) {
+                performClick();
                 mHandler.postDelayed(this, mZoomSpeed);
             }
         }
