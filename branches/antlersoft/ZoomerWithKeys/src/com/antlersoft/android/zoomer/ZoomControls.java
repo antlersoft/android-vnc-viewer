@@ -23,6 +23,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.LinearLayout;
+import android.widget.ZoomButton;
 
 /**
  * The {@code ZoomControls} class displays a simple set of controls used for zooming and
