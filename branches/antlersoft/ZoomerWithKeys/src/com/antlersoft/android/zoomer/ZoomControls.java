@@ -13,6 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*
+ * Copyright (C) 2011 Michael A. MacDonald
+ * 
+ * This is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this software; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
+ * USA.
+ */
 
 package com.antlersoft.android.zoomer;
 
@@ -22,6 +40,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ZoomButton;
 
@@ -32,6 +51,7 @@ public class ZoomControls extends LinearLayout {
 
     private final ZoomButton mZoomIn;
     private final ZoomButton mZoomOut;
+    private final ImageButton mZoomKeyboard;
         
     public ZoomControls(Context context) {
         this(context, null);
@@ -48,6 +68,7 @@ public class ZoomControls extends LinearLayout {
         
         mZoomIn = (ZoomButton) findViewById(R.id.zoomIn);
         mZoomOut = (ZoomButton) findViewById(R.id.zoomOut);
+        mZoomKeyboard = (ImageButton) findViewById(R.id.zoomKeys);
     }
 
     public void setOnZoomInClickListener(OnClickListener listener) {
@@ -56,6 +77,10 @@ public class ZoomControls extends LinearLayout {
     
     public void setOnZoomOutClickListener(OnClickListener listener) {
         mZoomOut.setOnClickListener(listener);
+    }
+    
+    public void setOnZoomKeyboardClickListener(OnClickListener listener) {
+    	mZoomKeyboard.setOnClickListener(listener);
     }
     
     /*
