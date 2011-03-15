@@ -23,10 +23,15 @@
 <string name="delete_key">Delete Selected Key</string>
 <string name="delete_key_list">Delete Key List</string>
 <string name="disconnect">Disconnect</string>
+<string name="export_settings">Export</string>
+<string name="export_settings_path">Export to file</string>
 <string name="enter_text_title">Enter Text to Send</string>
 <string name="enter_text">Send text</string>
 <string name="fit_to_screen">Fit to Screen</string>
 <string name="force_full_check">Force full-screen bitmap</string>
+<string name="import_export_settings">Import/Export Settings</string>
+<string name="import_settings">Import</string>
+<string name="import_settings_file_url">Import from file or URL</string>
 <string name="info">Info</string>
 <string name="intro_text">If you need help, please check the &lt;a href="http://code.google.com/p/android-vnc-viewer/wiki/Documentation"&gt;manual&lt;/a&gt; (press phone\'s Menu button to access manual and other menu items), or the &lt;a href="http://code.google.com/p/android-vnc-viewer/wiki/faq"&gt;FAQ&lt;/a&gt;.&lt;br&gt;</string>
 <string name="intro_title">Welcome</string>
