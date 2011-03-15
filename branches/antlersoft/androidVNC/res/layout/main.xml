@@ -167,6 +167,12 @@
 					android:text="@string/repeater_empty_text"
 					/>
 			</LinearLayout>
+			<Button
+				android:id="@+id/buttonImportExport"
+				android:text="@string/import_export_settings"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				/>
 		</LinearLayout>
 	</ScrollView>
 </LinearLayout>

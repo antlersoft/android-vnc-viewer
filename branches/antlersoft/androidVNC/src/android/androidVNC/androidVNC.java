@@ -79,6 +79,12 @@ public class androidVNC extends Activity {
 				showDialog(R.layout.repeater_dialog);
 			}
 		});
+		((Button)findViewById(R.id.buttonImportExport)).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showDialog(R.layout.importexport);
+			}
+		});
 		colorSpinner = (Spinner)findViewById(R.id.colorformat);
 		COLORMODEL[] models=COLORMODEL.values();
 		ArrayAdapter<COLORMODEL> colorSpinnerAdapter = new ArrayAdapter<COLORMODEL>(this, android.R.layout.simple_spinner_item, models);
@@ -135,7 +141,10 @@ public class androidVNC extends Activity {
 	 */
 	@Override
 	protected Dialog onCreateDialog(int id) {
-		return new RepeaterDialog(this);
+		if (id == R.layout.importexport)
+			return new ImportExportDialog(this);
+		else
+			return new RepeaterDialog(this);
 	}
 
 	/* (non-Javadoc)
@@ -286,7 +295,7 @@ public class androidVNC extends Activity {
 		return recents.get(0);
 	}
 	
-	private void arriveOnPage() {
+	void arriveOnPage() {
 		ArrayList<ConnectionBean> connections=new ArrayList<ConnectionBean>();
 		ConnectionBean.getAll(database.getReadableDatabase(), ConnectionBean.GEN_TABLE_NAME, connections, ConnectionBean.newInstance);
 		Collections.sort(connections);
@@ -322,6 +331,11 @@ public class androidVNC extends Activity {
 		}
 		updateSelectedFromView();
 		selected.save(database.getWritableDatabase());
+	}
+	
+	VncDatabase getDatabaseHelper()
+	{
+		return database;
 	}
 	
 	private void canvasStart() {

@@ -13,15 +13,11 @@
     >
 </android.androidVNC.VncCanvas>
   
-<ZoomControls
+<com.antlersoft.android.zoomer.ZoomControls
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:id="@+id/zoomer"
     android:layout_gravity="bottom|center"
 />
-<Button android:id="@+id/showkbd" android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:drawableTop="@drawable/btn_keypad"
-        android:text="@string/showkbd_label"
-        android:layout_gravity="bottom|left" />
+
 </FrameLayout>

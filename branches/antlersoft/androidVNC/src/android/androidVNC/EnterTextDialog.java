@@ -15,6 +15,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
+import android.view.WindowManager.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -24,6 +26,7 @@ import android.widget.ImageButton;
  *
  */
 class EnterTextDialog extends Dialog {
+
 	static final int NUMBER_SENT_SAVED = 100;
 	static final int DELETED_ID = -10;
 	
@@ -108,6 +111,20 @@ class EnterTextDialog extends Dialog {
 		setContentView(R.layout.entertext);
 		setTitle(R.string.enter_text_title);
 		_textEnterText = (EditText)findViewById(R.id.textEnterText);
+		getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+		_textEnterText.setOnFocusChangeListener(new OnFocusChangeListener() {
+
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				// TODO remove this
+				android.util.Log.i("android.androidVNC.EnterTextDialog", "onFocusChange hasFocus=" + hasFocus);
+				if (hasFocus)
+				{
+					getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+				}
+			}
+			
+		});
 		_buttonNextEntry = (ImageButton)findViewById(R.id.buttonNextEntry);
 		_buttonNextEntry.setOnClickListener(new View.OnClickListener() {
 
@@ -240,6 +257,8 @@ class EnterTextDialog extends Dialog {
 	@Override
 	protected void onStart() {
 		super.onStart();
+		// TODO remove this
+		android.util.Log.i("android.androidVNC.EnterTextDialog", "onStart isFocusable=" + _textEnterText.isFocusable());
 		_textEnterText.requestFocus();
 	}
 }
