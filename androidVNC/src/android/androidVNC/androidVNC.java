@@ -36,6 +36,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -48,12 +49,13 @@ public class androidVNC extends Activity {
 	private EditText passwordText;
 	private Button goButton;
 	private TextView repeaterText;
+	private RadioGroup groupForceFullScreen;
 	private Spinner colorSpinner;
-	private CheckBox checkboxForceFullScreen;
 	private Spinner spinnerConnection;
 	private VncDatabase database;
 	private ConnectionBean selected;
 	private EditText textNickname;
+	private EditText textUsername;
 	private CheckBox checkboxKeepPassword;
 	private CheckBox checkboxLocalCursor;
 	private boolean repeaterTextSet;
@@ -68,6 +70,7 @@ public class androidVNC extends Activity {
 		portText = (EditText) findViewById(R.id.textPORT);
 		passwordText = (EditText) findViewById(R.id.textPASSWORD);
 		textNickname = (EditText) findViewById(R.id.textNickname);
+		textUsername = (EditText) findViewById(R.id.textUsername);
 		goButton = (Button) findViewById(R.id.buttonGO);
 		((Button) findViewById(R.id.buttonRepeater)).setOnClickListener(new View.OnClickListener() {
 			
@@ -76,10 +79,16 @@ public class androidVNC extends Activity {
 				showDialog(R.layout.repeater_dialog);
 			}
 		});
+		((Button)findViewById(R.id.buttonImportExport)).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showDialog(R.layout.importexport);
+			}
+		});
 		colorSpinner = (Spinner)findViewById(R.id.colorformat);
 		COLORMODEL[] models=COLORMODEL.values();
 		ArrayAdapter<COLORMODEL> colorSpinnerAdapter = new ArrayAdapter<COLORMODEL>(this, android.R.layout.simple_spinner_item, models);
-		checkboxForceFullScreen = (CheckBox)findViewById(R.id.checkboxForceFullScreen);
+		groupForceFullScreen = (RadioGroup)findViewById(R.id.groupForceFullScreen);
 		checkboxKeepPassword = (CheckBox)findViewById(R.id.checkboxKeepPassword);
 		checkboxLocalCursor = (CheckBox)findViewById(R.id.checkboxUseLocalCursor);
 		colorSpinner.setAdapter(colorSpinnerAdapter);
@@ -132,7 +141,10 @@ public class androidVNC extends Activity {
 	 */
 	@Override
 	protected Dialog onCreateDialog(int id) {
-		return new RepeaterDialog(this);
+		if (id == R.layout.importexport)
+			return new ImportExportDialog(this);
+		else
+			return new RepeaterDialog(this);
 	}
 
 	/* (non-Javadoc)
@@ -195,10 +207,11 @@ public class androidVNC extends Activity {
 		if (selected.getKeepPassword() || selected.getPassword().length()>0) {
 			passwordText.setText(selected.getPassword());
 		}
-		checkboxForceFullScreen.setChecked(selected.getForceFull());
+		groupForceFullScreen.check(selected.getForceFull()==BitmapImplHint.AUTO ? R.id.radioForceFullScreenAuto : (selected.getForceFull() == BitmapImplHint.FULL ? R.id.radioForceFullScreenOn : R.id.radioForceFullScreenOff));
 		checkboxKeepPassword.setChecked(selected.getKeepPassword());
 		checkboxLocalCursor.setChecked(selected.getUseLocalCursor());
 		textNickname.setText(selected.getNickname());
+		textUsername.setText(selected.getUserName());
 		COLORMODEL cm = COLORMODEL.valueOf(selected.getColorModel());
 		COLORMODEL[] colors=COLORMODEL.values();
 		for (int i=0; i<colors.length; ++i)
@@ -244,7 +257,8 @@ public class androidVNC extends Activity {
 			
 		}
 		selected.setNickname(textNickname.getText().toString());
-		selected.setForceFull(checkboxForceFullScreen.isChecked());
+		selected.setUserName(textUsername.getText().toString());
+		selected.setForceFull(groupForceFullScreen.getCheckedRadioButtonId()==R.id.radioForceFullScreenAuto ? BitmapImplHint.AUTO : (groupForceFullScreen.getCheckedRadioButtonId()==R.id.radioForceFullScreenOn ? BitmapImplHint.FULL : BitmapImplHint.TILE));
 		selected.setPassword(passwordText.getText().toString());
 		selected.setKeepPassword(checkboxKeepPassword.isChecked());
 		selected.setUseLocalCursor(checkboxLocalCursor.isChecked());
@@ -281,7 +295,7 @@ public class androidVNC extends Activity {
 		return recents.get(0);
 	}
 	
-	private void arriveOnPage() {
+	void arriveOnPage() {
 		ArrayList<ConnectionBean> connections=new ArrayList<ConnectionBean>();
 		ConnectionBean.getAll(database.getReadableDatabase(), ConnectionBean.GEN_TABLE_NAME, connections, ConnectionBean.newInstance);
 		Collections.sort(connections);
@@ -317,6 +331,11 @@ public class androidVNC extends Activity {
 		}
 		updateSelectedFromView();
 		selected.save(database.getWritableDatabase());
+	}
+	
+	VncDatabase getDatabaseHelper()
+	{
+		return database;
 	}
 	
 	private void canvasStart() {

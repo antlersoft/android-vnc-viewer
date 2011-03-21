@@ -162,7 +162,7 @@ public class VncCanvas extends ImageView {
 		Thread t = new Thread() {
 			public void run() {
 				try {
-					connectAndAuthenticate(connection.getPassword());
+					connectAndAuthenticate(connection.getUserName(),connection.getPassword());
 					doProtocolInitialisation(display.getWidth(), display.getHeight());
 					handler.post(new Runnable() {
 						public void run() {
@@ -188,7 +188,7 @@ public class VncCanvas extends ImageView {
 							if (e.getMessage() != null && (e.getMessage().indexOf("authentication") > -1)) {
 								error = "VNC authentication failed!";
  							}
-							final String error_ = error;
+							final String error_ = error + "<br>" + e.getLocalizedMessage();
 							handler.post(new Runnable() {
 								public void run() {
 									Utils.showFatalErrorMessage(getContext(), error_);
@@ -202,7 +202,7 @@ public class VncCanvas extends ImageView {
 		t.start();
 	}
 
-	void connectAndAuthenticate(String pw) throws Exception {
+	void connectAndAuthenticate(String us,String pw) throws Exception {
 		Log.i(TAG, "Connecting to " + connection.getAddress() + ", port " + connection.getPort() + "...");
 
 		rfb = new RfbProto(connection.getAddress(), connection.getPort());
@@ -225,12 +225,19 @@ public class VncCanvas extends ImageView {
 		rfb.writeVersionMsg();
 		Log.i(TAG, "Using RFB protocol version " + rfb.clientMajor + "." + rfb.clientMinor);
 
-		int secType = rfb.negotiateSecurity();
+		int bitPref=0;
+		if(connection.getUserName().length()>0)
+		  bitPref|=1;
+		Log.d("debug","bitPref="+bitPref);
+		int secType = rfb.negotiateSecurity(bitPref);
 		int authType;
 		if (secType == RfbProto.SecTypeTight) {
 			rfb.initCapabilities();
 			rfb.setupTunneling();
 			authType = rfb.negotiateAuthenticationTight();
+		} else if (secType == RfbProto.SecTypeUltra34) {
+			rfb.prepareDH();
+			authType = RfbProto.AuthUltra;
 		} else {
 			authType = secType;
 		}
@@ -244,6 +251,9 @@ public class VncCanvas extends ImageView {
 			Log.i(TAG, "VNC authentication needed");
 			rfb.authenticateVNC(pw);
 			break;
+		case RfbProto.AuthUltra:
+			rfb.authenticateDH(us,pw);
+			break;
 		default:
 			throw new Exception("Unknown authentication scheme " + authType);
 		}
@@ -256,18 +266,19 @@ public class VncCanvas extends ImageView {
 		Log.i(TAG, "Desktop name is " + rfb.desktopName);
 		Log.i(TAG, "Desktop size is " + rfb.framebufferWidth + " x " + rfb.framebufferHeight);
 
-		boolean useCompact = connection.getForceFull();
-		int capacity = 0;
-		if (! useCompact)
+		boolean useFull = false;
+		int capacity = BCFactory.getInstance().getBCActivityManager().getMemoryClass(Utils.getActivityManager(getContext()));
+		if (connection.getForceFull() == BitmapImplHint.AUTO)
 		{
-			capacity = BCFactory.getInstance().getBCActivityManager().getMemoryClass(Utils.getActivityManager(getContext()));
 			if (rfb.framebufferWidth * rfb.framebufferHeight * FullBufferBitmapData.CAPACITY_MULTIPLIER <= capacity * 1024 * 1024)
-				useCompact = true;
+				useFull = true;
 		}
-		if (! useCompact)
+		else
+			useFull = (connection.getForceFull() == BitmapImplHint.FULL);
+		if (! useFull)
 			bitmapData=new LargeBitmapData(rfb,this,dx,dy,capacity);
 		else
-			bitmapData=new FullBufferBitmapData(rfb,this, dx, dy, capacity);
+			bitmapData=new FullBufferBitmapData(rfb,this, capacity);
 		mouseX=rfb.framebufferWidth/2;
 		mouseY=rfb.framebufferHeight/2;
 

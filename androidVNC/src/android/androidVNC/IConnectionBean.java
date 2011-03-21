@@ -23,8 +23,14 @@ interface IConnectionBean {
 	String getPassword();
 	@FieldAccessor
 	String getColorModel();
+	/**
+	 * Records bitmap data implementation selection.  0 for auto, 1 for force full bitmap, 2 for force tiled
+	 * <p>
+	 * For historical reasons, this is named as if it were just a boolean selection for auto and force full.
+	 * @return 0 for auto, 1 for force full bitmap, 2 for forced tiled
+	 */
 	@FieldAccessor
-	boolean getForceFull();
+	long getForceFull();
 	@FieldAccessor
 	String getRepeaterId();
 	@FieldAccessor
@@ -43,10 +49,14 @@ interface IConnectionBean {
 	long getMetaListId();
 	@FieldAccessor(Name="LAST_META_KEY_ID")
 	long getLastMetaKeyId();
-	@FieldAccessor(DefaultValue="0")
+	@FieldAccessor(DefaultValue="false")
 	boolean getFollowPan();
 	@FieldAccessor
 	String getUserName();
 	@FieldAccessor
 	String getSecureConnectionType();
+	@FieldAccessor(DefaultValue="true")
+	boolean getShowZoomButtons();
+	@FieldAccessor(Name="DOUBLE_TAP_ACTION")
+	String getDoubleTapActionAsString();
 }

@@ -19,6 +19,7 @@ public class BCFactory {
 	private IBCGestureDetector bcGestureDetector;
 	private IBCHaptic bcHaptic;
 	private IBCMotionEvent bcMotionEvent;
+	private IBCStorageContext bcStorageContext;
 	
 	/**
 	 * This is here so checking the static doesn't get optimized away;
@@ -200,6 +201,46 @@ public class BCFactory {
 			result = new DummyScaleGestureDetector();
 		}
 		return result;
+	}
+	
+	/**
+	 * 
+	 * @return An implementation of IBCStorageContext appropriate for the running Android release
+	 */
+	public IBCStorageContext getStorageContext()
+	{
+		if (bcStorageContext == null)
+		{
+			synchronized (this)
+			{
+				if (bcStorageContext == null)
+				{
+					if (getSdkVersion() >= 8)
+					{
+						try
+						{
+							bcStorageContext = (IBCStorageContext)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCStorageContext8").newInstance();
+						}
+						catch (Exception ie)
+						{
+							throw new RuntimeException("Error instantiating", ie);
+						}
+					}
+					else
+					{
+						try
+						{
+							bcStorageContext = (IBCStorageContext)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCStorageContext7").newInstance();
+						}
+						catch (Exception ie)
+						{
+							throw new RuntimeException("Error instantiating", ie);
+						}
+					}
+				}
+			}
+		}
+		return bcStorageContext;
 	}
 	
 	/**

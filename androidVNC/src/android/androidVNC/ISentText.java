@@ -13,10 +13,10 @@ import com.antlersoft.android.db.TableInterface;
  * @author Michael A. MacDonald
  *
  */
-@TableInterface(TableName="SENT_TEXT",ImplementingClassName="SentTextBean")
+@TableInterface(TableName="SENT_TEXT",ImplementingIsAbstract=false,ImplementingClassName="SentTextBean")
 public interface ISentText {
 	@FieldAccessor
-	long getId();
+	long get_Id();
 	@FieldAccessor
 	String getSentText();
 }

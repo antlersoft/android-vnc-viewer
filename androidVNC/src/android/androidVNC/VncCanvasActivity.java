@@ -25,7 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.antlersoft.android.bc.BCFactory;
-import com.antlersoft.android.bc.IBCScaleGestureDetector;
+
+import com.antlersoft.android.zoomer.ZoomControls;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -52,7 +53,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ZoomControls;
+import android.widget.Button;
+import android.view.inputmethod.InputMethodManager;
+import android.content.Context;
 
 public class VncCanvasActivity extends Activity {
 
@@ -638,6 +641,20 @@ public class VncCanvasActivity extends Activity {
 				showZoomer(true);
 				vncCanvas.scaling.zoomOut(VncCanvasActivity.this);
 
+			}
+
+		});
+		zoomer.setOnZoomKeyboardClickListener(new View.OnClickListener() {
+
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see android.view.View.OnClickListener#onClick(android.view.View)
+			 */
+			@Override
+			public void onClick(View v) {
+              InputMethodManager inputMgr = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+              inputMgr.toggleSoftInput(0, 0);
 			}
 
 		});

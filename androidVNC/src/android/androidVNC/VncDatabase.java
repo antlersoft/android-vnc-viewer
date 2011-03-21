@@ -15,7 +15,8 @@ import android.util.Log;
 class VncDatabase extends SQLiteOpenHelper {
 	static final int DBV_0_2_X = 9;
 	static final int DBV_0_2_4 = 10;
-	static final int DBV_0_5_0 = 11;
+	static final int DBV_0_4_7 = 11;
+	static final int DBV_0_5_0 = 12;
 	
 	public final static String TAG = VncDatabase.class.toString();
 	
@@ -70,12 +71,21 @@ class VncDatabase extends SQLiteOpenHelper {
 				db.execSQL("DROP TABLE OLD_" + AbstractConnectionBean.GEN_TABLE_NAME);
 				oldVersion = DBV_0_2_4;
 			}
-			Log.i(TAG,"Doing upgrade from 10 to 11");
+			if (oldVersion == DBV_0_2_4)
+			{
+				Log.i(TAG,"Doing upgrade from 10 to 11");
+				db.execSQL("ALTER TABLE " + AbstractConnectionBean.GEN_TABLE_NAME + " ADD COLUMN " +AbstractConnectionBean.GEN_FIELD_USERNAME+" TEXT");
+				db.execSQL("ALTER TABLE " + AbstractConnectionBean.GEN_TABLE_NAME + " ADD COLUMN " +AbstractConnectionBean.GEN_FIELD_SECURECONNECTIONTYPE+" TEXT");
+				db.execSQL("ALTER TABLE " + MostRecentBean.GEN_TABLE_NAME + " ADD COLUMN " + MostRecentBean.GEN_FIELD_SHOW_SPLASH_VERSION + " INTEGER");
+				db.execSQL("ALTER TABLE " + MostRecentBean.GEN_TABLE_NAME + " ADD COLUMN " + MostRecentBean.GEN_FIELD_TEXT_INDEX);
+				oldVersion = DBV_0_4_7;
+			}
+			Log.i(TAG,"Doing upgrade from 11 to 12");
+			// Haven't been using SentText before, primary key handling changed so drop and recreate it
+			db.execSQL("DROP TABLE IF EXISTS " + SentTextBean.GEN_TABLE_NAME);
 			db.execSQL(SentTextBean.GEN_CREATE);
-			db.execSQL("ALTER TABLE " + AbstractConnectionBean.GEN_TABLE_NAME + " ADD COLUMN " +AbstractConnectionBean.GEN_FIELD_USERNAME+" TEXT");
-			db.execSQL("ALTER TABLE " + AbstractConnectionBean.GEN_TABLE_NAME + " ADD COLUMN " +AbstractConnectionBean.GEN_FIELD_SECURECONNECTIONTYPE+" TEXT");
-			db.execSQL("ALTER TABLE " + MostRecentBean.GEN_TABLE_NAME + " ADD COLUMN " + MostRecentBean.GEN_FIELD_SHOW_SPLASH_VERSION + " INTEGER");
-			db.execSQL("ALTER TABLE " + MostRecentBean.GEN_TABLE_NAME + " ADD COLUMN " + MostRecentBean.GEN_FIELD_TEXT_INDEX);
+			db.execSQL("ALTER TABLE " + AbstractConnectionBean.GEN_TABLE_NAME + " ADD COLUMN " +AbstractConnectionBean.GEN_FIELD_SHOWZOOMBUTTONS+" INTEGER DEFAULT 1");
+			db.execSQL("ALTER TABLE " + AbstractConnectionBean.GEN_TABLE_NAME + " ADD COLUMN " +AbstractConnectionBean.GEN_FIELD_DOUBLE_TAP_ACTION+" TEXT");
 		}
 	}
 

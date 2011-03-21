@@ -30,6 +30,13 @@ class MetaKeyBean extends AbstractMetaKeyBean implements Comparable<MetaKeyBean>
 	
 	static {
 		allKeys = new ArrayList<MetaKeyBase>();
+
+		allKeys.add(new MetaKeyBase("Hangul", 0xff31));
+		allKeys.add(new MetaKeyBase("Hangul_Start", 0xff32));
+		allKeys.add(new MetaKeyBase("Hangul_End", 0xff33));
+		allKeys.add(new MetaKeyBase("Hangul_Hanja", 0xff34));
+		allKeys.add(new MetaKeyBase("Kana_Shift", 0xff2e));
+		allKeys.add(new MetaKeyBase("Right_Alt", 0xffea));
 		
 		allKeys.add(new MetaKeyBase(VncCanvas.MOUSE_BUTTON_LEFT,"Mouse Left"));
 		allKeys.add(new MetaKeyBase(VncCanvas.MOUSE_BUTTON_MIDDLE,"Mouse Middle"));
