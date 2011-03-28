@@ -88,7 +88,7 @@ public class ConnectionListActivity extends ListActivity {
 		if (connection.Gen_read(database.getReadableDatabase(), id))
 		{
             // create shortcut if requested
-            ShortcutIconResource icon = Intent.ShortcutIconResource.fromContext(this, R.drawable.icon);
+            ShortcutIconResource icon = Intent.ShortcutIconResource.fromContext(this, R.drawable.mouse_icon);
 
             Intent intent = new Intent();
             
