@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!-- 
+
+	<style name="FixSpinnerTheme" parent="android:Theme">
+		<item name="android:spinnerDropDownItemStyle">@style/FixSpinnerDropDownStyle</item>
+	</style>
+	<style name="FixSpinnerDropDownStyle" parent="@android:style/Widget.DropDownItem.Spinner">
+	    <item name="android:popupBackground">#0000FF</item>
+	    <item name="android:textAppearance">@style/FixSpinnerDropDownTextAppearance</item>
+	</style>
+	<style name="FixSpinnerDropDownTextAppearance" parent="@android:style/TextAppearance.Widget.TextView.SpinnerItem">
+		<item name="android:textColor">#ff0000</item>
+	</style>
+	-->
+        <style name="FixSpinnerTheme">
+            <item name="android:spinnerDropDownItemStyle">@style/Widget.DropDownItem.Spinner</item>
+            <item name="android:listViewStyle">@style/Widget.ListView</item>
+            <item name="android:alertDialogStyle">@style/AlertDialog</item>
+         </style>
+
+        <style name="Widget.DropDownItem.Spinner" parent="@android:style/Widget.DropDownItem.Spinner">
+                <item name="android:textStyle">bold</item>
+                <item name="android:textColor">#FFFFFF</item>
+        </style>
+
+        <style name="Widget.ListView" parent="android:Widget.ListView">
+
+                <item name="android:dividerHeight">10dip</item>
+                <item name="android:background">#0000FF</item>
+        </style>
+
+        <style name="AlertDialog" parent="@android:style/AlertDialog">
+
+        </style> 
+</resources>
