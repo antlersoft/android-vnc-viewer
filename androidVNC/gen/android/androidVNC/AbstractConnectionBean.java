@@ -5,7 +5,7 @@ package android.androidVNC;
 public abstract class AbstractConnectionBean extends com.antlersoft.android.dbimpl.IdImplementationBase implements IConnectionBean {
 
     public static final String GEN_TABLE_NAME = "CONNECTION_BEAN";
-    public static final int GEN_COUNT = 21;
+    public static final int GEN_COUNT = 23;
 
     // Field constants
     public static final String GEN_FIELD__ID = "_id";
@@ -50,6 +50,10 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
     public static final int GEN_ID_SHOWZOOMBUTTONS = 19;
     public static final String GEN_FIELD_DOUBLE_TAP_ACTION = "DOUBLE_TAP_ACTION";
     public static final int GEN_ID_DOUBLE_TAP_ACTION = 20;
+    public static final String GEN_FIELD_USEIMMERSIVE = "USEIMMERSIVE";
+    public static final int GEN_ID_USEIMMERSIVE = 21;
+    public static final String GEN_FIELD_USEWAKELOCK = "USEWAKELOCK";
+    public static final int GEN_ID_USEWAKELOCK = 22;
 
     // SQL Command for creating the table
     public static String GEN_CREATE = "CREATE TABLE CONNECTION_BEAN (" +
@@ -73,7 +77,9 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
     "USERNAME TEXT," +
     "SECURECONNECTIONTYPE TEXT," +
     "SHOWZOOMBUTTONS INTEGER DEFAULT 1," +
-    "DOUBLE_TAP_ACTION TEXT" +
+    "DOUBLE_TAP_ACTION TEXT," +
+    "USEIMMERSIVE INTEGER DEFAULT 1," +
+    "USEWAKELOCK INTEGER DEFAULT 0" +
     ")";
 
     // Members corresponding to defined fields
@@ -98,6 +104,8 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
     private java.lang.String gen_secureConnectionType;
     private boolean gen_showZoomButtons;
     private java.lang.String gen_DOUBLE_TAP_ACTION;
+    private boolean gen_useImmersive;
+    private boolean gen_useWakeLock;
 
 
     public String Gen_tableName() { return GEN_TABLE_NAME; }
@@ -145,6 +153,10 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
     public void setShowZoomButtons(boolean arg_showZoomButtons) { gen_showZoomButtons = arg_showZoomButtons; }
     public java.lang.String getDoubleTapActionAsString() { return gen_DOUBLE_TAP_ACTION; }
     public void setDoubleTapActionAsString(java.lang.String arg_DOUBLE_TAP_ACTION) { gen_DOUBLE_TAP_ACTION = arg_DOUBLE_TAP_ACTION; }
+    public boolean getUseImmersive() { return gen_useImmersive; }
+    public void setUseImmersive(boolean arg_useImmersive) { gen_useImmersive = arg_useImmersive; }
+    public boolean getUseWakeLock() { return gen_useWakeLock; }
+    public void setUseWakeLock(boolean arg_useWakeLock) { gen_useWakeLock = arg_useWakeLock; }
 
     public android.content.ContentValues Gen_getValues() {
         android.content.ContentValues values=new android.content.ContentValues();
@@ -169,6 +181,8 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
         values.put(GEN_FIELD_SECURECONNECTIONTYPE,this.gen_secureConnectionType);
         values.put(GEN_FIELD_SHOWZOOMBUTTONS,(this.gen_showZoomButtons ? "1" : "0"));
         values.put(GEN_FIELD_DOUBLE_TAP_ACTION,this.gen_DOUBLE_TAP_ACTION);
+        values.put(GEN_FIELD_USEIMMERSIVE,(this.gen_useImmersive ? "1" : "0"));
+        values.put(GEN_FIELD_USEWAKELOCK,(this.gen_useWakeLock ? "1" : "0"));
         return values;
     }
 
@@ -204,6 +218,8 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
         result[18] = cursor.getColumnIndex(GEN_FIELD_SECURECONNECTIONTYPE);
         result[19] = cursor.getColumnIndex(GEN_FIELD_SHOWZOOMBUTTONS);
         result[20] = cursor.getColumnIndex(GEN_FIELD_DOUBLE_TAP_ACTION);
+        result[21] = cursor.getColumnIndex(GEN_FIELD_USEIMMERSIVE);
+        result[22] = cursor.getColumnIndex(GEN_FIELD_USEWAKELOCK);
         return result;
     }
 
@@ -274,6 +290,12 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
         if ( columnIndices[GEN_ID_DOUBLE_TAP_ACTION] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_DOUBLE_TAP_ACTION])) {
             gen_DOUBLE_TAP_ACTION = cursor.getString(columnIndices[GEN_ID_DOUBLE_TAP_ACTION]);
         }
+        if ( columnIndices[GEN_ID_USEIMMERSIVE] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_USEIMMERSIVE])) {
+            gen_useImmersive = (cursor.getInt(columnIndices[GEN_ID_USEIMMERSIVE]) != 0);
+        }
+        if ( columnIndices[GEN_ID_USEWAKELOCK] >= 0 && ! cursor.isNull(columnIndices[GEN_ID_USEWAKELOCK])) {
+            gen_useWakeLock = (cursor.getInt(columnIndices[GEN_ID_USEWAKELOCK]) != 0);
+        }
     }
 
     /**
@@ -301,5 +323,7 @@ public abstract class AbstractConnectionBean extends com.antlersoft.android.dbim
         gen_secureConnectionType = values.getAsString(GEN_FIELD_SECURECONNECTIONTYPE);
         gen_showZoomButtons = (values.getAsInteger(GEN_FIELD_SHOWZOOMBUTTONS) != 0);
         gen_DOUBLE_TAP_ACTION = values.getAsString(GEN_FIELD_DOUBLE_TAP_ACTION);
+        gen_useImmersive = (values.getAsInteger(GEN_FIELD_USEIMMERSIVE) != 0);
+        gen_useWakeLock = (values.getAsInteger(GEN_FIELD_USEWAKELOCK) != 0);
     }
 }

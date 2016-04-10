@@ -53,6 +53,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView.ScaleType;
 import android.widget.Button;
 import android.view.inputmethod.InputMethodManager;
 import android.content.Context;
@@ -674,6 +675,10 @@ public class VncCanvasActivity extends Activity {
 				.setScaleTypeForActivity(this);
 		this.inputHandler = handler;
 		showPanningState();
+		if (connection.getScaleMode()==ScaleType.MATRIX && connection.getUseImmersive())
+		{
+			BCFactory.getInstance().getSystemUiVisibility().HideSystemUI(vncCanvas);
+		}
 	}
 
 	ConnectionBean getConnection() {

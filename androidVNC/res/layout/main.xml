@@ -150,6 +150,23 @@
 				</RadioGroup>
 			</LinearLayout>
 			<LinearLayout android:orientation="horizontal"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    > 
+			    <CheckBox
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:id="@+id/checkUseImmersive"
+			        android:text="@string/use_immersive_check"
+			        />
+			    <CheckBox
+					android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:id="@+id/checkUseWakeLock"
+			        android:text="@string/use_wake_lock_check"
+			        />
+      		</LinearLayout>
+			<LinearLayout android:orientation="horizontal"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
 				>

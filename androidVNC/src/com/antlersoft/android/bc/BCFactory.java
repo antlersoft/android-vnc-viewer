@@ -20,6 +20,7 @@ public class BCFactory {
 	private IBCHaptic bcHaptic;
 	private IBCMotionEvent bcMotionEvent;
 	private IBCStorageContext bcStorageContext;
+	private IBCSystemUiVisibility bcSystemUiVisibility;
 	
 	/**
 	 * This is here so checking the static doesn't get optimized away;
@@ -241,6 +242,39 @@ public class BCFactory {
 			}
 		}
 		return bcStorageContext;
+	}
+	
+	/**
+	 * 
+	 * @return An implementation of IBCSystemUiVisibility appropriate for the Android version
+	 */
+	public IBCSystemUiVisibility getSystemUiVisibility()
+	{
+		if (bcSystemUiVisibility == null)
+		{
+			synchronized (this)
+			{
+				if (bcSystemUiVisibility == null)
+				{
+					if (getSdkVersion()>=19)
+					{
+						try
+						{
+							bcMotionEvent = (IBCMotionEvent)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCSystemUiVisibility19").newInstance();
+						}
+						catch (Exception ie)
+						{
+							throw new RuntimeException("Error instantiating", ie);
+						}
+					}
+					else
+					{
+						bcSystemUiVisibility = new DefaultSystemUiVisibility();
+					}
+				}
+			}
+		}
+		return bcSystemUiVisibility;
 	}
 	
 	/**

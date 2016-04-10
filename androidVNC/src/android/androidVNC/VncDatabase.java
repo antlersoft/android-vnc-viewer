@@ -17,12 +17,13 @@ class VncDatabase extends SQLiteOpenHelper {
 	static final int DBV_0_2_4 = 10;
 	static final int DBV_0_4_7 = 11;
 	static final int DBV_0_5_0 = 12;
+	static final int DBV_0_6_0 = 13;
 	
 	public final static String TAG = VncDatabase.class.toString();
 	
 	VncDatabase(Context context)
 	{
-		super(context,"VncDatabase",null,DBV_0_5_0);
+		super(context,"VncDatabase",null,DBV_0_6_0);
 	}
 
 	/* (non-Javadoc)
@@ -80,12 +81,19 @@ class VncDatabase extends SQLiteOpenHelper {
 				db.execSQL("ALTER TABLE " + MostRecentBean.GEN_TABLE_NAME + " ADD COLUMN " + MostRecentBean.GEN_FIELD_TEXT_INDEX);
 				oldVersion = DBV_0_4_7;
 			}
-			Log.i(TAG,"Doing upgrade from 11 to 12");
-			// Haven't been using SentText before, primary key handling changed so drop and recreate it
-			db.execSQL("DROP TABLE IF EXISTS " + SentTextBean.GEN_TABLE_NAME);
-			db.execSQL(SentTextBean.GEN_CREATE);
-			db.execSQL("ALTER TABLE " + AbstractConnectionBean.GEN_TABLE_NAME + " ADD COLUMN " +AbstractConnectionBean.GEN_FIELD_SHOWZOOMBUTTONS+" INTEGER DEFAULT 1");
-			db.execSQL("ALTER TABLE " + AbstractConnectionBean.GEN_TABLE_NAME + " ADD COLUMN " +AbstractConnectionBean.GEN_FIELD_DOUBLE_TAP_ACTION+" TEXT");
+			if (oldVersion == DBV_0_4_7)
+			{
+				Log.i(TAG,"Doing upgrade from 11 to 12");
+				// Haven't been using SentText before, primary key handling changed so drop and recreate it
+				db.execSQL("DROP TABLE IF EXISTS " + SentTextBean.GEN_TABLE_NAME);
+				db.execSQL(SentTextBean.GEN_CREATE);
+				db.execSQL("ALTER TABLE " + AbstractConnectionBean.GEN_TABLE_NAME + " ADD COLUMN " +AbstractConnectionBean.GEN_FIELD_SHOWZOOMBUTTONS+" INTEGER DEFAULT 1");
+				db.execSQL("ALTER TABLE " + AbstractConnectionBean.GEN_TABLE_NAME + " ADD COLUMN " +AbstractConnectionBean.GEN_FIELD_DOUBLE_TAP_ACTION+" TEXT");
+				oldVersion = DBV_0_5_0;
+			}
+			Log.i(TAG, "Doing upgrade from 12 to 13");
+			db.execSQL("ALTER TABLE "+AbstractConnectionBean.GEN_TABLE_NAME+" ADD COLUMN "+AbstractConnectionBean.GEN_FIELD_USEIMMERSIVE+" INTEGER DEFAULT 1");
+			db.execSQL("ALTER TABLE "+AbstractConnectionBean.GEN_TABLE_NAME+" ADD COLUMN "+AbstractConnectionBean.GEN_FIELD_USEWAKELOCK+" INTEGER");
 		}
 	}
 

@@ -76,6 +76,8 @@
 <string name="shortcut_label">VNC Connection</string>
 <string name="showkbd_label">Keyboard</string>
 <string name="special_keys">Send Keys</string>
+<string name="use_immersive_check">Use Immersive (4.4+)</string>
+<string name="use_wake_lock_check">Use Wake Lock</string>
 <string name="username_caption">Username</string>
 <string name="username_hint">For Windows Authentication</string>
 </resources>
