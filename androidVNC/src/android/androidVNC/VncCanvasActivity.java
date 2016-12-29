@@ -507,15 +507,15 @@ public class VncCanvasActivity extends Activity {
 		private SensorManager manager;
 		private Sensor orientation;
 		
-		private float[] lastOrientation = new float[3];
-		private float offsetX = 200.0f;
-		private float offsetY = -80.0f;
-		private float avgX = 200.0f;
-		private float avgY = -80.0f;
+		private float[] lastOrientation = new float[4];
+		private float offsetX = 0.0f;
+		private float offsetY = 0.0f;
+		private float avgX = 0.0f;
+		private float avgY = 0.0f;
 
 		public DeviceBearingHandler() {
 			manager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-			orientation = manager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+			orientation = manager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 		}
 
 		@Override
@@ -523,18 +523,33 @@ public class VncCanvasActivity extends Activity {
 
 		@Override
 		public final void onSensorChanged(SensorEvent e) {
-			if(e.sensor == orientation) {
-				lastOrientation[0] = e.values[0];
-				lastOrientation[1] = e.values[1];
-				lastOrientation[2] = e.values[2];
-				// Log.i(TAG, "Orientation: " + e.values[0] + "; " + e.values[1] + "; " + e.values[2]);
-			}
+			// Compare: en.wikipedia.org/wiki/Euler-Rodrigues_formula
+			final float b = e.values[0];
+			final float c = e.values[1];
+			final float d = e.values[2];
+			final float a = (float)Math.cos(Math.asin(Math.sqrt(b * b + c * c + d * d)));
+
+			final float[] rotatedZVector = new float[]{
+				2 * (b * d + a * c),
+				2 * (c * d - a * b),
+				a * a + d * d - b * b - c * c,
+			};
+
+			Log.i(TAG, "RotX: " + rotatedZVector[0]);
+			Log.i(TAG, "RotY: " + rotatedZVector[1]);
+			Log.i(TAG, "RotZ: " + rotatedZVector[2]);
+
+			final float xAngle = (float)Math.atan2(rotatedZVector[0], rotatedZVector[1]);
+			final float yAngle = -(float)Math.acos(rotatedZVector[2]);
+
+			Log.i(TAG, "xAngle: " + xAngle);
+			Log.i(TAG, "yAngle: " + yAngle);
 
 			if(vncCanvas.isImageReady()) {
-				avgX = (float)(0.7 * avgX + 0.3 * lastOrientation[0]);
-				avgY = (float)(0.7 * avgY + 0.3 * lastOrientation[1]);
-				double viewedX = (avgX - offsetX) / 20.0 * vncCanvas.getImageWidth();
-				double viewedY = (avgY - offsetY) / 7.0 * vncCanvas.getImageHeight();
+				// avgX = (float)(0.7 * avgX + 0.3 * lastOrientation[0]);
+				// avgY = (float)(0.7 * avgY + 0.3 * lastOrientation[1]);
+				double viewedX = (xAngle - offsetX) / 0.5 * vncCanvas.getImageWidth();
+				double viewedY = (yAngle - offsetY) / 0.5 * vncCanvas.getImageHeight();
 				final int maxX = vncCanvas.getImageWidth() - vncCanvas.getVisibleWidth();
 				final int maxY = vncCanvas.getImageHeight() - vncCanvas.getVisibleHeight();
 				// Log.i(TAG, "viewedX: " + viewedX);
@@ -542,14 +557,14 @@ public class VncCanvasActivity extends Activity {
 				// Log.i(TAG, "maxX: " + maxX);
 				// Log.i(TAG, "maxY: " + maxY);
 				if(viewedX < -100) {
-					offsetX -= 1.0;
+					offsetX -= 0.01;
 				} else if(viewedX >= maxX + 100) {
-					offsetX += 1.0;
+					offsetX += 0.01;
 				}
 				if(viewedY < -100) {
-					offsetY -= 0.1;
+					offsetY -= 0.01;
 				} else if(viewedY >= maxY + 100) {
-					offsetY += 0.1;
+					offsetY += 0.01;
 				}
 				if(viewedX < 0) viewedX = 0;
 				if(viewedX >= maxX) viewedX = maxX - 1;
