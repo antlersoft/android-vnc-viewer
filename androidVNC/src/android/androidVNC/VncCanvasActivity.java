@@ -40,6 +40,10 @@ import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorEvent;
+import android.hardware.SensorManager;
+import android.hardware.Sensor;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -498,6 +502,74 @@ public class VncCanvasActivity extends Activity {
 			return true;
 		}
 	}
+
+	public class DeviceBearingHandler implements SensorEventListener {
+		private SensorManager manager;
+		private Sensor orientation;
+		
+		private float[] lastOrientation = new float[3];
+		private float offsetX = 200.0f;
+		private float offsetY = -80.0f;
+		private float avgX = 200.0f;
+		private float avgY = -80.0f;
+
+		public DeviceBearingHandler() {
+			manager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+			orientation = manager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+		}
+
+		@Override
+		public final void onAccuracyChanged(Sensor s, int accuracy) { /* ignore */ } 
+
+		@Override
+		public final void onSensorChanged(SensorEvent e) {
+			if(e.sensor == orientation) {
+				lastOrientation[0] = e.values[0];
+				lastOrientation[1] = e.values[1];
+				lastOrientation[2] = e.values[2];
+				// Log.i(TAG, "Orientation: " + e.values[0] + "; " + e.values[1] + "; " + e.values[2]);
+			}
+
+			if(vncCanvas.isImageReady()) {
+				avgX = (float)(0.7 * avgX + 0.3 * lastOrientation[0]);
+				avgY = (float)(0.7 * avgY + 0.3 * lastOrientation[1]);
+				double viewedX = (avgX - offsetX) / 20.0 * vncCanvas.getImageWidth();
+				double viewedY = (avgY - offsetY) / 7.0 * vncCanvas.getImageHeight();
+				final int maxX = vncCanvas.getImageWidth() - vncCanvas.getVisibleWidth();
+				final int maxY = vncCanvas.getImageHeight() - vncCanvas.getVisibleHeight();
+				// Log.i(TAG, "viewedX: " + viewedX);
+				// Log.i(TAG, "viewedY: " + viewedY);
+				// Log.i(TAG, "maxX: " + maxX);
+				// Log.i(TAG, "maxY: " + maxY);
+				if(viewedX < -100) {
+					offsetX -= 1.0;
+				} else if(viewedX >= maxX + 100) {
+					offsetX += 1.0;
+				}
+				if(viewedY < -100) {
+					offsetY -= 0.1;
+				} else if(viewedY >= maxY + 100) {
+					offsetY += 0.1;
+				}
+				if(viewedX < 0) viewedX = 0;
+				if(viewedX >= maxX) viewedX = maxX - 1;
+				if(viewedY < 0) viewedY = 0;
+				if(viewedY >= maxY) viewedY = maxY - 1;
+
+				vncCanvas.absoluteXPosition = (int)viewedX;
+				vncCanvas.absoluteYPosition = (int)viewedY;
+				vncCanvas.scrollToAbsolute();
+			}
+		}
+
+		public final void onResume() {
+			manager.registerListener(this, orientation, SensorManager.SENSOR_DELAY_GAME);
+		}
+
+		public final void onPause() {
+			manager.unregisterListener(this);
+		}
+	}
 	
 	private final static String TAG = "VncCanvasActivity";
 
@@ -516,6 +588,7 @@ public class VncCanvasActivity extends Activity {
 			R.id.itemInputMouse, R.id.itemInputPan,
 			R.id.itemInputTouchPanTrackballMouse,
 			R.id.itemInputDPadPanTouchMouse, R.id.itemInputTouchPanZoomMouse };
+	private DeviceBearingHandler deviceBearing;
 
 	ZoomControls zoomer;
 	Panner panner;
@@ -661,6 +734,7 @@ public class VncCanvasActivity extends Activity {
 		panner = new Panner(this, vncCanvas.handler);
 
 		inputHandler = getInputHandlerById(R.id.itemInputFitToScreen);
+		deviceBearing = new DeviceBearingHandler();
 	}
 
 	/**
@@ -723,6 +797,18 @@ public class VncCanvasActivity extends Activity {
 	protected void onRestart() {
 		vncCanvas.enableRepaints();
 		super.onRestart();
+	}
+
+	@Override
+	protected void onPause() {
+		deviceBearing.onPause();
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		deviceBearing.onResume();
 	}
 
 	/** {@inheritDoc} */

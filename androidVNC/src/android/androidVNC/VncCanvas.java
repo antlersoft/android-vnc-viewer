@@ -981,6 +981,10 @@ public class VncCanvas extends ImageView {
 		return (int)((double)getHeight() / getScale() + 0.5);
 	}
 
+	public boolean isImageReady() {
+		return bitmapData != null;
+	}
+
 	public int getImageWidth() {
 		return bitmapData.framebufferwidth;
 	}
