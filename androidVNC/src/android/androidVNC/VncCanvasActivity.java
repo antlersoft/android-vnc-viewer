@@ -588,14 +588,14 @@ public class VncCanvasActivity extends Activity {
 					viewedY = (yAngle - offsetY) / 0.5 * vncCanvas.getImageHeight();
 
 					if(viewedX < -borderWidth) {
-						offsetX -= 0.01; changes = true;
+						offsetX -= 0.0005; changes = true;
 					} else if(viewedX >= maxX + borderWidth) {
-						offsetX += 0.01; changes = true;
+						offsetX += 0.0005; changes = true;
 					}
 					if(viewedY < -borderHeight) {
-						offsetY -= 0.01; changes = true;
+						offsetY -= 0.0005; changes = true;
 					} else if(viewedY >= maxY + borderHeight) {
-						offsetY += 0.01; changes = true;
+						offsetY += 0.0005; changes = true;
 					}
 				} while(changes);
 
