@@ -527,6 +527,9 @@ public class VncCanvasActivity extends Activity {
 		private float[] medianTmp = new float[11];
 		private int historicWriteIndex = -1;
 
+		private static final float PANNING_FACTOR_X = 0.5f;
+		private static final float PANNING_FACTOR_Y = 0.3f;
+
 		public DeviceBearingHandler() {
 			super(VncCanvasActivity.this);
 
@@ -580,24 +583,19 @@ public class VncCanvasActivity extends Activity {
 				final int borderWidth = vncCanvas.getVisibleWidth() / 2;
 				final int borderHeight = vncCanvas.getVisibleHeight() / 2;
 
-				double viewedX, viewedY;
-				boolean changes;
-				do {
-					changes = false;
-					viewedX = (xAngle - offsetX) / 0.5 * vncCanvas.getImageWidth();
-					viewedY = (yAngle - offsetY) / 0.5 * vncCanvas.getImageHeight();
+				double viewedX = (xAngle - offsetX) / PANNING_FACTOR_X * vncCanvas.getImageWidth();
+				double viewedY = (yAngle - offsetY) / PANNING_FACTOR_Y * vncCanvas.getImageHeight();
 
-					if(viewedX < -borderWidth) {
-						offsetX -= 0.0005; changes = true;
-					} else if(viewedX >= maxX + borderWidth) {
-						offsetX += 0.0005; changes = true;
-					}
-					if(viewedY < -borderHeight) {
-						offsetY -= 0.0005; changes = true;
-					} else if(viewedY >= maxY + borderHeight) {
-						offsetY += 0.0005; changes = true;
-					}
-				} while(changes);
+				if(viewedX < -borderWidth) {
+					offsetX = PANNING_FACTOR_X * borderWidth / vncCanvas.getImageWidth() + xAngle;
+				} else if(viewedX >= maxX + borderWidth) {
+					offsetX = PANNING_FACTOR_X * (-maxX - borderWidth) / vncCanvas.getImageWidth() + xAngle;
+				}
+				if(viewedY < -borderHeight) {
+					offsetY = PANNING_FACTOR_Y * borderHeight / vncCanvas.getImageHeight() + yAngle;
+				} else if(viewedY >= maxY + borderHeight) {
+					offsetY = PANNING_FACTOR_Y * (-maxY - borderHeight) / vncCanvas.getImageHeight() + yAngle;
+				}
 
 				vncCanvas.absoluteXPosition = (int)viewedX;
 				vncCanvas.absoluteYPosition = (int)viewedY;
