@@ -51,4 +51,14 @@ interface AbstractInputHandler {
 	 * and version changes
 	 */
 	String getName();
+
+	/**
+	 * Register sensors, etc.
+	 */
+	void onResume();
+
+	/**
+	 * Deregister sensors, etc.
+	 */
+	void onPause();
 }
