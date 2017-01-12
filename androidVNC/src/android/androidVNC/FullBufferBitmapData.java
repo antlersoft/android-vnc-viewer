@@ -59,6 +59,7 @@ class FullBufferBitmapData extends AbstractBitmapData {
 					int drawHeight = vncCanvas.getVisibleHeight();
 					if (drawHeight + yo > data.framebufferheight)
 						drawHeight = data.framebufferheight - yo;
+					canvas.drawRGB(160, 128, 128);
 					canvas.drawBitmap(data.bitmapPixels, offset(xo, yo), data.framebufferwidth, xo, yo, drawWidth, drawHeight, false, null);
 				/*
 				}

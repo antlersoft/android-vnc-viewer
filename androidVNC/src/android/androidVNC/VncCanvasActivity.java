@@ -575,25 +575,29 @@ public class VncCanvasActivity extends Activity {
 			final float yAngle = medianTmp[medianTmp.length / 2];
 
 			if(vncCanvas.isImageReady()) {
-				double viewedX = (xAngle - offsetX) / 0.5 * vncCanvas.getImageWidth();
-				double viewedY = (yAngle - offsetY) / 0.5 * vncCanvas.getImageHeight();
 				final int maxX = vncCanvas.getImageWidth() - vncCanvas.getVisibleWidth();
 				final int maxY = vncCanvas.getImageHeight() - vncCanvas.getVisibleHeight();
+				final int borderWidth = vncCanvas.getVisibleWidth() / 2;
+				final int borderHeight = vncCanvas.getVisibleHeight() / 2;
 
-				if(viewedX < -100) {
-					offsetX -= 0.01;
-				} else if(viewedX >= maxX + 100) {
-					offsetX += 0.01;
-				}
-				if(viewedY < -100) {
-					offsetY -= 0.01;
-				} else if(viewedY >= maxY + 100) {
-					offsetY += 0.01;
-				}
-				if(viewedX < 0) viewedX = 0;
-				if(viewedX >= maxX) viewedX = maxX - 1;
-				if(viewedY < 0) viewedY = 0;
-				if(viewedY >= maxY) viewedY = maxY - 1;
+				double viewedX, viewedY;
+				boolean changes;
+				do {
+					changes = false;
+					viewedX = (xAngle - offsetX) / 0.5 * vncCanvas.getImageWidth();
+					viewedY = (yAngle - offsetY) / 0.5 * vncCanvas.getImageHeight();
+
+					if(viewedX < -borderWidth) {
+						offsetX -= 0.01; changes = true;
+					} else if(viewedX >= maxX + borderWidth) {
+						offsetX += 0.01; changes = true;
+					}
+					if(viewedY < -borderHeight) {
+						offsetY -= 0.01; changes = true;
+					} else if(viewedY >= maxY + borderHeight) {
+						offsetY += 0.01; changes = true;
+					}
+				} while(changes);
 
 				vncCanvas.absoluteXPosition = (int)viewedX;
 				vncCanvas.absoluteYPosition = (int)viewedY;

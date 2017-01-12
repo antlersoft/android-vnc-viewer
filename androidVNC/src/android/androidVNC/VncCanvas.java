@@ -279,6 +279,7 @@ public class VncCanvas extends ImageView {
 			bitmapData=new LargeBitmapData(rfb,this,dx,dy,capacity);
 		else
 			bitmapData=new FullBufferBitmapData(rfb,this, capacity);
+
 		mouseX=rfb.framebufferWidth/2;
 		mouseY=rfb.framebufferHeight/2;
 
