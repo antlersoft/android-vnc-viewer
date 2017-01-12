@@ -597,6 +597,10 @@ public class VncCanvasActivity extends Activity {
 					offsetY = PANNING_FACTOR_Y * (-maxY - borderHeight) / vncCanvas.getImageHeight() + yAngle;
 				}
 
+				// recalculate after adjustment
+				viewedX = (xAngle - offsetX) / PANNING_FACTOR_X * vncCanvas.getImageWidth();
+				viewedY = (yAngle - offsetY) / PANNING_FACTOR_Y * vncCanvas.getImageHeight();
+
 				vncCanvas.absoluteXPosition = (int)viewedX;
 				vncCanvas.absoluteYPosition = (int)viewedY;
 				vncCanvas.scrollToAbsolute();
