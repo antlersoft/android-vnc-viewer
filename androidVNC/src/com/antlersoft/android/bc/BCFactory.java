@@ -260,7 +260,7 @@ public class BCFactory {
 					{
 						try
 						{
-							bcMotionEvent = (IBCMotionEvent)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCSystemUiVisibility19").newInstance();
+							bcSystemUiVisibility = (IBCSystemUiVisibility)getClass().getClassLoader().loadClass("com.antlersoft.android.bc.BCSystemUiVisibility19").newInstance();
 						}
 						catch (Exception ie)
 						{

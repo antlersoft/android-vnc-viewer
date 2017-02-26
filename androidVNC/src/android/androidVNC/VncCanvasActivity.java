@@ -921,6 +921,15 @@ public class VncCanvasActivity extends Activity {
 
 	private MetaKeyBean lastSentKey;
 
+	@Override
+	public void onOptionsMenuClosed(Menu menu) {
+		if (connection.getUseImmersive())
+		{
+			BCFactory.getInstance().getSystemUiVisibility().HideSystemUI(vncCanvas);
+		}
+		super.onOptionsMenuClosed(menu);
+	}
+
 	private void sendSpecialKeyAgain() {
 		if (lastSentKey == null
 				|| lastSentKey.get_Id() != connection.getLastMetaKeyId()) {
