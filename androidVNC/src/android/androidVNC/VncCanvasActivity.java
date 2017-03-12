@@ -72,16 +72,10 @@ public class VncCanvasActivity extends Activity {
 		private boolean dragMode;
 		
 		/**
-		 * Key handler delegate that handles DPad-based mouse motion
-		 */
-		private DPadMouseKeyHandler keyHandler;
-
-		/**
 		 * @param c
 		 */
 		ZoomInputHandler() {
 			super(VncCanvasActivity.this);
-			keyHandler = new DPadMouseKeyHandler(VncCanvasActivity.this,vncCanvas.handler);
 		}
 
 		/*
@@ -113,7 +107,7 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public boolean onKeyDown(int keyCode, KeyEvent evt) {
-			return keyHandler.onKeyDown(keyCode, evt);
+			return VncCanvasActivity.this.defaultKeyDownHandler(keyCode, evt);
 		}
 
 		/*
@@ -124,7 +118,7 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public boolean onKeyUp(int keyCode, KeyEvent evt) {
-			return keyHandler.onKeyUp(keyCode, evt);
+			return VncCanvasActivity.this.defaultKeyUpHandler(keyCode, evt);
 		}
 
 		/*
@@ -716,6 +710,15 @@ public class VncCanvasActivity extends Activity {
 	public void onConfigurationChanged(Configuration newConfig) {
 		// ignore orientation/keyboard change
 		super.onConfigurationChanged(newConfig);
+	}
+	
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+		if (hasFocus && connection.getScaleMode()==ScaleType.MATRIX && connection.getUseImmersive())
+		{
+			BCFactory.getInstance().getSystemUiVisibility().HideSystemUI(vncCanvas);
+		}	
 	}
 
 	@Override

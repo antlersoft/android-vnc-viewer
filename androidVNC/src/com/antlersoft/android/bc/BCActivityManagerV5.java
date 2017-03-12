@@ -9,6 +9,7 @@ import android.app.ActivityManager;
 /**
  * @author Michael A. MacDonald
  */
+@SuppressLint("NewApi")
 public class BCActivityManagerV5 implements IBCActivityManager {
 
 	/* (non-Javadoc)
