@@ -935,6 +935,19 @@ public class VncCanvas extends ImageView {
 		      case KeyEvent.KEYCODE_DPAD_CENTER:  key = 0xff0d; break;
 		      case KeyEvent.KEYCODE_FORWARD_DEL:  key = 0xffff; break;
 		      case KeyEvent.KEYCODE_TAB:          key = 0xff09; break;
+		      case KeyEvent.KEYCODE_F1:
+		      case KeyEvent.KEYCODE_F2:
+		      case KeyEvent.KEYCODE_F3:
+		      case KeyEvent.KEYCODE_F4:
+		      case KeyEvent.KEYCODE_F5:
+		      case KeyEvent.KEYCODE_F6:
+		      case KeyEvent.KEYCODE_F7:
+		      case KeyEvent.KEYCODE_F8:
+		      case KeyEvent.KEYCODE_F9:
+		      case KeyEvent.KEYCODE_F10:
+		      case KeyEvent.KEYCODE_F11:
+		      case KeyEvent.KEYCODE_F12:
+		    	  key = keyCode - KeyEvent.KEYCODE_F1 + 0xffbe; break;
 		      default: 							  
 		    	  key = evt.getUnicodeChar();
 		    	  metaState = 0;
