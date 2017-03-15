@@ -40,6 +40,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Paint.Style;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
@@ -54,6 +55,7 @@ import com.antlersoft.android.bc.BCFactory;
 public class VncCanvas extends ImageView {
 	private final static String TAG = "VncCanvas";
 	private final static boolean LOCAL_LOGV = true;
+	private PowerManager.WakeLock wakeLock;
 	
 	AbstractScaling scaling;
 	
@@ -144,6 +146,13 @@ public class VncCanvas extends ImageView {
 	 */
 	void initializeVncCanvas(ConnectionBean bean, final Runnable setModes) {
 		connection = bean;
+		if (connection.getUseWakeLock())
+		{
+			if (wakeLock != null && wakeLock.isHeld()) {
+				wakeLock.release();
+			}
+			wakeLock = ((PowerManager)getContext().getSystemService(Context.POWER_SERVICE)).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "android.androidVNC");
+		}
 		this.pendingColorModel = COLORMODEL.valueOf(bean.getColorModel());
 
 		// Startup the RFB thread with a nifty progess dialog
@@ -321,6 +330,9 @@ public class VncCanvas extends ImageView {
 	}
 
 	public void processNormalProtocol(final Context context, ProgressDialog pd, final Runnable setModes) throws Exception {
+		if (wakeLock != null && connection.getUseWakeLock()) {
+			wakeLock.acquire();
+		}
 		try {
 			bitmapData.writeFullUpdateRequest(false);
 
@@ -453,6 +465,10 @@ public class VncCanvas extends ImageView {
 		} finally {
 			Log.v(TAG, "Closing VNC Connection");
 			rfb.close();
+			if (wakeLock != null && wakeLock.isHeld()) {
+				wakeLock.release();
+			}
+			wakeLock = null;
 		}
 	}
 	
@@ -910,9 +926,28 @@ public class VncCanvas extends ImageView {
 		   	  case KeyEvent.KEYCODE_DPAD_UP:      key = 0xff52; break;
 		   	  case KeyEvent.KEYCODE_DPAD_RIGHT:   key = 0xff53; break;
 		   	  case KeyEvent.KEYCODE_DPAD_DOWN:    key = 0xff54; break;
+		   	  case KeyEvent.KEYCODE_MOVE_END:     key = 0xff57; break;
+		   	  case KeyEvent.KEYCODE_MOVE_HOME:    key = 0xff50; break;
+		   	  case KeyEvent.KEYCODE_PAGE_DOWN:    key = 0xff56; break;
+		   	  case KeyEvent.KEYCODE_PAGE_UP:      key = 0xff55; break;
 		      case KeyEvent.KEYCODE_DEL: 		  key = 0xff08; break;
 		      case KeyEvent.KEYCODE_ENTER:        key = 0xff0d; break;
 		      case KeyEvent.KEYCODE_DPAD_CENTER:  key = 0xff0d; break;
+		      case KeyEvent.KEYCODE_FORWARD_DEL:  key = 0xffff; break;
+		      case KeyEvent.KEYCODE_TAB:          key = 0xff09; break;
+		      case KeyEvent.KEYCODE_F1:
+		      case KeyEvent.KEYCODE_F2:
+		      case KeyEvent.KEYCODE_F3:
+		      case KeyEvent.KEYCODE_F4:
+		      case KeyEvent.KEYCODE_F5:
+		      case KeyEvent.KEYCODE_F6:
+		      case KeyEvent.KEYCODE_F7:
+		      case KeyEvent.KEYCODE_F8:
+		      case KeyEvent.KEYCODE_F9:
+		      case KeyEvent.KEYCODE_F10:
+		      case KeyEvent.KEYCODE_F11:
+		      case KeyEvent.KEYCODE_F12:
+		    	  key = keyCode - KeyEvent.KEYCODE_F1 + 0xffbe; break;
 		      default: 							  
 		    	  key = evt.getUnicodeChar();
 		    	  metaState = 0;

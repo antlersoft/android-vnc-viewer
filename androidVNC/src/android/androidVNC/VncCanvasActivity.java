@@ -53,6 +53,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView.ScaleType;
 import android.widget.Button;
 import android.view.inputmethod.InputMethodManager;
 import android.content.Context;
@@ -71,16 +72,10 @@ public class VncCanvasActivity extends Activity {
 		private boolean dragMode;
 		
 		/**
-		 * Key handler delegate that handles DPad-based mouse motion
-		 */
-		private DPadMouseKeyHandler keyHandler;
-
-		/**
 		 * @param c
 		 */
 		ZoomInputHandler() {
 			super(VncCanvasActivity.this);
-			keyHandler = new DPadMouseKeyHandler(VncCanvasActivity.this,vncCanvas.handler);
 		}
 
 		/*
@@ -112,7 +107,7 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public boolean onKeyDown(int keyCode, KeyEvent evt) {
-			return keyHandler.onKeyDown(keyCode, evt);
+			return VncCanvasActivity.this.defaultKeyDownHandler(keyCode, evt);
 		}
 
 		/*
@@ -123,7 +118,7 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public boolean onKeyUp(int keyCode, KeyEvent evt) {
-			return keyHandler.onKeyUp(keyCode, evt);
+			return VncCanvasActivity.this.defaultKeyUpHandler(keyCode, evt);
 		}
 
 		/*
@@ -674,6 +669,10 @@ public class VncCanvasActivity extends Activity {
 				.setScaleTypeForActivity(this);
 		this.inputHandler = handler;
 		showPanningState();
+		if (connection.getScaleMode()==ScaleType.MATRIX && connection.getUseImmersive())
+		{
+			BCFactory.getInstance().getSystemUiVisibility().HideSystemUI(vncCanvas);
+		}
 	}
 
 	ConnectionBean getConnection() {
@@ -711,6 +710,15 @@ public class VncCanvasActivity extends Activity {
 	public void onConfigurationChanged(Configuration newConfig) {
 		// ignore orientation/keyboard change
 		super.onConfigurationChanged(newConfig);
+	}
+	
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+		if (hasFocus && connection.getScaleMode()==ScaleType.MATRIX && connection.getUseImmersive())
+		{
+			BCFactory.getInstance().getSystemUiVisibility().HideSystemUI(vncCanvas);
+		}	
 	}
 
 	@Override
@@ -915,6 +923,15 @@ public class VncCanvasActivity extends Activity {
 	}
 
 	private MetaKeyBean lastSentKey;
+
+	@Override
+	public void onOptionsMenuClosed(Menu menu) {
+		if (connection.getUseImmersive())
+		{
+			BCFactory.getInstance().getSystemUiVisibility().HideSystemUI(vncCanvas);
+		}
+		super.onOptionsMenuClosed(menu);
+	}
 
 	private void sendSpecialKeyAgain() {
 		if (lastSentKey == null

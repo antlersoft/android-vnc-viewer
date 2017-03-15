@@ -59,4 +59,8 @@ interface IConnectionBean {
 	boolean getShowZoomButtons();
 	@FieldAccessor(Name="DOUBLE_TAP_ACTION")
 	String getDoubleTapActionAsString();
+	@FieldAccessor(DefaultValue="true")
+	boolean getUseImmersive();
+	@FieldAccessor(DefaultValue="false")
+	boolean getUseWakeLock();
 }

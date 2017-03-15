@@ -58,6 +58,8 @@ public class androidVNC extends Activity {
 	private EditText textUsername;
 	private CheckBox checkboxKeepPassword;
 	private CheckBox checkboxLocalCursor;
+	private CheckBox checkboxUseImmersive;
+	private CheckBox checkboxWakeLock;
 	private boolean repeaterTextSet;
 
 	@Override
@@ -91,6 +93,8 @@ public class androidVNC extends Activity {
 		groupForceFullScreen = (RadioGroup)findViewById(R.id.groupForceFullScreen);
 		checkboxKeepPassword = (CheckBox)findViewById(R.id.checkboxKeepPassword);
 		checkboxLocalCursor = (CheckBox)findViewById(R.id.checkboxUseLocalCursor);
+		checkboxUseImmersive = (CheckBox)findViewById(R.id.checkUseImmersive);
+		checkboxWakeLock = (CheckBox)findViewById(R.id.checkUseWakeLock);
 		colorSpinner.setAdapter(colorSpinnerAdapter);
 		colorSpinner.setSelection(0);
 		spinnerConnection = (Spinner)findViewById(R.id.spinnerConnection);
@@ -210,6 +214,8 @@ public class androidVNC extends Activity {
 		groupForceFullScreen.check(selected.getForceFull()==BitmapImplHint.AUTO ? R.id.radioForceFullScreenAuto : (selected.getForceFull() == BitmapImplHint.FULL ? R.id.radioForceFullScreenOn : R.id.radioForceFullScreenOff));
 		checkboxKeepPassword.setChecked(selected.getKeepPassword());
 		checkboxLocalCursor.setChecked(selected.getUseLocalCursor());
+		checkboxWakeLock.setChecked(selected.getUseWakeLock());
+		checkboxUseImmersive.setChecked(selected.getUseImmersive());
 		textNickname.setText(selected.getNickname());
 		textUsername.setText(selected.getUserName());
 		COLORMODEL cm = COLORMODEL.valueOf(selected.getColorModel());
@@ -263,6 +269,8 @@ public class androidVNC extends Activity {
 		selected.setKeepPassword(checkboxKeepPassword.isChecked());
 		selected.setUseLocalCursor(checkboxLocalCursor.isChecked());
 		selected.setColorModel(((COLORMODEL)colorSpinner.getSelectedItem()).nameString());
+		selected.setUseWakeLock(checkboxWakeLock.isChecked());
+		selected.setUseImmersive(checkboxUseImmersive.isChecked());
 		if (repeaterTextSet)
 		{
 			selected.setRepeaterId(repeaterText.getText().toString());
