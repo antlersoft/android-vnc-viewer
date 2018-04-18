@@ -8,7 +8,9 @@
     <string name="arrow_right">Flèche de droite</string>
     <string name="arrow_up">Flèche du haut</string>
     <string name="button_send_text">Envoi du texte</string>
+    <string name="button_send_without_saving">Envoyer le texte/Ne pas sauvegarder</string>
 <string name="center_mouse">Souris @</string>
+<string name="close">Fermer</string>
 <string name="color_format_caption">Format de couleur</string>
 <string name="color_mode">Mode de couleur</string>
 <string name="connect_button">Connecter</string>
@@ -20,11 +22,18 @@
 <string name="delete_key">Touche sélectionnée supprimée</string>
 <string name="delete_key_list">Liste de touche supprimée</string>
 <string name="disconnect">Déconnecter</string>
+<string name="export_settings">Exporter</string>
+<string name="export_settings_path">Exporter sous</string>
 <string name="enter_text_title">Entrer le texte à envoyer</string>
 <string name="enter_text">Envoi du texte</string>
 <string name="fit_to_screen">Ajuster à l\'écran</string>
 <string name="force_full_check">Forcer en plein écran bitmap</string>
+<string name="import_export_settings">Importer/Exporter paramètres</string>
+<string name="import_settings">Importer</string>
+<string name="import_settings_file_url">Importer depuis un fichier ou une URL</string>
 <string name="info">Info</string>
+<string name="intro_text">Si vous avez besoin d\'aide, veuillez vérifier le &lt;a href=\"http://code.google.com/p/android-vnc-viewer/wiki/Documentation\"&gt;manuel&lt;/a&gt; (appuyez sur le bouton Menu du téléphone pour accéder au manuel et au autres items du menu), ou la &lt;a href=\"http://code.google.com/p/android-vnc-viewer/wiki/faq\"&gt;FAQ&lt;/a&gt;.&lt;br&gt;</string>
+<string name="intro_title">Bienvenue</string>
 <string name="input_mode">Mode d\'entrée</string>
 <string name="input_mode_fit_to_screen">Aucun curseur; Souris trackball</string>
 <string name="input_mode_mouse">Mode de contrôle du pointeur de souris</string>
@@ -33,6 +42,7 @@
 <string name="input_mode_dpad_pan_touchpad_mouse">Souris tactile; Curseur flèches</string>
 <string name="input_mode_touch_pan_zoom_mouse">Souris curseur et zoom tactile</string>
 <string name="input_mode_touchpad">Touchpad</string><string name="keep_password_button">Retenir</string>
+<string name="intro_dont_show">Ne plus afficher</string>
 <string name="keys_caption">Touches</string>
 <string name="list_caption">Liste</string>
 <string name="list_name_caption">Nom de liste</string>
@@ -60,6 +70,8 @@
 <string name="send_key_again">Envoie touche encore</string>
 <string name="shift_check">Shift</string>
 <string name="shortcut_label">Connexion VNC</string>
+<string name="showkbd_label">Clavier</string>
 <string name="special_keys">Envoi touches</string>
-
+<string name="use_immersive_check">Mode immersif (4.4+)</string>
+<string name="username_caption">Nom d\'utilisateur</string>
 </resources>
