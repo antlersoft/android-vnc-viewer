@@ -52,6 +52,7 @@ public class ZoomControls extends LinearLayout {
     private final ZoomButton mZoomIn;
     private final ZoomButton mZoomOut;
     private final ImageButton mZoomKeyboard;
+    private final ImageButton mZoomMenu;
         
     public ZoomControls(Context context) {
         this(context, null);
@@ -69,6 +70,7 @@ public class ZoomControls extends LinearLayout {
         mZoomIn = (ZoomButton) findViewById(R.id.zoomIn);
         mZoomOut = (ZoomButton) findViewById(R.id.zoomOut);
         mZoomKeyboard = (ImageButton) findViewById(R.id.zoomKeys);
+        mZoomMenu = (ImageButton) findViewById(R.id.zoomMenu);
     }
 
     public void setOnZoomInClickListener(OnClickListener listener) {
@@ -81,6 +83,10 @@ public class ZoomControls extends LinearLayout {
     
     public void setOnZoomKeyboardClickListener(OnClickListener listener) {
     	mZoomKeyboard.setOnClickListener(listener);
+    }
+
+    public void setOnZoomMenuClickListener(OnClickListener listener) {
+        mZoomMenu.setOnClickListener(listener);
     }
     
     /*

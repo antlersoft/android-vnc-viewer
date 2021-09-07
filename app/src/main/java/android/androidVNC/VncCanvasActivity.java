@@ -653,6 +653,13 @@ public class VncCanvasActivity extends Activity {
 			}
 
 		});
+
+		zoomer.setOnZoomMenuClickListener(new View.OnClickListener() {
+		    @Override
+            public void onClick(View v) {
+		        openOptionsMenu();
+            }
+        });
 		panner = new Panner(this, vncCanvas.handler);
 
 		inputHandler = getInputHandlerById(R.id.itemInputFitToScreen);

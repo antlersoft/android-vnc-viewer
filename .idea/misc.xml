@@ -5,6 +5,12 @@
       <map>
         <entry key="../../../../../layout/custom_preview.xml" value="0.16979166666666667" />
         <entry key="ZoomerWithKeys/src/main/res/drawable/btn_zoom_up.xml" value="0.18697916666666667" />
+        <entry key="ZoomerWithKeys/src/main/res/layout/zoom_controls.xml" value="0.16259057971014493" />
+        <entry key="app/src/main/res/layout/entertext.xml" value="0.1421875" />
+        <entry key="app/src/main/res/layout/intro_dialog.xml" value="0.1421875" />
+        <entry key="app/src/main/res/layout/main.xml" value="0.7770833333333333" />
+        <entry key="app/src/main/res/menu/androidvncmenu.xml" value="0.5770833333333333" />
+        <entry key="app/src/main/res/menu/intro_dialog_menu.xml" value="0.1421875" />
       </map>
     </option>
   </component>
