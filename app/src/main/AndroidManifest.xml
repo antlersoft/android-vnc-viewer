@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="android.androidVNC" android:installLocation="auto" >
+    android:installLocation="auto" >
     <application android:icon="@drawable/mouse_icon" android:label="androidVNC">
- 		<activity android:label="@string/app_name" android:name="androidVNC" android:screenOrientation="landscape">
+ 		<activity android:label="@string/app_name" android:name="androidVNC" android:exported="true" android:screenOrientation="landscape">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN"></action>
 				<category android:name="android.intent.category.LAUNCHER"></category>
 			</intent-filter>
 		</activity>
-		<activity android:screenOrientation="landscape" android:configChanges="orientation|keyboardHidden" android:name="VncCanvasActivity">
+		<activity android:screenOrientation="landscape" android:exported="true" android:configChanges="orientation|keyboardHidden" android:name="VncCanvasActivity">
 			<intent-filter>
 				<action android:name="android.intent.action.VIEW"></action>
 			</intent-filter>
@@ -18,7 +18,7 @@
                 <data android:scheme="vnc" />
             </intent-filter>
 		</activity>
-       <activity android:name=".ConnectionListActivity" android:label="@string/shortcut_label">
+       <activity android:name=".ConnectionListActivity" android:exported="true" android:label="@string/shortcut_label">
         	<intent-filter>
         		<action android:name="android.intent.action.CREATE_SHORTCUT" />
         		<category android:name="android.intent.category.DEFAULT" />
@@ -28,7 +28,6 @@
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 	<uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
-    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="4"></uses-sdk>
     <supports-screens android:anyDensity="true" />
 
 </manifest> 

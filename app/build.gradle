@@ -3,14 +3,14 @@ plugins {
 }
 
 android {
-    compileSdk 31
+    compileSdk 34
 
     defaultConfig {
         applicationId "android.androidVNC"
         minSdk 14
-        targetSdk 30
-        versionCode 17
-        versionName "0.7.1"
+        targetSdk 34
+        versionCode 18
+        versionName "0.7.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -25,6 +25,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    namespace 'android.androidVNC'
 }
 
 dependencies {
