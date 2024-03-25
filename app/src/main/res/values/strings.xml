@@ -35,7 +35,7 @@
 <string name="info">Info</string>
 <string name="intro_text">If you need help, please check the &lt;a href="http://code.google.com/p/android-vnc-viewer/wiki/Documentation"&gt;manual&lt;/a&gt; (press Menu button to access manual and other menu items), or the &lt;a href="http://code.google.com/p/android-vnc-viewer/wiki/faq"&gt;FAQ&lt;/a&gt;.&lt;br&gt;</string>
 <string name="intro_title">Welcome</string>
-<string name="intro_version_text">&lt;br&gt;-Make menus accessible on modern phones&lt;br&gt;-When connected, new menu button on floating button panel</string>
+<string name="intro_version_text">&lt;br&gt;-Fix crash bug and make compatible with newer Android</string>
 <string name="input_mode">Input Mode</string>
 <string name="input_mode_fit_to_screen">No Pan; Trackball Mouse</string>
 <string name="input_mode_mouse">Mouse Pointer Control Mode</string>

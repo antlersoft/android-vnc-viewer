@@ -255,6 +255,9 @@ class ScaleGestureDetector implements IBCScaleGestureDetector {
      * MotionEvent has no getRawX(int) method; simulate it pending future API approval. 
      */
     private static float getRawX(MotionEvent event, int pointerIndex) {
+        if (pointerIndex >= event.getPointerCount()) {
+            pointerIndex = 0;
+        }
         float offset = event.getX() - event.getRawX();
         return event.getX(pointerIndex) + offset;
     }
@@ -263,6 +266,9 @@ class ScaleGestureDetector implements IBCScaleGestureDetector {
      * MotionEvent has no getRawY(int) method; simulate it pending future API approval. 
      */
     private static float getRawY(MotionEvent event, int pointerIndex) {
+        if (pointerIndex >= event.getPointerCount()) {
+            pointerIndex = 0;
+        }
         float offset = event.getY() - event.getRawY();
         return event.getY(pointerIndex) + offset;
     }
